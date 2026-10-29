@@ -74,11 +74,18 @@ public partial class MainViewModel : ViewModelBase
         SelectedSection = Sections[0];
     }
 
-    partial void OnSelectedSectionChanged(
-        NavigationItem? value)
-    {
-        CurrentPage = value?.Page;
-    }
+
+	partial void OnSelectedSectionChanged(
+	    NavigationItem? value)
+	{
+	    if (CurrentPage is DocumentsViewModel documents
+	        && !ReferenceEquals(documents, value?.Page))
+	    {
+	        documents.CancelPendingRequests();
+	    }
+
+	    CurrentPage = value?.Page;
+	}
 
     public Task InitializeAsync()
     {

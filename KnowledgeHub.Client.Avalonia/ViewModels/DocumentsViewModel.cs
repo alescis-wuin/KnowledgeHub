@@ -10,6 +10,8 @@ namespace KnowledgeHub.Client.Avalonia.ViewModels;
 public partial class DocumentsViewModel : ViewModelBase
 {
     private readonly DocumentApiService _service;
+
+    private CancellationTokenSource? _activeRequest;
     private bool _hasLoaded;
 
     public ObservableCollection<DocumentDto> Documents { get; } = [];
@@ -49,30 +51,34 @@ public partial class DocumentsViewModel : ViewModelBase
 
     public Task EnsureLoadedAsync()
     {
-        return _hasLoaded ? Task.CompletedTask : LoadAsync();
+        return _hasLoaded
+            ? Task.CompletedTask
+            : LoadAsync();
     }
 
-    [RelayCommand]
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private Task SearchAsync() => LoadAsync();
 
-    [RelayCommand]
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private Task RefreshAsync() => LoadAsync();
 
     public async Task LoadAsync()
     {
-        if (IsLoading)
-        {
-            return;
-        }
+        using var request = BeginRequest();
 
-        IsLoading = true;
-        ErrorMessage = string.Empty;
+        var query = SearchText.Trim();
+
+        HasNoResults = false;
 
         try
         {
-            var documents = string.IsNullOrWhiteSpace(SearchText)
-                ? await _service.GetDocumentsAsync()
-                : await _service.SearchDocumentsAsync(SearchText.Trim());
+            var documents = query.Length == 0
+                ? await _service.GetDocumentsAsync(request.Token)
+                : await _service.SearchDocumentsAsync(
+                    query,
+                    request.Token);
+
+            request.Token.ThrowIfCancellationRequested();
 
             Documents.Clear();
 
@@ -84,41 +90,53 @@ public partial class DocumentsViewModel : ViewModelBase
             HasNoResults = Documents.Count == 0;
             _hasLoaded = true;
         }
+        catch (OperationCanceledException)
+            when (request.IsCancellationRequested)
+        {
+            // A newer request or navigation canceled this operation.
+        }
+        catch (OperationCanceledException)
+        {
+            if (IsCurrentRequest(request))
+            {
+                ErrorMessage = "La requête a expiré.";
+            }
+        }
         catch (HttpRequestException ex)
         {
-            ErrorMessage = $"Erreur HTTP : {ex.Message}";
-        }
-        catch (TaskCanceledException)
-        {
-            ErrorMessage = "La requête a expiré ou a été annulée.";
+            if (IsCurrentRequest(request))
+            {
+                ErrorMessage = $"Erreur HTTP : {ex.Message}";
+            }
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Erreur de chargement : {ex.Message}";
+            if (IsCurrentRequest(request))
+            {
+                ErrorMessage = $"Erreur de chargement : {ex.Message}";
+            }
         }
         finally
         {
-            IsLoading = false;
+            CompleteRequest(request);
         }
     }
 
     public async Task OpenDetailsAsync(Guid documentId)
     {
-        if (IsLoading)
-        {
-            return;
-        }
+        using var request = BeginRequest();
 
         IsDetailsOpen = true;
-        IsLoading = true;
-        ErrorMessage = string.Empty;
         Details = null;
         TagsText = string.Empty;
 
         try
         {
-            var details =
-                await _service.GetDocumentDetailsAsync(documentId);
+            var details = await _service.GetDocumentDetailsAsync(
+                documentId,
+                request.Token);
+
+            request.Token.ThrowIfCancellationRequested();
 
             if (details is null)
             {
@@ -132,31 +150,89 @@ public partial class DocumentsViewModel : ViewModelBase
                 ? "Aucun tag"
                 : string.Join(", ", details.Tags);
         }
+        catch (OperationCanceledException)
+            when (request.IsCancellationRequested)
+        {
+            // Cancellation is expected during navigation.
+        }
+        catch (OperationCanceledException)
+        {
+            if (IsCurrentRequest(request))
+            {
+                ErrorMessage =
+                    "Le chargement du document a expiré.";
+            }
+        }
         catch (HttpRequestException ex)
         {
-            ErrorMessage =
-                $"Impossible de charger le document : {ex.Message}";
-        }
-        catch (TaskCanceledException)
-        {
-            ErrorMessage = "Le chargement du document a expiré.";
+            if (IsCurrentRequest(request))
+            {
+                ErrorMessage =
+                    $"Impossible de charger le document : {ex.Message}";
+            }
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Erreur : {ex.Message}";
+            if (IsCurrentRequest(request))
+            {
+                ErrorMessage = $"Erreur : {ex.Message}";
+            }
         }
         finally
         {
-            IsLoading = false;
+            CompleteRequest(request);
         }
+    }
+
+    public void CancelPendingRequests()
+    {
+        _activeRequest?.Cancel();
+        _activeRequest = null;
+
+        IsLoading = false;
+        IsDetailsOpen = false;
+
+        Details = null;
+        TagsText = string.Empty;
+        ErrorMessage = string.Empty;
     }
 
     [RelayCommand]
     private void BackToList()
     {
-        IsDetailsOpen = false;
-        Details = null;
-        TagsText = string.Empty;
+        CancelPendingRequests();
+    }
+
+    private CancellationTokenSource BeginRequest()
+    {
+        _activeRequest?.Cancel();
+
+        var request = new CancellationTokenSource();
+
+        _activeRequest = request;
+
+        IsLoading = true;
         ErrorMessage = string.Empty;
+
+        return request;
+    }
+
+    private bool IsCurrentRequest(
+        CancellationTokenSource request)
+    {
+        return ReferenceEquals(_activeRequest, request)
+            && !request.IsCancellationRequested;
+    }
+
+    private void CompleteRequest(
+        CancellationTokenSource request)
+    {
+        if (!ReferenceEquals(_activeRequest, request))
+        {
+            return;
+        }
+
+        _activeRequest = null;
+        IsLoading = false;
     }
 }
