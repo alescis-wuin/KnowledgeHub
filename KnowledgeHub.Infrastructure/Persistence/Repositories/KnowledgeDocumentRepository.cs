@@ -58,6 +58,78 @@ public class KnowledgeDocumentRepository
                 cancellationToken);
     }
 
+	public async Task AddIndexedAsync(
+	    KnowledgeDocument document,
+	    IReadOnlyCollection<ChunkEmbedding> embeddings,
+	    CancellationToken cancellationToken = default)
+	{
+	    ValidateIndex(document, embeddings);
+
+	    await using var transaction =
+	        await _context.Database.BeginTransactionAsync(
+	            cancellationToken);
+
+	    await _context.Documents.AddAsync(
+	        document,
+	        cancellationToken);
+
+	    await _context.ChunkEmbeddings.AddRangeAsync(
+	        embeddings,
+	        cancellationToken);
+
+	    await _context.SaveChangesAsync(cancellationToken);
+
+	    await transaction.CommitAsync(cancellationToken);
+	}
+
+	public async Task UpdateIndexedAsync(
+	    KnowledgeDocument document,
+	    IReadOnlyCollection<ChunkEmbedding> embeddings,
+	    CancellationToken cancellationToken = default)
+	{
+	    ValidateIndex(document, embeddings);
+
+	    if (_context.Entry(document).State == EntityState.Detached)
+	    {
+	        throw new InvalidOperationException(
+	            "Indexed updates require a tracked document.");
+	    }
+
+	    await using var transaction =
+	        await _context.Database.BeginTransactionAsync(
+	            cancellationToken);
+
+	    await _context.ChunkEmbeddings.AddRangeAsync(
+	        embeddings,
+	        cancellationToken);
+
+	    await _context.SaveChangesAsync(cancellationToken);
+
+	    await transaction.CommitAsync(cancellationToken);
+	}
+
+	private static void ValidateIndex(
+	    KnowledgeDocument document,
+	    IReadOnlyCollection<ChunkEmbedding> embeddings)
+	{
+	    ArgumentNullException.ThrowIfNull(document);
+	    ArgumentNullException.ThrowIfNull(embeddings);
+
+	    var chunkIds = document.Chunks
+	        .Select(chunk => chunk.Id)
+	        .ToHashSet();
+
+	    if (chunkIds.Count == 0 ||
+	        chunkIds.Count != document.Chunks.Count ||
+	        chunkIds.Count != embeddings.Count ||
+	        !chunkIds.SetEquals(
+	            embeddings.Select(embedding => embedding.ChunkId)))
+	    {
+	        throw new InvalidOperationException(
+	            "Every chunk must have exactly one matching embedding.");
+	    }
+	}
+
     public async Task UpdateAsync(
         KnowledgeDocument document,
         CancellationToken cancellationToken = default)

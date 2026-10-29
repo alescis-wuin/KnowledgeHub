@@ -40,5 +40,8 @@ public class KnowledgeDocumentConfiguration
             .WithMany()
             .HasForeignKey(x => x.SourceId)
             .OnDelete(DeleteBehavior.SetNull);
+
+		builder.Property(x => x.UpdatedAt)
+		    .IsConcurrencyToken();
     }
 }

@@ -42,4 +42,14 @@ public interface IKnowledgeDocumentRepository
 
     Task<KnowledgeStatistics> GetStatisticsAsync(
         CancellationToken cancellationToken = default);
+
+	Task AddIndexedAsync(
+	    KnowledgeDocument document,
+	    IReadOnlyCollection<ChunkEmbedding> embeddings,
+	    CancellationToken cancellationToken = default);
+
+	Task UpdateIndexedAsync(
+	    KnowledgeDocument document,
+	    IReadOnlyCollection<ChunkEmbedding> embeddings,
+	    CancellationToken cancellationToken = default);
 }
