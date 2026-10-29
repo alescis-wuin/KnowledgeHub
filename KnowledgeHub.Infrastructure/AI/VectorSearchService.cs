@@ -50,9 +50,24 @@ public sealed class VectorSearchService
             CancellationToken cancellationToken =
                 default)
     {
-        if (
-            string.IsNullOrWhiteSpace(
-                question))
+        if (string.IsNullOrWhiteSpace(question) || topK <= 0)
+        {
+            return [];
+        }
+
+        var embeddings = await GetEmbeddingsAsync(
+            cancellationToken);
+
+        if (embeddings.Count == 0)
+        {
+            return [];
+        }
+
+        var chunks = await GetChunksAsync(
+            cancellationToken);
+
+        if (chunks.Count == 0 ||
+            !embeddings.Any(x => chunks.ContainsKey(x.ChunkId)))
         {
             return [];
         }

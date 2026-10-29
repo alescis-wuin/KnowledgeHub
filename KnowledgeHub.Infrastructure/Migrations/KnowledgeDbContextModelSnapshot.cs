@@ -20,7 +20,6 @@ namespace KnowledgeHub.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("KnowledgeHub.Domain.Entities.Category", b =>
@@ -93,85 +92,6 @@ namespace KnowledgeHub.Infrastructure.Migrations
                     b.HasIndex("DocumentId");
 
                     b.ToTable("DocumentChunks", (string)null);
-                });
-
-            modelBuilder.Entity("KnowledgeHub.Domain.Entities.EvaluationDataset", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("SourceType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("EvaluationDatasets", (string)null);
-                });
-
-            modelBuilder.Entity("KnowledgeHub.Domain.Entities.EvaluationQuestion", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("DatasetId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Difficulty")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("ExpectedAnswer")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Question")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DatasetId");
-
-                    b.ToTable("EvaluationQuestions", (string)null);
-                });
-
-            modelBuilder.Entity("KnowledgeHub.Domain.Entities.EvaluationReferenceDocument", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Content")
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("EvaluationQuestionId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ExternalDocumentId")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EvaluationQuestionId");
-
-                    b.ToTable("EvaluationReferenceDocuments", (string)null);
                 });
 
             modelBuilder.Entity("KnowledgeHub.Domain.Entities.KnowledgeDocument", b =>
@@ -292,28 +212,6 @@ namespace KnowledgeHub.Infrastructure.Migrations
                     b.Navigation("Document");
                 });
 
-            modelBuilder.Entity("KnowledgeHub.Domain.Entities.EvaluationQuestion", b =>
-                {
-                    b.HasOne("KnowledgeHub.Domain.Entities.EvaluationDataset", "Dataset")
-                        .WithMany("Questions")
-                        .HasForeignKey("DatasetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Dataset");
-                });
-
-            modelBuilder.Entity("KnowledgeHub.Domain.Entities.EvaluationReferenceDocument", b =>
-                {
-                    b.HasOne("KnowledgeHub.Domain.Entities.EvaluationQuestion", "EvaluationQuestion")
-                        .WithMany("ReferenceDocuments")
-                        .HasForeignKey("EvaluationQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("EvaluationQuestion");
-                });
-
             modelBuilder.Entity("KnowledgeHub.Domain.Entities.KnowledgeDocument", b =>
                 {
                     b.HasOne("KnowledgeHub.Domain.Entities.Category", "Category")
@@ -348,16 +246,6 @@ namespace KnowledgeHub.Infrastructure.Migrations
                     b.Navigation("Document");
 
                     b.Navigation("Tag");
-                });
-
-            modelBuilder.Entity("KnowledgeHub.Domain.Entities.EvaluationDataset", b =>
-                {
-                    b.Navigation("Questions");
-                });
-
-            modelBuilder.Entity("KnowledgeHub.Domain.Entities.EvaluationQuestion", b =>
-                {
-                    b.Navigation("ReferenceDocuments");
                 });
 
             modelBuilder.Entity("KnowledgeHub.Domain.Entities.KnowledgeDocument", b =>

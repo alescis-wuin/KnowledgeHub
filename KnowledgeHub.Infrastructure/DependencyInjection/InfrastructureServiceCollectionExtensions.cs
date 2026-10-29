@@ -1,8 +1,6 @@
 ﻿using KnowledgeHub.Application.Interfaces;
 using KnowledgeHub.Domain.Interfaces;
 using KnowledgeHub.Infrastructure.AI;
-using KnowledgeHub.Infrastructure.Evaluation;
-using KnowledgeHub.Infrastructure.Evaluation.Beir;
 using KnowledgeHub.Infrastructure.Persistence.Context;
 using KnowledgeHub.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -39,10 +37,6 @@ public static class InfrastructureServiceCollectionExtensions
             IKnowledgeSourceRepository,
             KnowledgeSourceRepository>();
 
-        services.AddScoped<
-            IVectorStore,
-            PgVectorStore>();
-
         services.AddHttpClient<
             IEmbeddingService,
             OllamaEmbeddingService>(
@@ -78,13 +72,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddHostedService<
             EmbeddingCacheWarmupService>();
 
-        services.AddScoped<
-            IEvaluationDatasetImportService,
-            EvaluationDatasetImportService>();
-
-        services.AddScoped<
-            IEvaluationDatasetParser,
-            FiQaParser>();
+        services.AddScoped<RagService>();
 
         return services;
     }

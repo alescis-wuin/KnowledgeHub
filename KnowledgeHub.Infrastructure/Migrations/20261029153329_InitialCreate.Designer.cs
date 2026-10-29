@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KnowledgeHub.Infrastructure.Migrations
 {
     [DbContext(typeof(KnowledgeDbContext))]
-    [Migration("20261027164954_AddDocumentMetadata")]
-    partial class AddDocumentMetadata
+    [Migration("20261029153329_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,6 +44,30 @@ namespace KnowledgeHub.Infrastructure.Migrations
                     b.ToTable("Categories", (string)null);
                 });
 
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.ChunkEmbedding", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ChunkId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Embedding")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChunkId")
+                        .IsUnique();
+
+                    b.ToTable("ChunkEmbeddings", (string)null);
+                });
+
             modelBuilder.Entity("KnowledgeHub.Domain.Entities.DocumentChunk", b =>
                 {
                     b.Property<Guid>("Id")
@@ -70,7 +94,7 @@ namespace KnowledgeHub.Infrastructure.Migrations
 
                     b.HasIndex("DocumentId");
 
-                    b.ToTable("DocumentChunks");
+                    b.ToTable("DocumentChunks", (string)null);
                 });
 
             modelBuilder.Entity("KnowledgeHub.Domain.Entities.KnowledgeDocument", b =>
@@ -167,6 +191,17 @@ namespace KnowledgeHub.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Tags", (string)null);
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.ChunkEmbedding", b =>
+                {
+                    b.HasOne("KnowledgeHub.Domain.Entities.DocumentChunk", "Chunk")
+                        .WithMany()
+                        .HasForeignKey("ChunkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chunk");
                 });
 
             modelBuilder.Entity("KnowledgeHub.Domain.Entities.DocumentChunk", b =>

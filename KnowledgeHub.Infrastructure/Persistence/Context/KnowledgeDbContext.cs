@@ -30,20 +30,9 @@ public class KnowledgeDbContext : DbContext
         ChunkEmbeddings =>
             Set<ChunkEmbedding>();
 
-    public DbSet<EvaluationDataset> EvaluationDatasets =>
-    Set<EvaluationDataset>();
-
-    public DbSet<EvaluationQuestion> EvaluationQuestions =>
-        Set<EvaluationQuestion>();
-
-    public DbSet<EvaluationReferenceDocument> EvaluationReferenceDocuments =>
-        Set<EvaluationReferenceDocument>();
-
     protected override void OnModelCreating(
         ModelBuilder modelBuilder)
     {
-        modelBuilder.HasPostgresExtension(
-            "vector");
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(KnowledgeDbContext).Assembly);
         base.OnModelCreating(modelBuilder);

@@ -106,24 +106,48 @@ public class DocumentService
         return Map(document);
     }
 
+
     public async Task<DocumentDto?> UpdateAsync(
         Guid id,
         UpdateDocumentDto dto,
         CancellationToken cancellationToken = default)
     {
-        var document =
-            await _repository.GetByIdAsync(
-                id,
-                cancellationToken);
+        var document = await _repository.GetByIdAsync(
+            id,
+            cancellationToken);
 
         if (document is null)
         {
             return null;
         }
 
-        document.Update(
-            dto.Title,
-            dto.Content);
+        var newContent = dto.Content?.Trim() ?? string.Empty;
+
+        var contentChanged = !string.Equals(
+            document.Content,
+            newContent,
+            StringComparison.Ordinal);
+
+        document.Update(dto.Title, dto.Content);
+
+        if (contentChanged)
+        {
+            var chunks = _chunker
+                .Chunk(document.Content)
+                .Select(chunk => chunk.Trim())
+                .Where(chunk => !string.IsNullOrWhiteSpace(chunk))
+                .ToArray();
+
+            document.ClearChunks();
+
+            for (var index = 0; index < chunks.Length; index++)
+            {
+                document.AddChunk(
+                    index,
+                    chunks[index].Length,
+                    chunks[index]);
+            }
+        }
 
         await _repository.UpdateAsync(
             document,
