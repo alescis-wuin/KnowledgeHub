@@ -85,6 +85,8 @@ public partial class App : Application
             });
 
             services.AddTransient<MainViewModel>();
+			services.AddTransient<DashboardViewModel>();
+			services.AddTransient<MainViewModel>();
 
             _serviceProvider = services.BuildServiceProvider();
 

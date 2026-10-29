@@ -1,22 +1,58 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:KnowledgeHub.Client.Avalonia.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="KnowledgeHub.Client.Avalonia.Views.MainWindow"
-        x:DataType="vm:MainViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="KnowledgeHub.Client.Avalonia">
 
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainViewModel />
-    </Design.DataContext>
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:KnowledgeHub.Client.Avalonia.ViewModels"
+    x:Class="KnowledgeHub.Client.Avalonia.Views.MainWindow"
+    x:DataType="vm:MainViewModel"
+    Title="KnowledgeHub"
+    Width="1100"
+    Height="720"
+    MinWidth="850"
+    MinHeight="520">
 
-    <TextBox Text="{Binding Greeting}"
-             HorizontalAlignment="Center"
-             VerticalAlignment="Center" />
+    <Grid ColumnDefinitions="230,*">
 
+        <Border Grid.Column="0"
+                Background="#0F172A"
+                Padding="12">
+
+            <DockPanel>
+
+                <StackPanel DockPanel.Dock="Top"
+                            Margin="12,20,12,24"
+                            Spacing="7">
+
+                    <TextBlock Text="KnowledgeHub"
+                               Foreground="White"
+                               FontSize="22"
+                               FontWeight="Bold" />
+
+                    <TextBlock Text="Base de connaissances"
+                               Foreground="#CBD5E1"
+                               FontSize="12" />
+                </StackPanel>
+
+                <ListBox
+                    ItemsSource="{Binding Sections}"
+                    SelectedItem="{Binding SelectedSection, Mode=TwoWay}"
+                    Background="Transparent"
+                    Foreground="White"
+                    BorderThickness="0">
+
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:NavigationItem">
+                            <TextBlock Text="{Binding Title}"
+                                       Margin="8,10" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+            </DockPanel>
+        </Border>
+
+        <ContentControl Grid.Column="1"
+                        Content="{Binding CurrentPage}" />
+
+    </Grid>
 </Window>
