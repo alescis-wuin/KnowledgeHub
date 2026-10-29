@@ -78,14 +78,6 @@ public sealed class VectorSearchService
                     question,
                     cancellationToken);
 
-        var embeddings =
-            await GetEmbeddingsAsync(
-                cancellationToken);
-
-        var chunks =
-            await GetChunksAsync(
-                cancellationToken);
-
         var results =
     embeddings
         .Where(

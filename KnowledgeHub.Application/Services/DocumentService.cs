@@ -128,7 +128,7 @@ public class DocumentService
             newContent,
             StringComparison.Ordinal);
 
-        document.Update(dto.Title, dto.Content);
+        document.Update(dto.Title, newContent);
 
         if (contentChanged)
         {
