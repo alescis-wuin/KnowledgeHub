@@ -1,0 +1,100 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:KnowledgeHub.Client.Avalonia.ViewModels"
+    xmlns:models="using:KnowledgeHub.Client.Avalonia.Models"
+    xmlns:views="using:KnowledgeHub.Client.Avalonia.Views"
+    x:Class="KnowledgeHub.Client.Avalonia.Views.DocumentsView"
+    x:DataType="vm:DocumentsViewModel">
+
+    <Grid>
+
+        <Grid IsVisible="{Binding IsListVisible}"
+              Margin="28"
+              RowDefinitions="Auto,Auto,Auto,*"
+              RowSpacing="14">
+
+            <StackPanel Grid.Row="0" Spacing="5">
+                <TextBlock Text="Documents"
+                           FontSize="28"
+                           FontWeight="Bold" />
+
+                <TextBlock
+                    Text="Rechercher et consulter la base documentaire"
+                    Opacity="0.7" />
+            </StackPanel>
+
+            <Grid Grid.Row="1"
+                  ColumnDefinitions="*,Auto,Auto"
+                  ColumnSpacing="10">
+
+                <TextBox Grid.Column="0"
+                         PlaceholderText="Rechercher un document..."
+                         Text="{Binding SearchText, Mode=TwoWay}" />
+
+                <Button Grid.Column="1"
+                        Content="Rechercher"
+                        Command="{Binding SearchCommand}" />
+
+                <Button Grid.Column="2"
+                        Content="Actualiser"
+                        Command="{Binding RefreshCommand}" />
+            </Grid>
+
+            <StackPanel Grid.Row="2" Spacing="8">
+
+                <ProgressBar Height="4"
+                             IsIndeterminate="True"
+                             IsVisible="{Binding IsLoading}" />
+
+                <TextBlock Text="{Binding ErrorMessage}"
+                           Foreground="#DC2626"
+                           TextWrapping="Wrap" />
+
+                <TextBlock Text="Aucun document trouvé."
+                           IsVisible="{Binding HasNoResults}"
+                           Opacity="0.7" />
+            </StackPanel>
+
+            <ListBox Grid.Row="3"
+                     ItemsSource="{Binding Documents}"
+                     SelectionMode="Single"
+                     SelectionChanged="OnDocumentSelectionChanged">
+
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:DocumentDto">
+
+                        <Border Margin="4,5"
+                                Padding="16"
+                                BorderThickness="1"
+                                BorderBrush="#64748B"
+                                CornerRadius="10">
+
+                            <StackPanel Spacing="8">
+
+                                <TextBlock Text="{Binding Title}"
+                                           FontSize="18"
+                                           FontWeight="SemiBold" />
+
+                                <TextBlock Text="{Binding Content}"
+                                           TextWrapping="Wrap"
+                                           TextTrimming="WordEllipsis"
+                                           MaxLines="2" />
+
+                                <TextBlock
+                                    Text="{Binding CreatedAt, StringFormat='Créé le {0:dd/MM/yyyy}'}"
+                                    FontSize="12"
+                                    Opacity="0.6" />
+
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+
+        <views:DocumentDetailsView
+            IsVisible="{Binding IsDetailsOpen}" />
+
+    </Grid>
+</UserControl>

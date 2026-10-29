@@ -1,3 +1,4 @@
+
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace KnowledgeHub.Client.Avalonia.ViewModels;
@@ -26,18 +27,28 @@ public partial class MainViewModel : ViewModelBase
         set;
     }
 
-    public MainViewModel(DashboardViewModel dashboard)
+    public MainViewModel(
+        DashboardViewModel dashboard,
+        DocumentsViewModel documents)
     {
         _dashboard = dashboard;
 
         Sections =
         [
             new("Tableau de bord", dashboard),
-            new("Documents", new PlaceholderViewModel("Documents")),
-            new("Catégories", new PlaceholderViewModel("Catégories")),
-            new("Tags", new PlaceholderViewModel("Tags")),
-            new("Sources", new PlaceholderViewModel("Sources")),
-            new("Chat IA", new PlaceholderViewModel("Chat IA"))
+            new("Documents", documents),
+            new(
+                "Catégories",
+                new PlaceholderViewModel("Catégories")),
+            new(
+                "Tags",
+                new PlaceholderViewModel("Tags")),
+            new(
+                "Sources",
+                new PlaceholderViewModel("Sources")),
+            new(
+                "Chat IA",
+                new PlaceholderViewModel("Chat IA"))
         ];
 
         SelectedSection = Sections[0];

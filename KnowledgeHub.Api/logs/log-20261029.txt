@@ -1048,3 +1048,314 @@ POSITION: 63
 2026-10-29 19:48:37.379 +01:00 [INF] Hosting environment: Development
 2026-10-29 19:48:37.379 +01:00 [INF] Content root path: /developpement/seynax/KnowledgeHub/KnowledgeHub.Api
 2026-10-29 19:48:41.648 +01:00 [INF] Application is shutting down...
+2026-10-29 19:49:44.293 +01:00 [INF] Executed DbCommand (12ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-29 19:49:44.465 +01:00 [ERR] Failed executing DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."ChunkId", c."CreatedAt", c."Embedding"
+FROM "ChunkEmbeddings" AS c
+2026-10-29 19:49:44.473 +01:00 [ERR] An exception occurred while iterating over the results of a query for context type 'KnowledgeHub.Infrastructure.Persistence.Context.KnowledgeDbContext'.
+Npgsql.PostgresException (0x80004005): 42P01: relation "ChunkEmbeddings" does not exist
+
+POSITION: 63
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42P01
+    MessageText: relation "ChunkEmbeddings" does not exist
+    Position: 63
+    File: parse_relation.c
+    Line: 1449
+    Routine: parserOpenTable
+Npgsql.PostgresException (0x80004005): 42P01: relation "ChunkEmbeddings" does not exist
+
+POSITION: 63
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42P01
+    MessageText: relation "ChunkEmbeddings" does not exist
+    Position: 63
+    File: parse_relation.c
+    Line: 1449
+    Routine: parserOpenTable
+2026-10-29 19:49:44.508 +01:00 [INF] Now listening on: http://localhost:5115
+2026-10-29 19:49:44.509 +01:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-10-29 19:49:44.509 +01:00 [INF] Hosting environment: Development
+2026-10-29 19:49:44.509 +01:00 [INF] Content root path: /developpement/seynax/KnowledgeHub/KnowledgeHub.Api
+2026-10-29 19:50:01.020 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5115/api/statistics - null null
+2026-10-29 19:50:01.035 +01:00 [WRN] Failed to determine the https port for redirect.
+2026-10-29 19:50:01.036 +01:00 [INF] Executing endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 19:50:01.045 +01:00 [INF] Route matched with {action = "Get", controller = "Statistics"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Get(System.Threading.CancellationToken) on controller StatisticsController (KnowledgeHub.Api).
+2026-10-29 19:50:01.127 +01:00 [ERR] Failed executing DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Documents" AS d
+2026-10-29 19:50:01.128 +01:00 [ERR] An exception occurred while iterating over the results of a query for context type 'KnowledgeHub.Infrastructure.Persistence.Context.KnowledgeDbContext'.
+Npgsql.PostgresException (0x80004005): 42P01: relation "Documents" does not exist
+
+POSITION: 27
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42P01
+    MessageText: relation "Documents" does not exist
+    Position: 27
+    File: parse_relation.c
+    Line: 1449
+    Routine: parserOpenTable
+Npgsql.PostgresException (0x80004005): 42P01: relation "Documents" does not exist
+
+POSITION: 27
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42P01
+    MessageText: relation "Documents" does not exist
+    Position: 27
+    File: parse_relation.c
+    Line: 1449
+    Routine: parserOpenTable
+2026-10-29 19:50:01.133 +01:00 [INF] Executed action StatisticsController.Get (KnowledgeHub.Api) in 85.5795ms
+2026-10-29 19:50:01.133 +01:00 [INF] Executed endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 19:50:01.144 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5115/api/statistics - 500 null application/json 125.2705ms
+2026-10-29 19:50:02.879 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5115/api/statistics - null null
+2026-10-29 19:50:02.880 +01:00 [INF] Executing endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 19:50:02.881 +01:00 [INF] Route matched with {action = "Get", controller = "Statistics"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Get(System.Threading.CancellationToken) on controller StatisticsController (KnowledgeHub.Api).
+2026-10-29 19:50:02.884 +01:00 [ERR] Failed executing DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Documents" AS d
+2026-10-29 19:50:02.885 +01:00 [ERR] An exception occurred while iterating over the results of a query for context type 'KnowledgeHub.Infrastructure.Persistence.Context.KnowledgeDbContext'.
+Npgsql.PostgresException (0x80004005): 42P01: relation "Documents" does not exist
+
+POSITION: 27
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42P01
+    MessageText: relation "Documents" does not exist
+    Position: 27
+    File: parse_relation.c
+    Line: 1449
+    Routine: parserOpenTable
+Npgsql.PostgresException (0x80004005): 42P01: relation "Documents" does not exist
+
+POSITION: 27
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42P01
+    MessageText: relation "Documents" does not exist
+    Position: 27
+    File: parse_relation.c
+    Line: 1449
+    Routine: parserOpenTable
+2026-10-29 19:50:02.886 +01:00 [INF] Executed action StatisticsController.Get (KnowledgeHub.Api) in 5.6945ms
+2026-10-29 19:50:02.886 +01:00 [INF] Executed endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 19:50:02.887 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5115/api/statistics - 500 null application/json 8.5592ms
+2026-10-29 19:54:29.130 +01:00 [INF] Application is shutting down...
+eters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-29 19:54:04.092 +01:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."ChunkId", c."CreatedAt", c."Embedding"
+FROM "ChunkEmbeddings" AS c
+2026-10-29 19:54:04.176 +01:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id", d."ChunkIndex", d."Content", d."CreatedAt", d."DocumentId", d."TokenCount", d0."Id", d0."CategoryId", d0."Content", d0."CreatedAt", d0."SearchKeywords", d0."SourceId", d0."Summary", d0."Title", d0."UpdatedAt"
+FROM "DocumentChunks" AS d
+INNER JOIN "Documents" AS d0 ON d."DocumentId" = d0."Id"
+2026-10-29 19:54:04.225 +01:00 [ERR] Hosting failed to start
+System.IO.IOException: Failed to bind to address http://127.0.0.1:5115: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Address already in use
+ ---> System.Net.Sockets.SocketException (98): Address already in use
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<<StartAsync>g__OnBind|0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__14_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+2026-10-29 19:54:36.246 +01:00 [INF] Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-29 19:54:36.426 +01:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."ChunkId", c."CreatedAt", c."Embedding"
+FROM "ChunkEmbeddings" AS c
+2026-10-29 19:54:36.517 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id", d."ChunkIndex", d."Content", d."CreatedAt", d."DocumentId", d."TokenCount", d0."Id", d0."CategoryId", d0."Content", d0."CreatedAt", d0."SearchKeywords", d0."SourceId", d0."Summary", d0."Title", d0."UpdatedAt"
+FROM "DocumentChunks" AS d
+INNER JOIN "Documents" AS d0 ON d."DocumentId" = d0."Id"
+2026-10-29 19:54:36.542 +01:00 [INF] Now listening on: http://localhost:5115
+2026-10-29 19:54:36.543 +01:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-10-29 19:54:36.543 +01:00 [INF] Hosting environment: Development
+2026-10-29 19:54:36.543 +01:00 [INF] Content root path: /developpement/seynax/KnowledgeHub/KnowledgeHub.Api
+2026-10-29 19:54:56.516 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5115/api/statistics - null null
+2026-10-29 19:54:56.530 +01:00 [WRN] Failed to determine the https port for redirect.
+2026-10-29 19:54:56.531 +01:00 [INF] Executing endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 19:54:56.540 +01:00 [INF] Route matched with {action = "Get", controller = "Statistics"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Get(System.Threading.CancellationToken) on controller StatisticsController (KnowledgeHub.Api).
+2026-10-29 19:54:56.599 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Documents" AS d
+2026-10-29 19:54:56.624 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Categories" AS c
+2026-10-29 19:54:56.627 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "KnowledgeSources" AS k
+2026-10-29 19:54:56.629 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Tags" AS t
+2026-10-29 19:54:56.632 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "DocumentChunks" AS d
+2026-10-29 19:54:56.635 +01:00 [INF] Executing OkObjectResult, writing value of type 'KnowledgeHub.Application.DTOs.ApiResponse`1[[KnowledgeHub.Application.DTOs.KnowledgeStatisticsDto, KnowledgeHub.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-29 19:54:56.650 +01:00 [INF] Executed action StatisticsController.Get (KnowledgeHub.Api) in 108.2911ms
+2026-10-29 19:54:56.651 +01:00 [INF] Executed endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 19:54:56.654 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5115/api/statistics - 200 null application/json; charset=utf-8 139.3705ms
+2026-10-29 19:55:05.321 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5115/api/statistics - null null
+2026-10-29 19:55:05.323 +01:00 [INF] Executing endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 19:55:05.323 +01:00 [INF] Route matched with {action = "Get", controller = "Statistics"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Get(System.Threading.CancellationToken) on controller StatisticsController (KnowledgeHub.Api).
+2026-10-29 19:55:05.329 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Documents" AS d
+2026-10-29 19:55:05.330 +01:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Categories" AS c
+2026-10-29 19:55:05.330 +01:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "KnowledgeSources" AS k
+2026-10-29 19:55:05.331 +01:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Tags" AS t
+2026-10-29 19:55:05.332 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "DocumentChunks" AS d
+2026-10-29 19:55:05.333 +01:00 [INF] Executing OkObjectResult, writing value of type 'KnowledgeHub.Application.DTOs.ApiResponse`1[[KnowledgeHub.Application.DTOs.KnowledgeStatisticsDto, KnowledgeHub.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-29 19:55:05.333 +01:00 [INF] Executed action StatisticsController.Get (KnowledgeHub.Api) in 9.5164ms
+2026-10-29 19:55:05.333 +01:00 [INF] Executed endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 19:55:05.334 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5115/api/statistics - 200 null application/json; charset=utf-8 13.0104ms
+2026-10-29 20:54:17.800 +01:00 [INF] Executed DbCommand (12ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-29 20:54:17.973 +01:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."ChunkId", c."CreatedAt", c."Embedding"
+FROM "ChunkEmbeddings" AS c
+2026-10-29 20:54:18.038 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id", d."ChunkIndex", d."Content", d."CreatedAt", d."DocumentId", d."TokenCount", d0."Id", d0."CategoryId", d0."Content", d0."CreatedAt", d0."SearchKeywords", d0."SourceId", d0."Summary", d0."Title", d0."UpdatedAt"
+FROM "DocumentChunks" AS d
+INNER JOIN "Documents" AS d0 ON d."DocumentId" = d0."Id"
+2026-10-29 20:54:18.062 +01:00 [INF] Now listening on: http://localhost:5115
+2026-10-29 20:54:18.063 +01:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-10-29 20:54:18.063 +01:00 [INF] Hosting environment: Development
+2026-10-29 20:54:18.063 +01:00 [INF] Content root path: /developpement/seynax/KnowledgeHub/KnowledgeHub.Api
+2026-10-29 20:54:22.660 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5115/api/statistics - null null
+2026-10-29 20:54:22.690 +01:00 [WRN] Failed to determine the https port for redirect.
+2026-10-29 20:54:22.693 +01:00 [INF] Executing endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 20:54:22.724 +01:00 [INF] Route matched with {action = "Get", controller = "Statistics"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Get(System.Threading.CancellationToken) on controller StatisticsController (KnowledgeHub.Api).
+2026-10-29 20:54:22.830 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Documents" AS d
+2026-10-29 20:54:22.850 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Categories" AS c
+2026-10-29 20:54:22.853 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "KnowledgeSources" AS k
+2026-10-29 20:54:22.855 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Tags" AS t
+2026-10-29 20:54:22.857 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "DocumentChunks" AS d
+2026-10-29 20:54:22.861 +01:00 [INF] Executing OkObjectResult, writing value of type 'KnowledgeHub.Application.DTOs.ApiResponse`1[[KnowledgeHub.Application.DTOs.KnowledgeStatisticsDto, KnowledgeHub.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-29 20:54:22.872 +01:00 [INF] Executed action StatisticsController.Get (KnowledgeHub.Api) in 146.2649ms
+2026-10-29 20:54:22.873 +01:00 [INF] Executed endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 20:54:22.876 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5115/api/statistics - 200 null application/json; charset=utf-8 216.7013ms
+2026-10-29 20:54:24.710 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5115/api/documents - null null
+2026-10-29 20:54:24.712 +01:00 [INF] Executing endpoint 'KnowledgeHub.Api.Controllers.DocumentsController.Get (KnowledgeHub.Api)'
+2026-10-29 20:54:24.717 +01:00 [INF] Route matched with {action = "Get", controller = "Documents"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Get(System.Threading.CancellationToken) on controller KnowledgeHub.Api.Controllers.DocumentsController (KnowledgeHub.Api).
+2026-10-29 20:54:24.773 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id", d."CategoryId", d."Content", d."CreatedAt", d."SearchKeywords", d."SourceId", d."Summary", d."Title", d."UpdatedAt", c."Id", c."Name", k."Id", k."Name", k."Url"
+FROM "Documents" AS d
+LEFT JOIN "Categories" AS c ON d."CategoryId" = c."Id"
+LEFT JOIN "KnowledgeSources" AS k ON d."SourceId" = k."Id"
+ORDER BY d."Id", c."Id", k."Id"
+2026-10-29 20:54:24.783 +01:00 [INF] Executing OkObjectResult, writing value of type 'KnowledgeHub.Application.DTOs.ApiResponse`1[[System.Collections.Generic.List`1[[KnowledgeHub.Application.DTOs.DocumentDto, KnowledgeHub.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2026-10-29 20:54:24.787 +01:00 [INF] Executed action KnowledgeHub.Api.Controllers.DocumentsController.Get (KnowledgeHub.Api) in 70.5312ms
+2026-10-29 20:54:24.787 +01:00 [INF] Executed endpoint 'KnowledgeHub.Api.Controllers.DocumentsController.Get (KnowledgeHub.Api)'
+2026-10-29 20:54:24.788 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5115/api/documents - 200 null application/json; charset=utf-8 77.5018ms
