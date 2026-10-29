@@ -1,0 +1,99 @@
+
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:KnowledgeHub.Client.Avalonia.ViewModels"
+    x:Class="KnowledgeHub.Client.Avalonia.Views.ReferenceListView"
+    x:DataType="vm:ReferenceListViewModel">
+
+    <Grid Margin="28"
+          RowDefinitions="Auto,Auto,Auto,*"
+          RowSpacing="16">
+
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*,Auto"
+              ColumnSpacing="12">
+
+            <StackPanel Grid.Column="0" Spacing="6">
+
+                <TextBlock
+                    Text="{Binding Title}"
+                    FontSize="28"
+                    FontWeight="Bold" />
+
+                <TextBlock
+                    Text="Éléments de la base de connaissances"
+                    Opacity="0.7" />
+
+            </StackPanel>
+
+            <Button
+                Grid.Column="1"
+                Content="Actualiser"
+                Command="{Binding RefreshCommand}"
+                VerticalAlignment="Center" />
+
+        </Grid>
+
+        <ProgressBar Grid.Row="1"
+                     Height="4"
+                     IsIndeterminate="True"
+                     IsVisible="{Binding IsLoading}" />
+
+        <TextBlock Grid.Row="2"
+                   Text="{Binding ErrorMessage}"
+                   Foreground="#DC2626"
+                   TextWrapping="Wrap" />
+
+        <Grid Grid.Row="3">
+
+            <TextBlock
+                Text="Aucun élément disponible."
+                IsVisible="{Binding HasNoResults}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Opacity="0.7" />
+
+            <ListBox
+                ItemsSource="{Binding Items}"
+                IsVisible="{Binding HasItems}"
+                SelectionMode="Single">
+
+                <ListBox.ItemTemplate>
+
+                    <DataTemplate x:DataType="vm:ReferenceItem">
+
+                        <Border
+                            Margin="4,5"
+                            Padding="16"
+                            BorderBrush="#64748B"
+                            BorderThickness="1"
+                            CornerRadius="10">
+
+                            <StackPanel Spacing="8">
+
+                                <TextBlock
+                                    Text="{Binding Name}"
+                                    FontSize="17"
+                                    FontWeight="SemiBold" />
+
+                                <TextBlock
+                                    Text="{Binding Subtitle}"
+                                    IsVisible="{Binding HasSubtitle}"
+                                    TextWrapping="Wrap"
+                                    Opacity="0.65" />
+
+                            </StackPanel>
+
+                        </Border>
+
+                    </DataTemplate>
+
+                </ListBox.ItemTemplate>
+
+            </ListBox>
+
+        </Grid>
+
+    </Grid>
+</UserControl>

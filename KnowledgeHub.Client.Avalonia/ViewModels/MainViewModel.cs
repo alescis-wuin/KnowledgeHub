@@ -1,5 +1,6 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using KnowledgeHub.Client.Avalonia.Services;
 
 namespace KnowledgeHub.Client.Avalonia.ViewModels;
 
@@ -29,23 +30,43 @@ public partial class MainViewModel : ViewModelBase
 
     public MainViewModel(
         DashboardViewModel dashboard,
-        DocumentsViewModel documents)
+        DocumentsViewModel documents,
+        CategoryApiService categoryService,
+        TagApiService tagService,
+        SourceApiService sourceService)
     {
         _dashboard = dashboard;
+
+        var categories = new ReferenceListViewModel(
+            "Catégories",
+            async () =>
+                (await categoryService.GetCategoriesAsync())
+                    .Select(x => new ReferenceItem(x.Name))
+                    .ToArray());
+
+        var tags = new ReferenceListViewModel(
+            "Tags",
+            async () =>
+                (await tagService.GetTagsAsync())
+                    .Select(x => new ReferenceItem(x.Name))
+                    .ToArray());
+
+        var sources = new ReferenceListViewModel(
+            "Sources",
+            async () =>
+                (await sourceService.GetSourcesAsync())
+                    .Select(x => new ReferenceItem(
+                        x.Name,
+                        x.Url))
+                    .ToArray());
 
         Sections =
         [
             new("Tableau de bord", dashboard),
             new("Documents", documents),
-            new(
-                "Catégories",
-                new PlaceholderViewModel("Catégories")),
-            new(
-                "Tags",
-                new PlaceholderViewModel("Tags")),
-            new(
-                "Sources",
-                new PlaceholderViewModel("Sources")),
+            new("Catégories", categories),
+            new("Tags", tags),
+            new("Sources", sources),
             new(
                 "Chat IA",
                 new PlaceholderViewModel("Chat IA"))
