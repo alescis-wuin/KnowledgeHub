@@ -75,7 +75,6 @@ appsettings.Development.local.json
 # AI Models
 #######################################
 
-models/
 embeddings/
 
 #######################################
