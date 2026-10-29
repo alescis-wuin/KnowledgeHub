@@ -1,0 +1,115 @@
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="KnowledgeHub.Client.Views.DocumentsPage"
+    Title="Documents">
+
+    <Grid
+        Padding="15"
+        RowDefinitions="Auto,Auto,*">
+
+        <SearchBar
+            Grid.Row="0"
+            Placeholder="Rechercher..."
+            Text="{Binding SearchText}"
+            SearchCommand="{Binding SearchCommand}" />
+
+        <ActivityIndicator
+            Grid.Row="1"
+            Margin="0,15"
+            IsRunning="{Binding IsLoading}"
+            IsVisible="{Binding IsLoading}" />
+
+        <CollectionView
+            Grid.Row="2"
+            ItemsSource="{Binding Documents}"
+            SelectionMode="Single"
+            SelectionChanged="DocumentsSelectionChanged">
+
+            <CollectionView.EmptyView>
+
+                <VerticalStackLayout
+                    Padding="40"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center">
+
+                    <Label
+                        FontSize="18"
+                        HorizontalOptions="Center"
+                        Text="Aucun document trouvé" />
+
+                </VerticalStackLayout>
+
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+
+                <DataTemplate>
+
+                    <Border
+                        Margin="0,0,0,12"
+                        Padding="16"
+                        Stroke="#E5E7EB"
+                        StrokeShape="RoundRectangle 12">
+
+                        <VerticalStackLayout
+                            Spacing="10">
+
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="18"
+                                Text="{Binding Title}" />
+
+                            <!-- Tags -->
+
+                            <FlexLayout
+                                Wrap="Wrap"
+                                BindableLayout.ItemsSource="{Binding Tags}">
+
+                                <BindableLayout.ItemTemplate>
+
+                                    <DataTemplate>
+
+                                        <Border
+                                            Margin="0,0,8,8"
+                                            Padding="8,4"
+                                            StrokeThickness="0"
+                                            BackgroundColor="{Binding ., Converter={StaticResource TagColorConverter}}"
+                                            StrokeShape="RoundRectangle 20">
+
+                                            <Label
+                                                FontSize="12"
+                                                TextColor="White"
+                                                Text="{Binding .}" />
+
+                                        </Border>
+
+                                    </DataTemplate>
+
+                                </BindableLayout.ItemTemplate>
+
+                            </FlexLayout>
+
+                            <Label
+                                MaxLines="2"
+                                LineBreakMode="TailTruncation"
+                                Text="{Binding Content}" />
+
+                            <Label
+                                FontSize="12"
+                                TextColor="Gray"
+                                Text="{Binding CreatedAt}" />
+
+                        </VerticalStackLayout>
+
+                    </Border>
+
+                </DataTemplate>
+
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>

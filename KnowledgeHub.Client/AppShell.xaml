@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Shell
+    x:Class="KnowledgeHub.Client.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:KnowledgeHub.Client.Views">
+
+    <TabBar>
+
+        <ShellContent
+            Title="Accueil"
+            ContentTemplate="{DataTemplate views:DashboardPage}" />
+
+        <ShellContent
+            Title="Documents"
+            ContentTemplate="{DataTemplate views:DocumentsPage}" />
+
+        <ShellContent
+            Title="Catégories"
+            ContentTemplate="{DataTemplate views:CategoriesPage}" />
+
+        <ShellContent
+            Title="Tags"
+            ContentTemplate="{DataTemplate views:TagsPage}" />
+
+        <ShellContent
+            Title="Sources"
+            ContentTemplate="{DataTemplate views:SourcesPage}" />
+
+        <ShellContent
+            Title="Chat IA"
+            ContentTemplate="{DataTemplate views:ChatPage}" />
+        
+    </TabBar>
+
+</Shell>

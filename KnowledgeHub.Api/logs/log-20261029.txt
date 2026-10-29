@@ -1,0 +1,422 @@
+2026-10-29 09:49:39.346 +01:00 [INF] Executed DbCommand (14ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-29 09:49:39.550 +01:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."ChunkId", c."CreatedAt", c."Embedding"
+FROM "ChunkEmbeddings" AS c
+2026-10-29 09:49:40.015 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id", d."ChunkIndex", d."Content", d."CreatedAt", d."DocumentId", d."TokenCount", d0."Id", d0."CategoryId", d0."Content", d0."CreatedAt", d0."SearchKeywords", d0."SourceId", d0."Summary", d0."Title", d0."UpdatedAt"
+FROM "DocumentChunks" AS d
+INNER JOIN "Documents" AS d0 ON d."DocumentId" = d0."Id"
+2026-10-29 09:49:40.164 +01:00 [INF] Now listening on: http://localhost:5115
+2026-10-29 09:49:40.165 +01:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-10-29 09:49:40.166 +01:00 [INF] Hosting environment: Development
+2026-10-29 09:49:40.166 +01:00 [INF] Content root path: C:\Users\aguinot\Documents\developpement\KnowledgeHub\KnowledgeHub.Api
+2026-10-29 09:57:00.621 +01:00 [INF] Application is shutting down...
+2026-10-29 10:08:50.015 +01:00 [INF] Executed DbCommand (18ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-29 10:08:50.277 +01:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."ChunkId", c."CreatedAt", c."Embedding"
+FROM "ChunkEmbeddings" AS c
+2026-10-29 10:08:50.997 +01:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id", d."ChunkIndex", d."Content", d."CreatedAt", d."DocumentId", d."TokenCount", d0."Id", d0."CategoryId", d0."Content", d0."CreatedAt", d0."SearchKeywords", d0."SourceId", d0."Summary", d0."Title", d0."UpdatedAt"
+FROM "DocumentChunks" AS d
+INNER JOIN "Documents" AS d0 ON d."DocumentId" = d0."Id"
+2026-10-29 10:08:51.448 +01:00 [INF] Now listening on: https://localhost:7141
+2026-10-29 10:08:51.450 +01:00 [INF] Now listening on: http://localhost:5115
+2026-10-29 10:08:51.630 +01:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-10-29 10:08:51.631 +01:00 [INF] Hosting environment: Development
+2026-10-29 10:08:51.631 +01:00 [INF] Content root path: C:\Users\aguinot\Documents\developpement\KnowledgeHub\KnowledgeHub.Api
+2026-10-29 10:08:51.991 +01:00 [INF] Request starting HTTP/1.1 GET https://localhost:7141/api/statistics - null null
+2026-10-29 10:08:52.018 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar - null null
+2026-10-29 10:08:52.049 +01:00 [INF] Executing endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 10:08:52.076 +01:00 [INF] Route matched with {action = "Get", controller = "Statistics"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Get(System.Threading.CancellationToken) on controller StatisticsController (KnowledgeHub.Api).
+2026-10-29 10:08:52.115 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 10:08:52.127 +01:00 [INF] Executing RedirectResult, redirecting to scalar/.
+2026-10-29 10:08:52.129 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 10:08:52.136 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar - 302 null null 117.178ms
+2026-10-29 10:08:52.140 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar/ - null null
+2026-10-29 10:08:52.147 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 10:08:52.192 +01:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Documents" AS d
+2026-10-29 10:08:52.203 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Categories" AS c
+2026-10-29 10:08:52.212 +01:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "KnowledgeSources" AS k
+2026-10-29 10:08:52.219 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Tags" AS t
+2026-10-29 10:08:52.228 +01:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "DocumentChunks" AS d
+2026-10-29 10:08:52.239 +01:00 [INF] Executing OkObjectResult, writing value of type 'KnowledgeHub.Application.DTOs.ApiResponse`1[[KnowledgeHub.Application.DTOs.KnowledgeStatisticsDto, KnowledgeHub.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-29 10:08:52.254 +01:00 [INF] Executed action StatisticsController.Get (KnowledgeHub.Api) in 172.2815ms
+2026-10-29 10:08:52.256 +01:00 [INF] Executed endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 10:08:52.263 +01:00 [INF] Request finished HTTP/1.1 GET https://localhost:7141/api/statistics - 200 null application/json; charset=utf-8 281.6024ms
+2026-10-29 10:08:52.285 +01:00 [INF] Write content with HTTP Response ContentType of text/html
+2026-10-29 10:08:52.303 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 10:08:52.306 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar/ - 200 null text/html 165.8621ms
+2026-10-29 10:08:52.316 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar/scalar.js - null null
+2026-10-29 10:08:52.316 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/_framework/aspnetcore-browser-refresh.js - null null
+2026-10-29 10:08:52.316 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar/scalar.aspnetcore.js - null null
+2026-10-29 10:08:52.316 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/_vs/browserLink - null null
+2026-10-29 10:08:52.319 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.js'
+2026-10-29 10:08:52.324 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2026-10-29 10:08:52.334 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/_framework/aspnetcore-browser-refresh.js - 200 14937 application/javascript; charset=utf-8 17.6048ms
+2026-10-29 10:08:52.335 +01:00 [INF] Sending file with download name ''.
+2026-10-29 10:08:52.336 +01:00 [INF] Sending file with download name ''.
+2026-10-29 10:08:52.344 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2026-10-29 10:08:52.344 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.js'
+2026-10-29 10:08:52.345 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar/scalar.aspnetcore.js - 304 null null 29.3504ms
+2026-10-29 10:08:52.346 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar/scalar.js - 304 null null 30.7936ms
+2026-10-29 10:08:52.396 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/_vs/browserLink - 200 null text/javascript; charset=UTF-8 79.8636ms
+2026-10-29 10:08:52.424 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/openapi/v1.json - null null
+2026-10-29 10:08:52.427 +01:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2026-10-29 10:08:52.441 +01:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2026-10-29 10:08:52.443 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/openapi/v1.json - 200 null application/json;charset=utf-8 18.8531ms
+2026-10-29 10:09:07.615 +01:00 [INF] Request starting HTTP/1.1 POST http://localhost:5115/api/rag/ask - application/json; charset=utf-8 null
+2026-10-29 10:09:07.621 +01:00 [INF] Request finished HTTP/1.1 POST http://localhost:5115/api/rag/ask - 307 0 null 6.1507ms
+2026-10-29 10:09:07.629 +01:00 [INF] Request starting HTTP/1.1 POST https://localhost:7141/api/rag/ask - application/json; charset=utf-8 null
+2026-10-29 10:09:07.632 +01:00 [INF] Executing endpoint 'KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api)'
+2026-10-29 10:09:07.641 +01:00 [INF] Route matched with {action = "Ask", controller = "Rag"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Ask(KnowledgeHub.Application.DTOs.AskQuestionRequestDto, System.Threading.CancellationToken) on controller KnowledgeHub.Api.Controllers.RagController (KnowledgeHub.Api).
+2026-10-29 10:09:07.688 +01:00 [INF] Start processing HTTP request POST http://localhost:11434/api/embeddings
+2026-10-29 10:09:07.690 +01:00 [INF] Sending HTTP request POST http://localhost:11434/api/embeddings
+2026-10-29 10:09:10.322 +01:00 [INF] Received HTTP response headers after 2628.6718ms - 200
+2026-10-29 10:09:10.324 +01:00 [INF] End processing HTTP request after 2636.6842ms - 200
+2026-10-29 10:09:10.379 +01:00 [INF] Start processing HTTP request POST http://localhost:11434/api/chat
+2026-10-29 10:09:10.381 +01:00 [INF] Sending HTTP request POST http://localhost:11434/api/chat
+2026-10-29 10:10:05.690 +01:00 [INF] Received HTTP response headers after 55307.3941ms - 200
+2026-10-29 10:10:05.692 +01:00 [INF] End processing HTTP request after 55312.5028ms - 200
+2026-10-29 10:10:05.700 +01:00 [INF] Executing OkObjectResult, writing value of type 'KnowledgeHub.Application.DTOs.AskQuestionResponseDto'.
+2026-10-29 10:10:05.705 +01:00 [INF] Executed action KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api) in 58061.4848ms
+2026-10-29 10:10:05.706 +01:00 [INF] Executed endpoint 'KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api)'
+2026-10-29 10:10:05.707 +01:00 [INF] Request finished HTTP/1.1 POST https://localhost:7141/api/rag/ask - 200 null application/json; charset=utf-8 58078.0255ms
+2026-10-29 10:10:18.454 +01:00 [INF] Request starting HTTP/1.1 GET https://localhost:7141/api/documents - null null
+2026-10-29 10:10:18.458 +01:00 [INF] Executing endpoint 'KnowledgeHub.Api.Controllers.DocumentsController.Get (KnowledgeHub.Api)'
+2026-10-29 10:10:18.464 +01:00 [INF] Route matched with {action = "Get", controller = "Documents"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Get(System.Threading.CancellationToken) on controller KnowledgeHub.Api.Controllers.DocumentsController (KnowledgeHub.Api).
+2026-10-29 10:10:18.539 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id", d."CategoryId", d."Content", d."CreatedAt", d."SearchKeywords", d."SourceId", d."Summary", d."Title", d."UpdatedAt", c."Id", c."Name", k."Id", k."Name", k."Url"
+FROM "Documents" AS d
+LEFT JOIN "Categories" AS c ON d."CategoryId" = c."Id"
+LEFT JOIN "KnowledgeSources" AS k ON d."SourceId" = k."Id"
+ORDER BY d."Id", c."Id", k."Id"
+2026-10-29 10:10:18.634 +01:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT d0."Id", d0."ChunkIndex", d0."Content", d0."CreatedAt", d0."DocumentId", d0."TokenCount", d."Id", c."Id", k."Id"
+FROM "Documents" AS d
+LEFT JOIN "Categories" AS c ON d."CategoryId" = c."Id"
+LEFT JOIN "KnowledgeSources" AS k ON d."SourceId" = k."Id"
+INNER JOIN "DocumentChunks" AS d0 ON d."Id" = d0."DocumentId"
+ORDER BY d."Id", c."Id", k."Id"
+2026-10-29 10:10:18.668 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT s."DocumentId", s."TagId", s."Id", s."Name", d."Id", c."Id", k."Id"
+FROM "Documents" AS d
+LEFT JOIN "Categories" AS c ON d."CategoryId" = c."Id"
+LEFT JOIN "KnowledgeSources" AS k ON d."SourceId" = k."Id"
+INNER JOIN (
+    SELECT k0."DocumentId", k0."TagId", t."Id", t."Name"
+    FROM "KnowledgeDocumentTags" AS k0
+    INNER JOIN "Tags" AS t ON k0."TagId" = t."Id"
+) AS s ON d."Id" = s."DocumentId"
+ORDER BY d."Id", c."Id", k."Id"
+2026-10-29 10:10:18.742 +01:00 [INF] Executing OkObjectResult, writing value of type 'KnowledgeHub.Application.DTOs.ApiResponse`1[[System.Collections.Generic.List`1[[KnowledgeHub.Application.DTOs.DocumentDto, KnowledgeHub.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2026-10-29 10:10:18.773 +01:00 [INF] Executed action KnowledgeHub.Api.Controllers.DocumentsController.Get (KnowledgeHub.Api) in 304.1137ms
+2026-10-29 10:10:18.775 +01:00 [INF] Executed endpoint 'KnowledgeHub.Api.Controllers.DocumentsController.Get (KnowledgeHub.Api)'
+2026-10-29 10:10:18.777 +01:00 [INF] Request finished HTTP/1.1 GET https://localhost:7141/api/documents - 200 null application/json; charset=utf-8 323.2159ms
+2026-10-29 10:10:31.112 +01:00 [INF] Request starting HTTP/1.1 GET https://localhost:7141/api/documents/fcb48c67-41fd-499a-8294-efc7eac89f54/details - null null
+2026-10-29 10:10:31.118 +01:00 [INF] Executing endpoint 'KnowledgeHub.Api.Controllers.DocumentsController.GetDetails (KnowledgeHub.Api)'
+2026-10-29 10:10:31.124 +01:00 [INF] Route matched with {action = "GetDetails", controller = "Documents"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetDetails(System.Guid, System.Threading.CancellationToken) on controller KnowledgeHub.Api.Controllers.DocumentsController (KnowledgeHub.Api).
+2026-10-29 10:10:31.178 +01:00 [INF] Executed DbCommand (6ms) [Parameters=[@id='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id", d."CategoryId", d."Content", d."CreatedAt", d."SearchKeywords", d."SourceId", d."Summary", d."Title", d."UpdatedAt", c."Id", c."Name", k."Id", k."Name", k."Url"
+FROM "Documents" AS d
+LEFT JOIN "Categories" AS c ON d."CategoryId" = c."Id"
+LEFT JOIN "KnowledgeSources" AS k ON d."SourceId" = k."Id"
+WHERE d."Id" = @id
+ORDER BY d."Id", c."Id", k."Id"
+LIMIT 1
+2026-10-29 10:10:31.186 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[@id='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT d0."Id", d0."ChunkIndex", d0."Content", d0."CreatedAt", d0."DocumentId", d0."TokenCount", s."Id", s."Id0", s."Id1"
+FROM (
+    SELECT d."Id", c."Id" AS "Id0", k."Id" AS "Id1"
+    FROM "Documents" AS d
+    LEFT JOIN "Categories" AS c ON d."CategoryId" = c."Id"
+    LEFT JOIN "KnowledgeSources" AS k ON d."SourceId" = k."Id"
+    WHERE d."Id" = @id
+    ORDER BY d."Id", c."Id", k."Id"
+    LIMIT 1
+) AS s
+INNER JOIN "DocumentChunks" AS d0 ON s."Id" = d0."DocumentId"
+ORDER BY s."Id", s."Id0", s."Id1"
+2026-10-29 10:10:31.193 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[@id='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT s1."DocumentId", s1."TagId", s1."Id", s1."Name", s0."Id", s0."Id0", s0."Id1"
+FROM (
+    SELECT d."Id", c."Id" AS "Id0", k."Id" AS "Id1"
+    FROM "Documents" AS d
+    LEFT JOIN "Categories" AS c ON d."CategoryId" = c."Id"
+    LEFT JOIN "KnowledgeSources" AS k ON d."SourceId" = k."Id"
+    WHERE d."Id" = @id
+    ORDER BY d."Id", c."Id", k."Id"
+    LIMIT 1
+) AS s0
+INNER JOIN (
+    SELECT k0."DocumentId", k0."TagId", t."Id", t."Name"
+    FROM "KnowledgeDocumentTags" AS k0
+    INNER JOIN "Tags" AS t ON k0."TagId" = t."Id"
+) AS s1 ON s0."Id" = s1."DocumentId"
+ORDER BY s0."Id", s0."Id0", s0."Id1"
+2026-10-29 10:10:31.199 +01:00 [INF] Executing OkObjectResult, writing value of type 'KnowledgeHub.Application.DTOs.ApiResponse`1[[DocumentDetailsDto, KnowledgeHub.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-29 10:10:31.205 +01:00 [INF] Executed action KnowledgeHub.Api.Controllers.DocumentsController.GetDetails (KnowledgeHub.Api) in 77.2865ms
+2026-10-29 10:10:31.214 +01:00 [INF] Executed endpoint 'KnowledgeHub.Api.Controllers.DocumentsController.GetDetails (KnowledgeHub.Api)'
+2026-10-29 10:10:31.216 +01:00 [INF] Request finished HTTP/1.1 GET https://localhost:7141/api/documents/fcb48c67-41fd-499a-8294-efc7eac89f54/details - 200 null application/json; charset=utf-8 103.4091ms
+2026-10-29 10:10:51.049 +01:00 [INF] Request starting HTTP/1.1 POST http://localhost:5115/api/rag/ask - application/json; charset=utf-8 null
+2026-10-29 10:10:51.053 +01:00 [INF] Request finished HTTP/1.1 POST http://localhost:5115/api/rag/ask - 307 0 null 4.0384ms
+2026-10-29 10:10:51.054 +01:00 [INF] Request starting HTTP/1.1 POST https://localhost:7141/api/rag/ask - application/json; charset=utf-8 null
+2026-10-29 10:10:51.058 +01:00 [INF] Executing endpoint 'KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api)'
+2026-10-29 10:10:51.059 +01:00 [INF] Route matched with {action = "Ask", controller = "Rag"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Ask(KnowledgeHub.Application.DTOs.AskQuestionRequestDto, System.Threading.CancellationToken) on controller KnowledgeHub.Api.Controllers.RagController (KnowledgeHub.Api).
+2026-10-29 10:10:51.063 +01:00 [INF] Start processing HTTP request POST http://localhost:11434/api/embeddings
+2026-10-29 10:10:51.064 +01:00 [INF] Sending HTTP request POST http://localhost:11434/api/embeddings
+2026-10-29 10:10:53.143 +01:00 [INF] Received HTTP response headers after 2077.9062ms - 200
+2026-10-29 10:10:53.144 +01:00 [INF] End processing HTTP request after 2081.8176ms - 200
+2026-10-29 10:10:53.158 +01:00 [INF] Start processing HTTP request POST http://localhost:11434/api/chat
+2026-10-29 10:10:53.159 +01:00 [INF] Sending HTTP request POST http://localhost:11434/api/chat
+2026-10-29 10:11:33.341 +01:00 [INF] Received HTTP response headers after 40181.3615ms - 200
+2026-10-29 10:11:33.342 +01:00 [INF] End processing HTTP request after 40184.6223ms - 200
+2026-10-29 10:11:33.345 +01:00 [INF] Executing OkObjectResult, writing value of type 'KnowledgeHub.Application.DTOs.AskQuestionResponseDto'.
+2026-10-29 10:11:33.346 +01:00 [INF] Executed action KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api) in 42285.4179ms
+2026-10-29 10:11:33.358 +01:00 [INF] Executed endpoint 'KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api)'
+2026-10-29 10:11:33.359 +01:00 [INF] Request finished HTTP/1.1 POST https://localhost:7141/api/rag/ask - 200 null application/json; charset=utf-8 42305.5419ms
+2026-10-29 10:22:32.394 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5115/ - null null
+2026-10-29 10:22:32.396 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5115/ - 307 0 null 2.5817ms
+2026-10-29 10:22:32.406 +01:00 [INF] Request starting HTTP/1.1 GET https://localhost:7141/ - null null
+2026-10-29 10:22:32.412 +01:00 [INF] Request finished HTTP/1.1 GET https://localhost:7141/ - 404 0 null 6.728ms
+2026-10-29 10:22:32.417 +01:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:7141/, Response status code: 404
+2026-10-29 10:22:32.426 +01:00 [INF] Request starting HTTP/1.1 POST http://localhost:5115/api/rag/ask - application/json 68
+2026-10-29 10:22:32.429 +01:00 [INF] Request finished HTTP/1.1 POST http://localhost:5115/api/rag/ask - 307 0 null 3.2063ms
+2026-10-29 10:22:32.430 +01:00 [INF] Request starting HTTP/1.1 POST https://localhost:7141/api/rag/ask - application/json 68
+2026-10-29 10:22:32.436 +01:00 [INF] Executing endpoint 'KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api)'
+2026-10-29 10:22:32.437 +01:00 [INF] Route matched with {action = "Ask", controller = "Rag"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Ask(KnowledgeHub.Application.DTOs.AskQuestionRequestDto, System.Threading.CancellationToken) on controller KnowledgeHub.Api.Controllers.RagController (KnowledgeHub.Api).
+2026-10-29 10:22:32.442 +01:00 [INF] Start processing HTTP request POST http://localhost:11434/api/embeddings
+2026-10-29 10:22:32.444 +01:00 [INF] Sending HTTP request POST http://localhost:11434/api/embeddings
+2026-10-29 10:22:34.772 +01:00 [INF] Received HTTP response headers after 2326.4745ms - 200
+2026-10-29 10:22:34.773 +01:00 [INF] End processing HTTP request after 2331.2067ms - 200
+2026-10-29 10:22:34.788 +01:00 [INF] Start processing HTTP request POST http://localhost:11434/api/chat
+2026-10-29 10:22:34.790 +01:00 [INF] Sending HTTP request POST http://localhost:11434/api/chat
+2026-10-29 10:23:27.788 +01:00 [INF] Received HTTP response headers after 52997.6129ms - 200
+2026-10-29 10:23:27.790 +01:00 [INF] End processing HTTP request after 53001.4769ms - 200
+2026-10-29 10:23:27.792 +01:00 [INF] Executing OkObjectResult, writing value of type 'KnowledgeHub.Application.DTOs.AskQuestionResponseDto'.
+2026-10-29 10:23:27.793 +01:00 [INF] Executed action KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api) in 55353.7919ms
+2026-10-29 10:23:27.794 +01:00 [INF] Executed endpoint 'KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api)'
+2026-10-29 10:23:27.795 +01:00 [INF] Request finished HTTP/1.1 POST https://localhost:7141/api/rag/ask - 200 null application/json; charset=utf-8 55365.7283ms
+2026-10-29 10:26:46.908 +01:00 [INF] Executed DbCommand (21ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-29 10:26:47.166 +01:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."ChunkId", c."CreatedAt", c."Embedding"
+FROM "ChunkEmbeddings" AS c
+2026-10-29 10:26:47.754 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id", d."ChunkIndex", d."Content", d."CreatedAt", d."DocumentId", d."TokenCount", d0."Id", d0."CategoryId", d0."Content", d0."CreatedAt", d0."SearchKeywords", d0."SourceId", d0."Summary", d0."Title", d0."UpdatedAt"
+FROM "DocumentChunks" AS d
+INNER JOIN "Documents" AS d0 ON d."DocumentId" = d0."Id"
+2026-10-29 10:26:48.030 +01:00 [INF] Now listening on: https://localhost:7141
+2026-10-29 10:26:48.032 +01:00 [INF] Now listening on: http://localhost:5115
+2026-10-29 10:26:48.064 +01:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-10-29 10:26:48.066 +01:00 [INF] Hosting environment: Development
+2026-10-29 10:26:48.066 +01:00 [INF] Content root path: C:\Users\aguinot\Documents\developpement\KnowledgeHub\KnowledgeHub.Api
+2026-10-29 10:26:48.573 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar - null null
+2026-10-29 10:26:48.583 +01:00 [INF] Request starting HTTP/1.1 GET https://localhost:7141/api/statistics - null null
+2026-10-29 10:26:48.632 +01:00 [INF] Executing endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 10:26:48.658 +01:00 [INF] Route matched with {action = "Get", controller = "Statistics"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Get(System.Threading.CancellationToken) on controller StatisticsController (KnowledgeHub.Api).
+2026-10-29 10:26:48.661 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 10:26:48.670 +01:00 [INF] Executing RedirectResult, redirecting to scalar/.
+2026-10-29 10:26:48.671 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 10:26:48.679 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar - 302 null null 111.8893ms
+2026-10-29 10:26:48.685 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar/ - null null
+2026-10-29 10:26:48.692 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 10:26:48.777 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Documents" AS d
+2026-10-29 10:26:48.789 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Categories" AS c
+2026-10-29 10:26:48.796 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "KnowledgeSources" AS k
+2026-10-29 10:26:48.805 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Tags" AS t
+2026-10-29 10:26:48.810 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "DocumentChunks" AS d
+2026-10-29 10:26:48.836 +01:00 [INF] Executing OkObjectResult, writing value of type 'KnowledgeHub.Application.DTOs.ApiResponse`1[[KnowledgeHub.Application.DTOs.KnowledgeStatisticsDto, KnowledgeHub.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-29 10:26:48.851 +01:00 [INF] Write content with HTTP Response ContentType of text/html
+2026-10-29 10:26:48.883 +01:00 [INF] Executed action StatisticsController.Get (KnowledgeHub.Api) in 215.6865ms
+2026-10-29 10:26:48.931 +01:00 [INF] Executed endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 10:26:48.941 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 10:26:48.954 +01:00 [INF] Request finished HTTP/1.1 GET https://localhost:7141/api/statistics - 200 null application/json; charset=utf-8 371.2559ms
+2026-10-29 10:26:48.961 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar/ - 200 null text/html 276.1058ms
+2026-10-29 10:26:48.973 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar/scalar.js - null null
+2026-10-29 10:26:48.973 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/_framework/aspnetcore-browser-refresh.js - null null
+2026-10-29 10:26:48.973 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar/scalar.aspnetcore.js - null null
+2026-10-29 10:26:49.225 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.js'
+2026-10-29 10:26:49.240 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2026-10-29 10:26:49.246 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/_framework/aspnetcore-browser-refresh.js - 200 14937 application/javascript; charset=utf-8 273.5945ms
+2026-10-29 10:26:49.247 +01:00 [INF] Sending file with download name ''.
+2026-10-29 10:26:49.249 +01:00 [INF] Sending file with download name ''.
+2026-10-29 10:26:49.259 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/_vs/browserLink - null null
+2026-10-29 10:26:49.262 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2026-10-29 10:26:49.267 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.js'
+2026-10-29 10:26:49.278 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar/scalar.aspnetcore.js - 304 null null 305.2931ms
+2026-10-29 10:26:49.291 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar/scalar.js - 304 null null 318.0195ms
+2026-10-29 10:26:49.426 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/_vs/browserLink - 200 null text/javascript; charset=UTF-8 166.5395ms
+2026-10-29 10:26:49.718 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/openapi/v1.json - null null
+2026-10-29 10:26:49.753 +01:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2026-10-29 10:26:49.792 +01:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2026-10-29 10:26:49.812 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/openapi/v1.json - 200 null application/json;charset=utf-8 94.1918ms
+2026-10-29 10:58:33.488 +01:00 [INF] Executed DbCommand (18ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-29 10:58:33.757 +01:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."ChunkId", c."CreatedAt", c."Embedding"
+FROM "ChunkEmbeddings" AS c
+2026-10-29 10:58:34.335 +01:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id", d."ChunkIndex", d."Content", d."CreatedAt", d."DocumentId", d."TokenCount", d0."Id", d0."CategoryId", d0."Content", d0."CreatedAt", d0."SearchKeywords", d0."SourceId", d0."Summary", d0."Title", d0."UpdatedAt"
+FROM "DocumentChunks" AS d
+INNER JOIN "Documents" AS d0 ON d."DocumentId" = d0."Id"
+2026-10-29 10:58:34.632 +01:00 [INF] Now listening on: https://localhost:7141
+2026-10-29 10:58:34.633 +01:00 [INF] Now listening on: http://localhost:5115
+2026-10-29 10:58:34.758 +01:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-10-29 10:58:34.758 +01:00 [INF] Hosting environment: Development
+2026-10-29 10:58:34.760 +01:00 [INF] Content root path: C:\Users\aguinot\Documents\developpement\KnowledgeHub\KnowledgeHub.Api
+2026-10-29 10:58:35.003 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar - null null
+2026-10-29 10:58:35.053 +01:00 [INF] Request starting HTTP/1.1 GET https://localhost:7141/api/statistics - null null
+2026-10-29 10:58:35.087 +01:00 [INF] Executing endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 10:58:35.087 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 10:58:35.096 +01:00 [INF] Executing RedirectResult, redirecting to scalar/.
+2026-10-29 10:58:35.097 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 10:58:35.103 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar - 302 null null 105.2111ms
+2026-10-29 10:58:35.107 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar/ - null null
+2026-10-29 10:58:35.109 +01:00 [INF] Route matched with {action = "Get", controller = "Statistics"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Get(System.Threading.CancellationToken) on controller StatisticsController (KnowledgeHub.Api).
+2026-10-29 10:58:35.115 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 10:58:35.212 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Documents" AS d
+2026-10-29 10:58:35.222 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Categories" AS c
+2026-10-29 10:58:35.227 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "KnowledgeSources" AS k
+2026-10-29 10:58:35.232 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Tags" AS t
+2026-10-29 10:58:35.237 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "DocumentChunks" AS d
+2026-10-29 10:58:35.240 +01:00 [INF] Write content with HTTP Response ContentType of text/html
+2026-10-29 10:58:35.249 +01:00 [INF] Executing OkObjectResult, writing value of type 'KnowledgeHub.Application.DTOs.ApiResponse`1[[KnowledgeHub.Application.DTOs.KnowledgeStatisticsDto, KnowledgeHub.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-29 10:58:35.254 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 10:58:35.256 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar/ - 200 null text/html 148.8352ms
+2026-10-29 10:58:35.262 +01:00 [INF] Executed action StatisticsController.Get (KnowledgeHub.Api) in 147.5517ms
+2026-10-29 10:58:35.263 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar/scalar.js - null null
+2026-10-29 10:58:35.265 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/_vs/browserLink - null null
+2026-10-29 10:58:35.264 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar/scalar.aspnetcore.js - null null
+2026-10-29 10:58:35.264 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/_framework/aspnetcore-browser-refresh.js - null null
+2026-10-29 10:58:35.266 +01:00 [INF] Executed endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 10:58:35.272 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2026-10-29 10:58:35.268 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.js'
+2026-10-29 10:58:35.283 +01:00 [INF] Sending file with download name ''.
+2026-10-29 10:58:35.283 +01:00 [INF] Request finished HTTP/1.1 GET https://localhost:7141/api/statistics - 200 null application/json; charset=utf-8 230.67ms
+2026-10-29 10:58:35.284 +01:00 [INF] Sending file with download name ''.
+2026-10-29 10:58:35.288 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2026-10-29 10:58:35.288 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/_framework/aspnetcore-browser-refresh.js - 200 14937 application/javascript; charset=utf-8 24.427ms
+2026-10-29 10:58:35.288 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.js'
+2026-10-29 10:58:35.289 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar/scalar.aspnetcore.js - 304 null null 25.6415ms
+2026-10-29 10:58:35.292 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar/scalar.js - 304 null null 29.8987ms
+2026-10-29 10:58:35.304 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/_vs/browserLink - 200 null text/javascript; charset=UTF-8 39.4736ms
+2026-10-29 10:58:35.362 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/openapi/v1.json - null null
+2026-10-29 10:58:35.365 +01:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2026-10-29 10:58:35.376 +01:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2026-10-29 10:58:35.377 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/openapi/v1.json - 200 null application/json;charset=utf-8 14.935ms
+2026-10-29 10:58:49.175 +01:00 [INF] Request starting HTTP/1.1 POST https://localhost:7141/api/rag/ask - application/json; charset=utf-8 null
+2026-10-29 10:58:49.180 +01:00 [INF] Executing endpoint 'KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api)'
+2026-10-29 10:58:49.187 +01:00 [INF] Route matched with {action = "Ask", controller = "Rag"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Ask(KnowledgeHub.Application.DTOs.AskQuestionRequestDto, System.Threading.CancellationToken) on controller KnowledgeHub.Api.Controllers.RagController (KnowledgeHub.Api).
+2026-10-29 10:58:49.191 +01:00 [INF] Executed action KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api) in 1.462ms
+2026-10-29 10:58:49.192 +01:00 [INF] Executed endpoint 'KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api)'
+2026-10-29 10:58:49.317 +01:00 [INF] Request finished HTTP/1.1 POST https://localhost:7141/api/rag/ask - 500 null application/json 141.8964ms
+2026-10-29 12:39:30.233 +01:00 [INF] Executed DbCommand (28ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-29 12:39:30.696 +01:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."ChunkId", c."CreatedAt", c."Embedding"
+FROM "ChunkEmbeddings" AS c
+2026-10-29 12:39:31.692 +01:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id", d."ChunkIndex", d."Content", d."CreatedAt", d."DocumentId", d."TokenCount", d0."Id", d0."CategoryId", d0."Content", d0."CreatedAt", d0."SearchKeywords", d0."SourceId", d0."Summary", d0."Title", d0."UpdatedAt"
+FROM "DocumentChunks" AS d
+INNER JOIN "Documents" AS d0 ON d."DocumentId" = d0."Id"
+2026-10-29 12:39:32.070 +01:00 [INF] Now listening on: https://localhost:7141
+2026-10-29 12:39:32.071 +01:00 [INF] Now listening on: http://localhost:5115
+2026-10-29 12:39:32.117 +01:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-10-29 12:39:32.118 +01:00 [INF] Hosting environment: Development
+2026-10-29 12:39:32.119 +01:00 [INF] Content root path: C:\Users\aguinot\Documents\developpement\KnowledgeHub\KnowledgeHub.Api
+2026-10-29 12:39:32.391 +01:00 [INF] Request starting HTTP/1.1 GET https://localhost:7141/api/statistics - null null
+2026-10-29 12:39:32.410 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar - null null
+2026-10-29 12:39:32.456 +01:00 [INF] Executing endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 12:39:32.491 +01:00 [INF] Route matched with {action = "Get", controller = "Statistics"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Get(System.Threading.CancellationToken) on controller StatisticsController (KnowledgeHub.Api).
+2026-10-29 12:39:32.495 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 12:39:32.505 +01:00 [INF] Executing RedirectResult, redirecting to scalar/.
+2026-10-29 12:39:32.507 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 12:39:32.517 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar - 302 null null 106.7861ms
+2026-10-29 12:39:32.522 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar/ - null null
+2026-10-29 12:39:32.529 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 12:39:32.621 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Documents" AS d
+2026-10-29 12:39:32.632 +01:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Categories" AS c
+2026-10-29 12:39:32.643 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "KnowledgeSources" AS k
+2026-10-29 12:39:32.654 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Tags" AS t
+2026-10-29 12:39:32.662 +01:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "DocumentChunks" AS d
+2026-10-29 12:39:32.675 +01:00 [INF] Executing OkObjectResult, writing value of type 'KnowledgeHub.Application.DTOs.ApiResponse`1[[KnowledgeHub.Application.DTOs.KnowledgeStatisticsDto, KnowledgeHub.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-29 12:39:32.685 +01:00 [INF] Write content with HTTP Response ContentType of text/html
+2026-10-29 12:39:32.688 +01:00 [INF] Executed action StatisticsController.Get (KnowledgeHub.Api) in 189.761ms
+2026-10-29 12:39:32.693 +01:00 [INF] Executed endpoint 'StatisticsController.Get (KnowledgeHub.Api)'
+2026-10-29 12:39:32.701 +01:00 [INF] Request finished HTTP/1.1 GET https://localhost:7141/api/statistics - 200 null application/json; charset=utf-8 323.7832ms
+2026-10-29 12:39:32.701 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2026-10-29 12:39:32.709 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar/ - 200 null text/html 187.0225ms
+2026-10-29 12:39:32.718 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar/scalar.js - null null
+2026-10-29 12:39:32.720 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/scalar/scalar.aspnetcore.js - null null
+2026-10-29 12:39:32.720 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/_framework/aspnetcore-browser-refresh.js - null null
+2026-10-29 12:39:32.720 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/_vs/browserLink - null null
+2026-10-29 12:39:32.723 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.js'
+2026-10-29 12:39:32.726 +01:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2026-10-29 12:39:32.745 +01:00 [INF] Sending file with download name ''.
+2026-10-29 12:39:32.745 +01:00 [INF] Sending file with download name ''.
+2026-10-29 12:39:32.745 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/_framework/aspnetcore-browser-refresh.js - 200 14937 application/javascript; charset=utf-8 25.9054ms
+2026-10-29 12:39:32.749 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2026-10-29 12:39:32.749 +01:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.js'
+2026-10-29 12:39:32.754 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar/scalar.aspnetcore.js - 304 null null 34.8736ms
+2026-10-29 12:39:32.756 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/scalar/scalar.js - 304 null null 37.7097ms
+2026-10-29 12:39:32.771 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/_vs/browserLink - 200 null text/javascript; charset=UTF-8 51.4685ms
+2026-10-29 12:39:32.833 +01:00 [INF] Request starting HTTP/2 GET https://localhost:7141/openapi/v1.json - null null
+2026-10-29 12:39:32.837 +01:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2026-10-29 12:39:32.850 +01:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2026-10-29 12:39:32.852 +01:00 [INF] Request finished HTTP/2 GET https://localhost:7141/openapi/v1.json - 200 null application/json;charset=utf-8 18.9251ms
+2026-10-29 12:39:48.635 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5115/ - null null
+2026-10-29 12:39:48.640 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5115/ - 307 0 null 4.7238ms
+2026-10-29 12:39:48.651 +01:00 [INF] Request starting HTTP/1.1 GET https://localhost:7141/ - null null
+2026-10-29 12:39:48.653 +01:00 [INF] Request finished HTTP/1.1 GET https://localhost:7141/ - 404 0 null 1.8426ms
+2026-10-29 12:39:48.661 +01:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:7141/, Response status code: 404
+2026-10-29 12:39:48.671 +01:00 [INF] Request starting HTTP/1.1 POST http://localhost:5115/api/rag/ask - application/json 68
+2026-10-29 12:39:48.674 +01:00 [INF] Request finished HTTP/1.1 POST http://localhost:5115/api/rag/ask - 307 0 null 3.0474ms
+2026-10-29 12:39:48.674 +01:00 [INF] Request starting HTTP/1.1 POST https://localhost:7141/api/rag/ask - application/json 68
+2026-10-29 12:39:48.682 +01:00 [INF] Executing endpoint 'KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api)'
+2026-10-29 12:39:48.699 +01:00 [INF] Route matched with {action = "Ask", controller = "Rag"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Ask(KnowledgeHub.Application.DTOs.AskQuestionRequestDto, System.Threading.CancellationToken) on controller KnowledgeHub.Api.Controllers.RagController (KnowledgeHub.Api).
+2026-10-29 12:39:48.704 +01:00 [INF] Executed action KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api) in 1.6089ms
+2026-10-29 12:39:48.705 +01:00 [INF] Executed endpoint 'KnowledgeHub.Api.Controllers.RagController.Ask (KnowledgeHub.Api)'
+2026-10-29 12:39:48.756 +01:00 [INF] Request finished HTTP/1.1 POST https://localhost:7141/api/rag/ask - 500 null application/json 81.5781ms
+2026-10-29 12:40:00.095 +01:00 [INF] Application is shutting down...

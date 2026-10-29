@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RunSettings>
+	<RunConfiguration>
+		<ResultsDirectory>./artifacts/test-results</ResultsDirectory>
+	</RunConfiguration>
+
+	<DataCollectionRunSettings>
+		<DataCollectors>
+
+			<DataCollector friendlyName="XPlat Code Coverage">
+
+				<Configuration>
+
+					<Format>cobertura</Format>
+
+					<Exclude>
+						[*.Tests]*,
+						[*.IntegrationTests]*,
+						[*.UnitTests]*,
+						[xunit.*]*,
+						[Microsoft.*]*,
+						[System.*]*
+					</Exclude>
+
+					<ExcludeByFile>
+						**/obj/**,
+						**/Migrations/**,
+						**/*.Designer.cs,
+						**/*.designer.cs,
+						**/*.g.cs,
+						**/*.g.i.cs,
+						**/OpenApi/**,
+						**/OpenAPI/**,
+						**/Generated/**,
+						**/*.generated.cs
+					</ExcludeByFile>
+
+					<ExcludeByAttribute>
+						Obsolete,
+						GeneratedCodeAttribute,
+						CompilerGeneratedAttribute,
+						ExcludeFromCodeCoverageAttribute
+					</ExcludeByAttribute>
+
+					<IncludeDirectory>
+						../
+					</IncludeDirectory>
+
+					<SkipAutoProps>false</SkipAutoProps>
+
+					<UseSourceLink>true</UseSourceLink>
+
+					<SingleHit>false</SingleHit>
+
+					<DeterministicReport>true</DeterministicReport>
+
+				</Configuration>
+
+			</DataCollector>
+
+		</DataCollectors>
+	</DataCollectionRunSettings>
+</RunSettings>

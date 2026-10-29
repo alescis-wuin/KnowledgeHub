@@ -1,0 +1,134 @@
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="KnowledgeHub.Client.Views.DashboardPage"
+    Title="Dashboard">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="20"
+            Spacing="15">
+
+            <Label
+                FontSize="28"
+                FontAttributes="Bold"
+                Text="KnowledgeHub" />
+
+            <ActivityIndicator
+                IsVisible="{Binding IsLoading}"
+                IsRunning="{Binding IsLoading}" />
+
+            <Grid
+                ColumnDefinitions="*,*"
+                RowDefinitions="Auto,Auto,Auto"
+                ColumnSpacing="15"
+                RowSpacing="15">
+
+                <Border
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Padding="20"
+                    Stroke="#2563EB"
+                    StrokeShape="RoundRectangle 12">
+
+                    <VerticalStackLayout>
+
+                        <Label
+                            Text="📚 Documents" />
+
+                        <Label
+                            FontSize="30"
+                            Text="{Binding DocumentsCount}" />
+
+                    </VerticalStackLayout>
+
+                </Border>
+
+                <Border
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Padding="20"
+                    Stroke="#10B981"
+                    StrokeShape="RoundRectangle 12">
+
+                    <VerticalStackLayout>
+
+                        <Label
+                            Text="🏷️ Tags" />
+
+                        <Label
+                            FontSize="30"
+                            Text="{Binding TagsCount}" />
+
+                    </VerticalStackLayout>
+
+                </Border>
+
+                <Border
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Padding="20"
+                    Stroke="#F59E0B"
+                    StrokeShape="RoundRectangle 12">
+
+                    <VerticalStackLayout>
+
+                        <Label
+                            Text="📂 Categories" />
+
+                        <Label
+                            FontSize="30"
+                            Text="{Binding CategoriesCount}" />
+
+                    </VerticalStackLayout>
+
+                </Border>
+
+                <Border
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Padding="20"
+                    Stroke="#8B5CF6"
+                    StrokeShape="RoundRectangle 12">
+
+                    <VerticalStackLayout>
+
+                        <Label
+                            Text="🔗 Sources" />
+
+                        <Label
+                            FontSize="30"
+                            Text="{Binding SourcesCount}" />
+
+                    </VerticalStackLayout>
+
+                </Border>
+
+                <Border
+                    Grid.Row="2"
+                    Grid.ColumnSpan="2"
+                    Padding="20"
+                    Stroke="#EC4899"
+                    StrokeShape="RoundRectangle 12">
+
+                    <VerticalStackLayout>
+
+                        <Label
+                            Text="🧩 Chunks" />
+
+                        <Label
+                            FontSize="30"
+                            Text="{Binding ChunksCount}" />
+
+                    </VerticalStackLayout>
+
+                </Border>
+
+            </Grid>
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>

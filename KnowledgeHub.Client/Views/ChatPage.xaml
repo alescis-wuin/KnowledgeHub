@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="KnowledgeHub.Client.Views.ChatPage"
+    Title="Assistant IA">
+
+    <VerticalStackLayout
+        Padding="20"
+        Spacing="15">
+
+        <Entry
+            Placeholder="Posez votre question..."
+            Text="{Binding Question}" />
+
+        <Button
+            Text="Demander"
+            Command="{Binding AskCommand}" />
+
+        <ActivityIndicator
+            IsVisible="{Binding IsLoading}"
+            IsRunning="{Binding IsLoading}" />
+
+        <Frame
+            BorderColor="LightGray"
+            Padding="10">
+
+            <ScrollView>
+
+                <Label
+                    Text="{Binding Answer}"
+                    LineBreakMode="WordWrap" />
+
+            </ScrollView>
+
+        </Frame>
+
+        <Label
+            Text="Sources"
+            FontAttributes="Bold"
+            IsVisible="{Binding Sources.Count}" />
+
+        <CollectionView
+            ItemsSource="{Binding Sources}">
+
+            <CollectionView.ItemTemplate>
+
+                <DataTemplate>
+
+                    <Frame
+                        Margin="0,5"
+                        Padding="10">
+
+                        <VerticalStackLayout
+                            Spacing="5">
+
+                            <Label
+                                Text="{Binding Title}"
+                                FontAttributes="Bold" />
+
+                            <Label
+                                Text="{Binding RelevancePercent, StringFormat='Pertinence : {0}%'}"
+                                FontSize="12" />
+
+                            <Label
+                                Text="{Binding Excerpt}"
+                                LineBreakMode="TailTruncation"
+                                MaxLines="4"
+                                FontSize="12" />
+
+                        </VerticalStackLayout>
+
+                    </Frame>
+
+                </DataTemplate>
+
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+
+    </VerticalStackLayout>
+
+</ContentPage>
