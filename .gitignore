@@ -1,6 +1,7 @@
 data/
 reports/
 Data/
+logs/
 
 #######################################
 # Build
@@ -75,7 +76,6 @@ appsettings.Development.local.json
 # AI Models
 #######################################
 
-models/
 embeddings/
 
 #######################################

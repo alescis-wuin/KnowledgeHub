@@ -71,18 +71,6 @@ await importer.ImportAsync(
 Console.WriteLine(
     "Import terminé.");
 
-var evaluationImporter =
-    scope.ServiceProvider
-        .GetRequiredService<
-            IEvaluationDatasetImportService>();
-
-await evaluationImporter
-    .ImportAllAsync(
-        CancellationToken.None);
-
-Console.WriteLine(
-    "Datasets d'évaluation importés.");
-
 var embeddingGenerator =
     scope.ServiceProvider
         .GetRequiredService<
