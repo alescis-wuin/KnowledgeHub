@@ -87,6 +87,7 @@ public partial class App : Application
             services.AddTransient<MainViewModel>();
             services.AddTransient<DocumentsViewModel>();
 			services.AddTransient<DashboardViewModel>();
+			services.AddTransient<ChatViewModel>();
 
             _serviceProvider = services.BuildServiceProvider();
 

@@ -28,12 +28,13 @@ public partial class MainViewModel : ViewModelBase
         set;
     }
 
-    public MainViewModel(
-        DashboardViewModel dashboard,
-        DocumentsViewModel documents,
-        CategoryApiService categoryService,
-        TagApiService tagService,
-        SourceApiService sourceService)
+	public MainViewModel(
+	    DashboardViewModel dashboard,
+	    DocumentsViewModel documents,
+	    CategoryApiService categoryService,
+	    TagApiService tagService,
+	    SourceApiService sourceService,
+	    ChatViewModel chat)
     {
         _dashboard = dashboard;
 
@@ -67,9 +68,7 @@ public partial class MainViewModel : ViewModelBase
             new("Catégories", categories),
             new("Tags", tags),
             new("Sources", sources),
-            new(
-                "Chat IA",
-                new PlaceholderViewModel("Chat IA"))
+            new("Chat IA", chat)
         ];
 
         SelectedSection = Sections[0];

@@ -1,0 +1,147 @@
+
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:KnowledgeHub.Client.Avalonia.ViewModels"
+    xmlns:models="using:KnowledgeHub.Client.Avalonia.Models"
+    x:Class="KnowledgeHub.Client.Avalonia.Views.ChatView"
+    x:DataType="vm:ChatViewModel">
+
+    <Grid Margin="28"
+          RowDefinitions="Auto,Auto,Auto,*"
+          RowSpacing="18">
+
+        <StackPanel Grid.Row="0" Spacing="6">
+            <TextBlock
+                Text="Assistant IA"
+                FontSize="28"
+                FontWeight="Bold" />
+
+            <TextBlock
+                Text="Interroger les connaissances documentaires"
+                Opacity="0.7" />
+        </StackPanel>
+
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*,Auto"
+              ColumnSpacing="12">
+
+            <TextBox
+                Grid.Column="0"
+                PlaceholderText="Posez votre question..."
+                Text="{Binding Question, Mode=TwoWay}"
+                AcceptsReturn="True"
+                TextWrapping="Wrap"
+                MinHeight="80"
+                MaxHeight="140" />
+
+            <StackPanel Grid.Column="1"
+                        Spacing="10"
+                        VerticalAlignment="Center">
+
+                <Button
+                    Content="Envoyer"
+                    Command="{Binding AskCommand}"
+                    IsEnabled="{Binding CanAsk}" />
+
+                <Button
+                    Content="Annuler"
+                    Command="{Binding CancelCommand}"
+                    IsVisible="{Binding IsLoading}" />
+
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Spacing="10">
+
+            <ProgressBar
+                Height="4"
+                IsIndeterminate="True"
+                IsVisible="{Binding IsLoading}" />
+
+            <TextBlock
+                Text="{Binding ErrorMessage}"
+                Foreground="#DC2626"
+                TextWrapping="Wrap" />
+
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="3">
+
+            <StackPanel Spacing="24">
+
+                <StackPanel Spacing="12">
+
+                    <TextBlock
+                        Text="Réponse"
+                        FontSize="20"
+                        FontWeight="SemiBold" />
+
+                    <Border
+                        Padding="18"
+                        BorderBrush="#64748B"
+                        BorderThickness="1"
+                        CornerRadius="10">
+
+                        <TextBlock
+                            Text="{Binding Answer}"
+                            TextWrapping="Wrap" />
+
+                    </Border>
+                </StackPanel>
+
+                <StackPanel
+                    Spacing="12"
+                    IsVisible="{Binding HasSources}">
+
+                    <TextBlock
+                        Text="Sources documentaires"
+                        FontSize="20"
+                        FontWeight="SemiBold" />
+
+                    <ItemsControl ItemsSource="{Binding Sources}">
+
+                        <ItemsControl.ItemTemplate>
+
+                            <DataTemplate
+                                x:DataType="models:SourceReferenceDto">
+
+                                <Border
+                                    Margin="0,0,0,12"
+                                    Padding="16"
+                                    BorderBrush="#64748B"
+                                    BorderThickness="1"
+                                    CornerRadius="10">
+
+                                    <StackPanel Spacing="8">
+
+                                        <TextBlock
+                                            Text="{Binding Title}"
+                                            FontSize="16"
+                                            FontWeight="SemiBold" />
+
+                                        <TextBlock
+                                            Text="{Binding RelevancePercent, StringFormat='Pertinence : {0}%'}"
+                                            FontSize="12"
+                                            Opacity="0.7" />
+
+                                        <TextBlock
+                                            Text="{Binding Excerpt}"
+                                            TextWrapping="Wrap" />
+
+                                    </StackPanel>
+
+                                </Border>
+
+                            </DataTemplate>
+
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </Grid>
+</UserControl>
