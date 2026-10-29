@@ -7,6 +7,7 @@
   </Folder>
   <Project Path="KnowledgeHub.Api/KnowledgeHub.Api.csproj" />
   <Project Path="KnowledgeHub.Application/KnowledgeHub.Application.csproj" />
+  <Project Path="KnowledgeHub.Client.Avalonia/KnowledgeHub.Client.Avalonia.csproj" />
   <Project Path="KnowledgeHub.Client/KnowledgeHub.Client.csproj" />
   <Project Path="KnowledgeHub.CorpusImporter/KnowledgeHub.CorpusImporter.csproj" />
   <Project Path="KnowledgeHub.Domain/KnowledgeHub.Domain.csproj" />
