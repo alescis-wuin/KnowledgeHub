@@ -28,6 +28,10 @@ public static class ApplicationServiceCollectionExtensions
             ITextChunker,
             DefaultTextChunker>();
 
+		services.AddScoped<
+		    IChunkEmbeddingGenerator,
+		    ChunkEmbeddingGenerator>();
+
         return services;
     }
 }
