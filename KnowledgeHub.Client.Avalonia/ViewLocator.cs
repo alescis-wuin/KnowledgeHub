@@ -1,33 +1,55 @@
-using System;
-using System.Diagnostics.CodeAnalysis;
+
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using KnowledgeHub.Client.Avalonia.ViewModels;
+using KnowledgeHub.Client.Avalonia.Views;
 
 namespace KnowledgeHub.Client.Avalonia;
 
 /// <summary>
-/// Given a view model, returns the corresponding view if possible.
+/// Resolves view models to their corresponding views
+/// without runtime reflection.
 /// </summary>
-[RequiresUnreferencedCode(
-    "Default implementation of ViewLocator involves reflection which may be trimmed away.",
-    Url = "https://docs.avaloniaui.net/docs/concepts/view-locator")]
-public class ViewLocator : IDataTemplate
+public sealed class ViewLocator : IDataTemplate
 {
-    public Control? Build(object? param)
+    public Control? Build(object? data)
     {
-        if (param is null)
-            return null;
-
-        var name = param.GetType().FullName!.Replace("ViewModel", "View", StringComparison.Ordinal);
-        var type = Type.GetType(name);
-
-        if (type != null)
+        return data switch
         {
-            return (Control)Activator.CreateInstance(type)!;
-        }
+            DashboardViewModel vm => new DashboardView
+            {
+                DataContext = vm
+            },
 
-        return new TextBlock { Text = "Not Found: " + name };
+            DocumentsViewModel vm => new DocumentsView
+            {
+                DataContext = vm
+            },
+
+            ReferenceListViewModel vm => new ReferenceListView
+            {
+                DataContext = vm
+            },
+
+            ChatViewModel vm => new ChatView
+            {
+                DataContext = vm
+            },
+
+            PlaceholderViewModel vm => new PlaceholderView
+            {
+                DataContext = vm
+            },
+
+            null => null,
+
+            _ => new TextBlock
+            {
+                Text =
+                    $"Aucune vue enregistrée pour " +
+                    $"{data.GetType().Name}"
+            }
+        };
     }
 
     public bool Match(object? data)
