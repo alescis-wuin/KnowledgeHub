@@ -1,4 +1,4 @@
-﻿using KnowledgeHub.Application.Interfaces;
+using KnowledgeHub.Application.Interfaces;
 using KnowledgeHub.Application.Services;
 
 namespace KnowledgeHub.Api.Extensions;
@@ -8,30 +8,13 @@ public static class ApplicationServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(
         this IServiceCollection services)
     {
-        services.AddScoped<
-            IDocumentService,
-            DocumentService>();
-
-        services.AddScoped<
-            ICategoryService,
-            CategoryService>();
-
-        services.AddScoped<
-            ITagService,
-            TagService>();
-
-        services.AddScoped<
-            IKnowledgeSourceService,
-            KnowledgeSourceService>();
-
-        services.AddScoped<
-            ITextChunker,
-            DefaultTextChunker>();
-
-		services.AddScoped<
-		    IChunkEmbeddingGenerator,
-		    ChunkEmbeddingGenerator>();
-
+        services.AddScoped<IDocumentService, DocumentService>();
+        services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<ITagService, TagService>();
+        services.AddScoped<IKnowledgeSourceService, KnowledgeSourceService>();
+        services.AddScoped<ITextChunker, DefaultTextChunker>();
+        services.AddScoped<IChunkEmbeddingGenerator, ChunkEmbeddingGenerator>();
+        services.AddScoped<DocumentIndexRepairService>();
         return services;
     }
 }

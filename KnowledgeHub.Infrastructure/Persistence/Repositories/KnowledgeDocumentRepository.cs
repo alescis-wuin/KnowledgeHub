@@ -50,6 +50,30 @@ public class KnowledgeDocumentRepository : IKnowledgeDocumentRepository
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
+    // Evaluates legacy index completeness without loading embedding arrays.
+    public async Task<bool> HasCompleteIndexAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var chunkIds = await _context.DocumentChunks
+            .AsNoTracking()
+            .Where(chunk => chunk.DocumentId == id)
+            .Select(chunk => chunk.Id)
+            .ToArrayAsync(cancellationToken);
+
+        if (chunkIds.Length == 0)
+        {
+            return false;
+        }
+
+        var embeddedCount = await _context.ChunkEmbeddings
+            .AsNoTracking()
+            .CountAsync(embedding => chunkIds.Contains(embedding.ChunkId),
+                cancellationToken);
+
+        return embeddedCount == chunkIds.Length;
+    }
+
     public async Task AddIndexedAsync(
         KnowledgeDocument document,
         IReadOnlyCollection<ChunkEmbedding> embeddings,
@@ -70,7 +94,6 @@ public class KnowledgeDocumentRepository : IKnowledgeDocumentRepository
         await transaction.CommitAsync(cancellationToken);
     }
 
-
     public async Task UpdateIndexedAsync(
         KnowledgeDocument document,
         IReadOnlyCollection<ChunkEmbedding> embeddings,
@@ -85,8 +108,7 @@ public class KnowledgeDocumentRepository : IKnowledgeDocumentRepository
         }
 
         await using var transaction =
-            await _context.Database.BeginTransactionAsync(
-                cancellationToken);
+            await _context.Database.BeginTransactionAsync(cancellationToken);
 
         // Detect removed and newly attached chunks.
         _context.ChangeTracker.DetectChanges();
