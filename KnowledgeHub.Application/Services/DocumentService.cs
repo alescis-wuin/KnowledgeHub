@@ -13,19 +13,22 @@ public class DocumentService
     private readonly IKnowledgeSourceRepository _sourceRepository;
     private readonly ITagRepository _tagRepository;
     private readonly ITextChunker _chunker;
+	private readonly IChunkEmbeddingGenerator _embeddingGenerator;
 
     public DocumentService(
         IKnowledgeDocumentRepository repository,
         ICategoryRepository categoryRepository,
         IKnowledgeSourceRepository sourceRepository,
         ITagRepository tagRepository,
-        ITextChunker chunker)
+        ITextChunker chunker,
+        IChunkEmbeddingGenerator embeddingGenerator)
     {
         _repository = repository;
         _categoryRepository = categoryRepository;
         _sourceRepository = sourceRepository;
         _tagRepository = tagRepository;
         _chunker = chunker;
+        _embeddingGenerator = embeddingGenerator;
     }
 
     public async Task<List<DocumentDto>> GetAllAsync(
@@ -85,26 +88,26 @@ public class DocumentService
             }
         }
 
-        var chunks =
-            _chunker.Chunk(
-                dto.Content);
+        var chunks = BuildChunks(
+            document.Id,
+            document.Content);
 
-        var index = 0;
+        var embeddings = await _embeddingGenerator.GenerateAsync(
+            chunks,
+            cancellationToken);
 
-        foreach (var chunk in chunks)
-        {
-            document.AddChunk(
-                index++,
-                chunk.Length,
-                chunk);
-        }
+        cancellationToken.ThrowIfCancellationRequested();
 
-        await _repository.AddAsync(
+        document.ReplaceChunks(chunks);
+
+        await _repository.AddIndexedAsync(
             document,
+            embeddings,
             cancellationToken);
 
         return Map(document);
     }
+
 
 
     public async Task<DocumentDto?> UpdateAsync(
@@ -112,6 +115,8 @@ public class DocumentService
         UpdateDocumentDto dto,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(dto);
+
         var document = await _repository.GetByIdAsync(
             id,
             cancellationToken);
@@ -121,36 +126,54 @@ public class DocumentService
             return null;
         }
 
+        var title = dto.Title?.Trim() ?? string.Empty;
         var newContent = dto.Content?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new ArgumentException("Title is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(newContent))
+        {
+            throw new ArgumentException("Content is required.");
+        }
 
         var contentChanged = !string.Equals(
             document.Content,
             newContent,
             StringComparison.Ordinal);
 
-        document.Update(dto.Title, newContent);
-
-        if (contentChanged)
+        if (!contentChanged)
         {
-            var chunks = _chunker
-                .Chunk(document.Content)
-                .Select(chunk => chunk.Trim())
-                .Where(chunk => !string.IsNullOrWhiteSpace(chunk))
-                .ToArray();
+            document.Update(title, newContent);
 
-            document.ClearChunks();
+            await _repository.UpdateAsync(
+                document,
+                cancellationToken);
 
-            for (var index = 0; index < chunks.Length; index++)
-            {
-                document.AddChunk(
-                    index,
-                    chunks[index].Length,
-                    chunks[index]);
-            }
+            return Map(document);
         }
 
-        await _repository.UpdateAsync(
+        // Prepare the complete replacement before changing
+        // the tracked document or its existing chunks.
+        var chunks = BuildChunks(
+            document.Id,
+            newContent);
+
+        var embeddings = await _embeddingGenerator.GenerateAsync(
+            chunks,
+            cancellationToken);
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        // No external embedding calls remain after this point.
+        document.Update(title, newContent);
+        document.ReplaceChunks(chunks);
+
+        await _repository.UpdateIndexedAsync(
             document,
+            embeddings,
             cancellationToken);
 
         return Map(document);
@@ -299,6 +322,31 @@ public class DocumentService
                 statistics.ChunksCount
         };
     }
+
+	private IReadOnlyList<DocumentChunk> BuildChunks(
+	    Guid documentId,
+	    string content)
+	{
+	    var texts = _chunker.Chunk(content)
+	        .Select(chunk => chunk?.Trim())
+	        .Where(chunk => !string.IsNullOrWhiteSpace(chunk))
+	        .Select(chunk => chunk!)
+	        .ToArray();
+
+	    if (texts.Length == 0)
+	    {
+	        throw new InvalidOperationException(
+	            "Chunking produced no usable chunks.");
+	    }
+
+	    return texts
+	        .Select((text, index) => new DocumentChunk(
+	            documentId,
+	            index,
+	            text.Length,
+	            text))
+	        .ToArray();
+	}
 
     private static DocumentDto Map(
         KnowledgeDocument document)

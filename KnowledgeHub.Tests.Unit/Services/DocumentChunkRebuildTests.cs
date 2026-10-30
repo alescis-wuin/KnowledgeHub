@@ -13,16 +13,32 @@ public sealed class DocumentChunkRebuildTests
 {
     private readonly Mock<IKnowledgeDocumentRepository> _repository = new();
     private readonly Mock<ITextChunker> _chunker = new();
+	private readonly Mock<IChunkEmbeddingGenerator> _embeddingGenerator = new();
 
-    private DocumentService CreateService()
-    {
-        return new DocumentService(
-            _repository.Object,
-            Mock.Of<ICategoryRepository>(),
-            Mock.Of<IKnowledgeSourceRepository>(),
-            Mock.Of<ITagRepository>(),
-            _chunker.Object);
-    }
+
+	private DocumentService CreateService()
+	{
+	    _embeddingGenerator
+	        .Setup(x => x.GenerateAsync(
+	            It.IsAny<IReadOnlyCollection<DocumentChunk>>(),
+	            It.IsAny<CancellationToken>()))
+	        .Returns((
+	            IReadOnlyCollection<DocumentChunk> chunks,
+	            CancellationToken _) =>
+	            Task.FromResult<IReadOnlyList<ChunkEmbedding>>(
+	                chunks.Select(chunk => new ChunkEmbedding(
+	                    chunk.Id,
+	                    new float[] { 1f, 0f }))
+	                .ToArray()));
+
+	    return new DocumentService(
+	        _repository.Object,
+	        Mock.Of<ICategoryRepository>(),
+	        Mock.Of<IKnowledgeSourceRepository>(),
+	        Mock.Of<ITagRepository>(),
+	        _chunker.Object,
+	        _embeddingGenerator.Object);
+	}
 
     [Fact]
     public async Task ContentChanged_RebuildsChunks()
@@ -73,11 +89,20 @@ public sealed class DocumentChunkRebuildTests
             chunks,
             x => x.Id == oldChunkId);
 
-        _repository.Verify(
-            x => x.UpdateAsync(
-                document,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+		_repository.Verify(
+		    x => x.UpdateIndexedAsync(
+		        document,
+		        It.Is<IReadOnlyCollection<ChunkEmbedding>>(
+		            embeddings => embeddings.Count == 2),
+		        It.IsAny<CancellationToken>()),
+		    Times.Once);
+
+		_embeddingGenerator.Verify(
+		    x => x.GenerateAsync(
+		        It.Is<IReadOnlyCollection<DocumentChunk>>(
+		            chunks => chunks.Count == 2),
+		        It.IsAny<CancellationToken>()),
+		    Times.Once);
     }
 
     [Fact]
@@ -122,5 +147,11 @@ public sealed class DocumentChunkRebuildTests
         _chunker.Verify(
             x => x.Chunk(It.IsAny<string>()),
             Times.Never);
+
+		_embeddingGenerator.Verify(
+		    x => x.GenerateAsync(
+		        It.IsAny<IReadOnlyCollection<DocumentChunk>>(),
+		        It.IsAny<CancellationToken>()),
+		    Times.Never);
     }
 }
