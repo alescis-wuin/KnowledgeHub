@@ -1,4 +1,3 @@
-
 using KnowledgeHub.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
@@ -15,12 +14,13 @@ public sealed class IsolatedPostgresFixture : IAsyncLifetime
             .WithPassword("kh_test_password")
             .Build();
 
+    public string ConnectionString => _container.GetConnectionString();
+
     public async Task InitializeAsync()
     {
         await _container.StartAsync();
 
         await using var context = CreateContext();
-
         await context.Database.MigrateAsync();
     }
 
@@ -33,7 +33,7 @@ public sealed class IsolatedPostgresFixture : IAsyncLifetime
     {
         var options =
             new DbContextOptionsBuilder<KnowledgeDbContext>()
-                .UseNpgsql(_container.GetConnectionString())
+                .UseNpgsql(ConnectionString)
                 .Options;
 
         return new KnowledgeDbContext(options);
