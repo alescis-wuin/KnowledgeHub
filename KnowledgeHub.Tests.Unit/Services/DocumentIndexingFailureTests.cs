@@ -107,17 +107,18 @@ public sealed class DocumentIndexingFailureTests
             Times.Never);
     }
 
-    private static DocumentService CreateService(
-        IKnowledgeDocumentRepository repository,
-        ITextChunker chunker,
-        IChunkEmbeddingGenerator generator)
-    {
-        return new DocumentService(
-            repository,
-            Mock.Of<ICategoryRepository>(),
-            Mock.Of<IKnowledgeSourceRepository>(),
-            Mock.Of<ITagRepository>(),
-            chunker,
-            generator);
-    }
+	private static DocumentService CreateService(
+	    IKnowledgeDocumentRepository repository,
+	    ITextChunker chunker,
+	    IChunkEmbeddingGenerator generator)
+	{
+	    return new DocumentService(
+	        repository,
+	        Mock.Of<ICategoryRepository>(),
+	        Mock.Of<IKnowledgeSourceRepository>(),
+	        Mock.Of<ITagRepository>(),
+	        chunker,
+	        generator,
+	        Mock.Of<IVectorIndexCacheInvalidator>());
+	}
 }

@@ -109,5 +109,10 @@ public sealed class CustomWebApplicationFactory
         }
 
         await context.Documents.ExecuteDeleteAsync(cancellationToken);
+
+        // Test reset bypasses DocumentService; invalidate explicitly.
+        await scope.ServiceProvider
+            .GetRequiredService<IVectorIndexCacheInvalidator>()
+            .InvalidateAsync();
     }
 }

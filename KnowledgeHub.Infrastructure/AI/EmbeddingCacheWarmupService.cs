@@ -1,119 +1,51 @@
-﻿using System.Diagnostics;
-using KnowledgeHub.Domain.Entities;
+using System.Diagnostics;
 using KnowledgeHub.Infrastructure.Persistence.Context;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace KnowledgeHub.Infrastructure.AI;
 
-public sealed class EmbeddingCacheWarmupService
-    : IHostedService
+public sealed class EmbeddingCacheWarmupService : IHostedService
 {
-    private readonly IServiceProvider
-        _serviceProvider;
-
-    private readonly IMemoryCache
-        _memoryCache;
-
-    public const string
-        EmbeddingsCacheKey =
-            "knowledgehub_embeddings";
-
-    public const string
-        ChunksCacheKey =
-            "knowledgehub_chunks";
+    private readonly IServiceProvider _serviceProvider;
+    private readonly VectorIndexCache _indexCache;
 
     public EmbeddingCacheWarmupService(
         IServiceProvider serviceProvider,
-        IMemoryCache memoryCache)
+        VectorIndexCache indexCache)
     {
-        _serviceProvider =
-            serviceProvider;
-
-        _memoryCache =
-            memoryCache;
+        _serviceProvider = serviceProvider;
+        _indexCache = indexCache;
     }
 
-    public async Task StartAsync(
-        CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var stopwatch =
-            Stopwatch.StartNew();
+        var stopwatch = Stopwatch.StartNew();
 
         try
         {
-            using var scope =
-                _serviceProvider.CreateScope();
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider
+                .GetRequiredService<KnowledgeDbContext>();
 
-            var context =
-                scope.ServiceProvider
-                    .GetRequiredService<
-                        KnowledgeDbContext>();
-
-            var embeddings =
-                await context
-                    .ChunkEmbeddings
-                    .AsNoTracking()
-                    .ToListAsync(
-                        cancellationToken);
-
-            _memoryCache.Set(
-                EmbeddingsCacheKey,
-                embeddings,
-                TimeSpan.FromHours(12));
-
-            var chunks =
-                await context
-                    .DocumentChunks
-                    .AsNoTracking()
-                    .Include(
-                        x => x.Document)
-                    .ToListAsync(
-                        cancellationToken);
-
-            var chunkDictionary =
-                chunks.ToDictionary(
-                    x => x.Id);
-
-            _memoryCache.Set(
-                ChunksCacheKey,
-                chunkDictionary,
-                TimeSpan.FromHours(12));
+            var snapshot = await _indexCache.GetAsync(
+                context, cancellationToken);
 
             stopwatch.Stop();
-
-            Console.WriteLine(
-                "====================================");
-
-            Console.WriteLine(
-                "KNOWLEDGEHUB CACHE WARMUP COMPLETE");
-
-            Console.WriteLine(
-                $"Embeddings : {embeddings.Count}");
-
-            Console.WriteLine(
-                $"Chunks     : {chunks.Count}");
-
-            Console.WriteLine(
-                $"Elapsed    : {stopwatch.Elapsed}");
-
-            Console.WriteLine(
-                "====================================");
+            Console.WriteLine("====================================");
+            Console.WriteLine("KNOWLEDGEHUB VECTOR INDEX WARMUP COMPLETE");
+            Console.WriteLine($"Indexed chunks : {snapshot.Count}");
+            Console.WriteLine($"Elapsed        : {stopwatch.Elapsed}");
+            Console.WriteLine("====================================");
         }
         catch (Exception ex)
         {
-            Console.WriteLine(
-                "CACHE WARMUP FAILED");
-
-            Console.WriteLine(
-                ex);
+            Console.WriteLine("VECTOR INDEX WARMUP FAILED");
+            Console.WriteLine(ex);
         }
     }
 
-    public Task StopAsync(
-        CancellationToken cancellationToken)
+    public Task StopAsync(CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
     }

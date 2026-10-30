@@ -14,6 +14,7 @@ public class DocumentService
     private readonly ITagRepository _tagRepository;
     private readonly ITextChunker _chunker;
 	private readonly IChunkEmbeddingGenerator _embeddingGenerator;
+    private readonly IVectorIndexCacheInvalidator _cacheInvalidator;
 
     public DocumentService(
         IKnowledgeDocumentRepository repository,
@@ -21,7 +22,8 @@ public class DocumentService
         IKnowledgeSourceRepository sourceRepository,
         ITagRepository tagRepository,
         ITextChunker chunker,
-        IChunkEmbeddingGenerator embeddingGenerator)
+        IChunkEmbeddingGenerator embeddingGenerator,
+        IVectorIndexCacheInvalidator cacheInvalidator)
     {
         _repository = repository;
         _categoryRepository = categoryRepository;
@@ -29,6 +31,7 @@ public class DocumentService
         _tagRepository = tagRepository;
         _chunker = chunker;
         _embeddingGenerator = embeddingGenerator;
+        _cacheInvalidator = cacheInvalidator;
     }
 
     public async Task<List<DocumentDto>> GetAllAsync(
@@ -105,6 +108,8 @@ public class DocumentService
             embeddings,
             cancellationToken);
 
+        await _cacheInvalidator.InvalidateAsync();
+
         return Map(document);
     }
 
@@ -152,6 +157,8 @@ public class DocumentService
                 document,
                 cancellationToken);
 
+            await _cacheInvalidator.InvalidateAsync();
+
             return Map(document);
         }
 
@@ -176,6 +183,8 @@ public class DocumentService
             embeddings,
             cancellationToken);
 
+        await _cacheInvalidator.InvalidateAsync();
+
         return Map(document);
     }
 
@@ -186,6 +195,8 @@ public class DocumentService
         await _repository.DeleteAsync(
             id,
             cancellationToken);
+
+        await _cacheInvalidator.InvalidateAsync();
     }
 
     public async Task<DocumentDetailsDto?> GetDetailsAsync(

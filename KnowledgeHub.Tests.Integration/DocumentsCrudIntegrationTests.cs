@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using FluentAssertions;
 using KnowledgeHub.Application.DTOs;
+using KnowledgeHub.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc.Testing;
 using KnowledgeHub.Infrastructure.Persistence.Context;
 using Microsoft.Extensions.DependencyInjection;
@@ -489,4 +490,73 @@ public class DocumentsCrudIntegrationTests
 	        Assert.Equal("Titre uniquement", title);
 	    }
 	}
+    [Fact]
+    public async Task VectorSearchCache_Reflects_EntireDocumentLifecycle()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var search = scope.ServiceProvider
+            .GetRequiredService<IVectorSearchService>();
+
+        // Populate an empty index snapshot before any write.
+        Assert.Empty(await search.SearchAsync("question", topK: 10));
+
+        using var create = await _client.PostAsJsonAsync(
+            "/api/documents",
+            new CreateDocumentDto
+            {
+                Title = "Titre initial",
+                Content = "Ancien contenu de recherche"
+            });
+
+        Assert.Equal(HttpStatusCode.Created, create.StatusCode);
+        var created = await create.Content
+            .ReadFromJsonAsync<ApiResponse<DocumentDto>>();
+        Assert.NotNull(created);
+        Assert.NotNull(created.Data);
+        var id = created.Data.Id;
+
+        var initial = Assert.Single(
+            await search.SearchAsync("question", topK: 10));
+        Assert.Equal(id, initial.DocumentId);
+        Assert.Equal("Titre initial", initial.Title);
+        Assert.Equal("Ancien contenu de recherche", initial.Content);
+
+        using var update = await _client.PutAsJsonAsync(
+            $"/api/documents/{id}",
+            new UpdateDocumentDto
+            {
+                Title = "Titre indexé",
+                Content = "Nouveau contenu de recherche"
+            });
+        Assert.Equal(HttpStatusCode.OK, update.StatusCode);
+
+        var replaced = Assert.Single(
+            await search.SearchAsync("question", topK: 10));
+        Assert.Equal(id, replaced.DocumentId);
+        Assert.Equal("Titre indexé", replaced.Title);
+        Assert.Equal("Nouveau contenu de recherche", replaced.Content);
+        Assert.NotEqual(initial.ChunkId, replaced.ChunkId);
+
+        // Metadata-only updates keep the chunk ID but refresh the title.
+        using var titleUpdate = await _client.PutAsJsonAsync(
+            $"/api/documents/{id}",
+            new UpdateDocumentDto
+            {
+                Title = "Titre seulement",
+                Content = "Nouveau contenu de recherche"
+            });
+        Assert.Equal(HttpStatusCode.OK, titleUpdate.StatusCode);
+
+        var renamed = Assert.Single(
+            await search.SearchAsync("question", topK: 10));
+        Assert.Equal(replaced.ChunkId, renamed.ChunkId);
+        Assert.Equal("Titre seulement", renamed.Title);
+        Assert.Equal(replaced.Content, renamed.Content);
+
+        using var deletion = await _client.DeleteAsync(
+            $"/api/documents/{id}");
+        Assert.Equal(HttpStatusCode.OK, deletion.StatusCode);
+        Assert.Empty(await search.SearchAsync("question", topK: 10));
+    }
+
 }

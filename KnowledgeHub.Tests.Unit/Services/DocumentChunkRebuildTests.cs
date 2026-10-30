@@ -31,13 +31,18 @@ public sealed class DocumentChunkRebuildTests
 	                    new float[] { 1f, 0f }))
 	                .ToArray()));
 
+	    var invalidator = new Mock<IVectorIndexCacheInvalidator>();
+	    invalidator.Setup(x => x.InvalidateAsync())
+	        .Returns(Task.CompletedTask);
+
 	    return new DocumentService(
 	        _repository.Object,
 	        Mock.Of<ICategoryRepository>(),
 	        Mock.Of<IKnowledgeSourceRepository>(),
 	        Mock.Of<ITagRepository>(),
 	        _chunker.Object,
-	        _embeddingGenerator.Object);
+	        _embeddingGenerator.Object,
+	        invalidator.Object);
 	}
 
     [Fact]

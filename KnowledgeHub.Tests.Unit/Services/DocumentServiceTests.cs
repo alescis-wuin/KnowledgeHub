@@ -28,6 +28,9 @@ public class DocumentServiceTests
 	private readonly Mock<IChunkEmbeddingGenerator>
 	    _embeddingGeneratorMock;
 
+    private readonly Mock<IVectorIndexCacheInvalidator>
+        _cacheInvalidatorMock;
+
     private readonly DocumentService _service;
 
     public DocumentServiceTests()
@@ -71,6 +74,13 @@ public class DocumentServiceTests
 		                new float[] { 1f, 0f }))
 		            .ToArray()));
 
+        _cacheInvalidatorMock =
+            new Mock<IVectorIndexCacheInvalidator>();
+
+        _cacheInvalidatorMock
+            .Setup(x => x.InvalidateAsync())
+            .Returns(Task.CompletedTask);
+
         _service =
             new DocumentService(
                 _repositoryMock.Object,
@@ -78,7 +88,8 @@ public class DocumentServiceTests
                 _sourceRepositoryMock.Object,
                 _tagRepositoryMock.Object,
                 _chunkerMock.Object,
-                _embeddingGeneratorMock.Object);
+                _embeddingGeneratorMock.Object,
+                _cacheInvalidatorMock.Object);
     }
 
     [Fact]
@@ -106,6 +117,10 @@ public class DocumentServiceTests
 		        It.IsAny<IReadOnlyCollection<ChunkEmbedding>>(),
 		        It.IsAny<CancellationToken>()),
 		    Times.Once);
+        _cacheInvalidatorMock.Verify(
+            x => x.InvalidateAsync(),
+            Times.Once);
+
     }
 
     [Fact]
@@ -244,6 +259,10 @@ public class DocumentServiceTests
 		        It.IsAny<IReadOnlyCollection<ChunkEmbedding>>(),
 		        It.IsAny<CancellationToken>()),
 		    Times.Once);
+        _cacheInvalidatorMock.Verify(
+            x => x.InvalidateAsync(),
+            Times.Once);
+
     }
 
     [Fact]
@@ -282,6 +301,10 @@ public class DocumentServiceTests
                 id,
                 It.IsAny<CancellationToken>()),
             Times.Once);
+        _cacheInvalidatorMock.Verify(
+            x => x.InvalidateAsync(),
+            Times.Once);
+
     }
 
     [Fact]
@@ -491,4 +514,26 @@ public class DocumentServiceTests
         result.Should()
             .HaveCount(1);
     }
+    [Fact]
+    public async Task Should_Not_Invalidate_Cache_When_Create_Fails()
+    {
+        _repositoryMock
+            .Setup(x => x.AddIndexedAsync(
+                It.IsAny<KnowledgeDocument>(),
+                It.IsAny<IReadOnlyCollection<ChunkEmbedding>>(),
+                It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("database failure"));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.CreateAsync(new CreateDocumentDto
+            {
+                Title = "Test",
+                Content = "Test content"
+            }));
+
+        _cacheInvalidatorMock.Verify(
+            x => x.InvalidateAsync(),
+            Times.Never);
+    }
+
 }

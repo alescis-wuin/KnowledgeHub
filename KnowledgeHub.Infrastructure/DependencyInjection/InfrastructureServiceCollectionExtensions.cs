@@ -69,6 +69,10 @@ public static class InfrastructureServiceCollectionExtensions
 
         services.AddMemoryCache();
 
+        services.AddSingleton<VectorIndexCache>();
+        services.AddSingleton<IVectorIndexCacheInvalidator>(
+            provider => provider.GetRequiredService<VectorIndexCache>());
+
         services.AddHostedService<
             EmbeddingCacheWarmupService>();
 
