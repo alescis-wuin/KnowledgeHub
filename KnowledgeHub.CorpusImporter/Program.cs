@@ -1,82 +1,43 @@
-﻿using KnowledgeHub.Application.Interfaces;
+using KnowledgeHub.Application.Interfaces;
 using KnowledgeHub.Application.Services;
 using KnowledgeHub.CorpusImporter.Services;
 using KnowledgeHub.Infrastructure.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-var configuration =
-    new ConfigurationBuilder()
-        .SetBasePath(
-            AppContext.BaseDirectory)
-        .AddJsonFile(
-            "appsettings.json",
-            optional: false)
-        .Build();
+if (args.Length > 1)
+{
+    throw new ArgumentException("Usage: KnowledgeHub.CorpusImporter [corpus.json]");
+}
 
-var services =
-    new ServiceCollection();
+var corpusPath = Path.GetFullPath(args.Length == 1
+    ? args[0]
+    : Path.Combine("Data", "KnowledgeHub-corpus-documentaire.json"));
 
-services.AddInfrastructure(
-    configuration);
+var configuration = new ConfigurationBuilder()
+    .SetBasePath(AppContext.BaseDirectory)
+    .AddJsonFile("appsettings.json", optional: false)
+    .Build();
 
-services.AddScoped<
-    ITextChunker,
-    DefaultTextChunker>();
+var services = new ServiceCollection();
+services.AddInfrastructure(configuration);
+services.AddScoped<ITextChunker, DefaultTextChunker>();
+services.AddScoped<IChunkEmbeddingGenerator, ChunkEmbeddingGenerator>();
+services.AddScoped<CorpusReader>();
+services.AddScoped<CorpusImporter>();
 
-services.AddScoped<
-    CorpusReader>();
+await using var provider = services.BuildServiceProvider(validateScopes: true);
+using var scope = provider.CreateScope();
 
-services.AddScoped<
-    CorpusImporter>();
+var reader = scope.ServiceProvider.GetRequiredService<CorpusReader>();
+var importer = scope.ServiceProvider.GetRequiredService<CorpusImporter>();
 
-services.AddScoped<
-    EmbeddingGenerationService>();
+var corpus = await reader.ReadAsync(corpusPath);
+Console.WriteLine($"Corpus: {corpusPath}");
+Console.WriteLine($"Categories: {corpus.Categories.Count}");
+Console.WriteLine($"Sources: {corpus.Sources.Count}");
+Console.WriteLine($"Tags: {corpus.Tags.Count}");
+Console.WriteLine($"Documents: {corpus.Documents.Count}");
 
-var provider =
-    services.BuildServiceProvider();
-
-using var scope =
-    provider.CreateScope();
-
-var reader =
-    scope.ServiceProvider
-        .GetRequiredService<
-            CorpusReader>();
-
-var importer =
-    scope.ServiceProvider
-        .GetRequiredService<
-            CorpusImporter>();
-
-var corpus =
-    await reader.ReadAsync(
-        @"Data\KnowledgeHub-corpus-documentaire.json");
-
-Console.WriteLine(
-    $"Categories : {corpus.Categories.Count}");
-
-Console.WriteLine(
-    $"Sources : {corpus.Sources.Count}");
-
-Console.WriteLine(
-    $"Tags : {corpus.Tags.Count}");
-
-Console.WriteLine(
-    $"Documents : {corpus.Documents.Count}");
-
-await importer.ImportAsync(
-    corpus);
-
-Console.WriteLine(
-    "Import terminé.");
-
-var embeddingGenerator =
-    scope.ServiceProvider
-        .GetRequiredService<
-            EmbeddingGenerationService>();
-
-await embeddingGenerator.GenerateAsync();
-
-Console.WriteLine(
-    "Vectorisation terminée.");
+await importer.ImportAsync(corpus);
+Console.WriteLine("Importation et indexation terminees.");

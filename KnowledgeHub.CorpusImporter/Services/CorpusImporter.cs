@@ -1,188 +1,220 @@
-﻿using KnowledgeHub.Application.Interfaces;
+using KnowledgeHub.Application.Interfaces;
 using KnowledgeHub.CorpusImporter.Models;
 using KnowledgeHub.Domain.Entities;
+using KnowledgeHub.Domain.Interfaces;
 using KnowledgeHub.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace KnowledgeHub.CorpusImporter.Services;
 
-public class CorpusImporter
+/// <summary>
+/// Imports metadata and persists each document with its complete vector index.
+/// An embedding failure leaves that document uncommitted; previously imported
+/// documents remain available so a later run can resume safely.
+/// </summary>
+public sealed class CorpusImporter
 {
     private readonly KnowledgeDbContext _context;
-
     private readonly ITextChunker _chunker;
+    private readonly IChunkEmbeddingGenerator _embeddingGenerator;
+    private readonly IKnowledgeDocumentRepository _documents;
+    private readonly IVectorIndexCacheInvalidator _cacheInvalidator;
 
     public CorpusImporter(
         KnowledgeDbContext context,
-        ITextChunker chunker)
+        ITextChunker chunker,
+        IChunkEmbeddingGenerator embeddingGenerator,
+        IKnowledgeDocumentRepository documents,
+        IVectorIndexCacheInvalidator cacheInvalidator)
     {
         _context = context;
         _chunker = chunker;
+        _embeddingGenerator = embeddingGenerator;
+        _documents = documents;
+        _cacheInvalidator = cacheInvalidator;
     }
 
     public async Task ImportAsync(
-        CorpusRoot corpus)
+        CorpusRoot corpus,
+        CancellationToken cancellationToken = default)
     {
-        Console.WriteLine(
-            "Import Categories...");
+        ArgumentNullException.ThrowIfNull(corpus);
 
-        foreach (var item in corpus.Categories)
-        {
-            if (await _context.Categories
-                .AnyAsync(x =>
-                    x.Name == item.Name))
-            {
-                continue;
-            }
-
-            _context.Categories.Add(
-                new Category(item.Name));
-        }
-
-        await _context.SaveChangesAsync();
-
-        Console.WriteLine(
-            "Import Sources...");
-
-        foreach (var item in corpus.Sources)
-        {
-            if (await _context.Sources
-                .AnyAsync(x =>
-                    x.Name == item.Name))
-            {
-                continue;
-            }
-
-            _context.Sources.Add(
-                new KnowledgeSource(
-                    item.Name,
-                    item.Url));
-        }
-
-        await _context.SaveChangesAsync();
-
-        Console.WriteLine(
-            "Import Tags...");
-
-        foreach (var item in corpus.Tags)
-        {
-            if (await _context.Tags
-                .AnyAsync(x =>
-                    x.Name == item.Name))
-            {
-                continue;
-            }
-
-            _context.Tags.Add(
-                new Tag(item.Name));
-        }
-
-        await _context.SaveChangesAsync();
-
-        Console.WriteLine(
-            "Import Documents...");
+        await ImportMetadataAsync(corpus, cancellationToken);
 
         foreach (var item in corpus.Documents)
         {
-            if (await _context.Documents
-                .AnyAsync(x =>
-                    x.Title == item.Title))
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (string.IsNullOrWhiteSpace(item.Title) ||
+                string.IsNullOrWhiteSpace(item.Content))
             {
+                Console.WriteLine("Skipping document with empty title or content.");
                 continue;
             }
 
+            var title = item.Title.Trim();
+            var existingId = await _context.Documents
+                .AsNoTracking()
+                .Where(document => document.Title == title)
+                .Select(document => (Guid?)document.Id)
+                .FirstOrDefaultAsync(cancellationToken);
 
-            if (string.IsNullOrWhiteSpace(item.Content))
+            if (existingId is Guid id)
             {
-                Console.WriteLine(
-                    $"Document ignoré : {item.Title}");
-
+                await RepairIncompleteIndexAsync(id, cancellationToken);
+                _context.ChangeTracker.Clear();
                 continue;
             }
 
-            var document =
-                new KnowledgeDocument(
-                    item.Title,
-                    item.Content);
+            var document = new KnowledgeDocument(title, item.Content);
+            document.SetSummary(item.Summary);
+            document.SetSearchKeywords(item.SearchKeywords);
 
-            document.SetSummary(
-                item.Summary);
-
-            document.SetSearchKeywords(
-                item.SearchKeywords);
-
-            var category =
-                await _context.Categories
-                    .FirstOrDefaultAsync(
-                        x => x.Name ==
-                            item.CategoryName);
-
+            var category = await _context.Categories
+                .FirstOrDefaultAsync(
+                    candidate => candidate.Name == item.CategoryName,
+                    cancellationToken);
             if (category is not null)
             {
-                document.AssignCategory(
-                    category.Id);
+                document.AssignCategory(category.Id);
             }
 
-            var source =
-                await _context.Sources
-                    .FirstOrDefaultAsync(
-                        x => x.Name ==
-                            item.SourceName);
-
+            var source = await _context.Sources
+                .FirstOrDefaultAsync(
+                    candidate => candidate.Name == item.SourceName,
+                    cancellationToken);
             if (source is not null)
             {
-                document.AssignSource(
-                    source.Id);
+                document.AssignSource(source.Id);
             }
 
-            foreach (var tagName
-                     in item.TagNames)
+            foreach (var tagName in item.TagNames.Distinct(StringComparer.Ordinal))
             {
-                var tag =
-                    await _context.Tags
-                        .FirstOrDefaultAsync(
-                            x => x.Name ==
-                                tagName);
-
+                var tag = await _context.Tags
+                    .FirstOrDefaultAsync(
+                        candidate => candidate.Name == tagName,
+                        cancellationToken);
                 if (tag is not null)
                 {
                     document.AddTag(tag);
                 }
             }
 
-            Console.WriteLine($"Importing document: {item.Title}");
-            var chunks =
-                _chunker.Chunk(
-                    item.Content);
+            var chunks = BuildChunks(document.Id, document.Content);
+            var embeddings = await _embeddingGenerator.GenerateAsync(
+                chunks, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
 
-            var index = 0;
+            document.ReplaceChunks(chunks);
+            await _documents.AddIndexedAsync(
+                document, embeddings, cancellationToken);
 
-            foreach (var chunk in chunks)
+            // The commit has completed. Invalidation must not be cancelled
+            // simply because the caller disconnected afterwards.
+            await _cacheInvalidator.InvalidateAsync();
+            _context.ChangeTracker.Clear();
+        }
+    }
+
+    private async Task ImportMetadataAsync(
+        CorpusRoot corpus,
+        CancellationToken cancellationToken)
+    {
+        foreach (var name in corpus.Categories
+            .Select(category => category.Name?.Trim())
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name!)
+            .Distinct(StringComparer.Ordinal))
+        {
+            if (!await _context.Categories
+                .AnyAsync(category => category.Name == name, cancellationToken))
             {
-                var content =
-                    chunk?.Trim();
-
-                if (string.IsNullOrWhiteSpace(content))
-                {
-                    Console.WriteLine(
-                        "Chunk vide ignoré");
-
-                    continue;
-                }
-
-                Console.WriteLine(
-                    $"Chunk size: {content.Length}");
-
-                document.AddChunk(
-                    index++,
-                    content.Length,
-                    content);
+                _context.Categories.Add(new Category(name));
             }
+        }
+        await _context.SaveChangesAsync(cancellationToken);
 
-            _context.Documents.Add(
-                document);
+        foreach (var source in corpus.Sources
+            .Where(source => !string.IsNullOrWhiteSpace(source.Name))
+            .DistinctBy(source => source.Name.Trim(), StringComparer.Ordinal))
+        {
+            var name = source.Name.Trim();
+            if (!await _context.Sources
+                .AnyAsync(candidate => candidate.Name == name, cancellationToken))
+            {
+                _context.Sources.Add(new KnowledgeSource(name, source.Url));
+            }
+        }
+        await _context.SaveChangesAsync(cancellationToken);
+
+        foreach (var name in corpus.Tags
+            .Select(tag => tag.Name?.Trim())
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name!)
+            .Distinct(StringComparer.Ordinal))
+        {
+            if (!await _context.Tags
+                .AnyAsync(tag => tag.Name == name, cancellationToken))
+            {
+                _context.Tags.Add(new Tag(name));
+            }
+        }
+        await _context.SaveChangesAsync(cancellationToken);
+        _context.ChangeTracker.Clear();
+    }
+
+    private async Task RepairIncompleteIndexAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var document = await _documents.GetByIdAsync(id, cancellationToken)
+            ?? throw new InvalidOperationException(
+                "Document disappeared while checking its index.");
+
+        var embeddedChunkIds = await _context.ChunkEmbeddings
+            .AsNoTracking()
+            .Where(embedding => embedding.Chunk.DocumentId == id)
+            .Select(embedding => embedding.ChunkId)
+            .ToArrayAsync(cancellationToken);
+
+        var ids = embeddedChunkIds.ToHashSet();
+        if (document.Chunks.Count > 0 &&
+            document.Chunks.Count == ids.Count &&
+            document.Chunks.All(chunk => ids.Contains(chunk.Id)))
+        {
+            return;
         }
 
-        await _context.SaveChangesAsync();
+        // Preserve the existing document and its metadata rather than
+        // overwriting user edits with potentially older corpus content.
+        var replacements = BuildChunks(document.Id, document.Content);
+        var embeddings = await _embeddingGenerator.GenerateAsync(
+            replacements, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        document.ReplaceChunks(replacements);
+        await _documents.UpdateIndexedAsync(
+            document, embeddings, cancellationToken);
+        await _cacheInvalidator.InvalidateAsync();
+    }
+
+    private IReadOnlyList<DocumentChunk> BuildChunks(Guid id, string content)
+    {
+        var texts = _chunker.Chunk(content)
+            .Select(chunk => chunk?.Trim())
+            .Where(chunk => !string.IsNullOrWhiteSpace(chunk))
+            .Select(chunk => chunk!)
+            .ToArray();
+
+        if (texts.Length == 0)
+        {
+            throw new InvalidOperationException(
+                "Chunking produced no usable chunks.");
+        }
+
+        return texts.Select((text, index) => new DocumentChunk(
+                id, index, text.Length, text))
+            .ToArray();
     }
 }
