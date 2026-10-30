@@ -2,18 +2,42 @@
 using System.Net.Http.Json;
 using FluentAssertions;
 using KnowledgeHub.Application.DTOs;
+using KnowledgeHub.Application.Interfaces;
+using Microsoft.AspNetCore.Mvc.Testing;
+using KnowledgeHub.Infrastructure.Persistence.Context;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
 namespace KnowledgeHub.Tests.Integration;
 
 public class DocumentsCrudIntegrationTests
-    : IClassFixture<CustomWebApplicationFactory>
+    : IClassFixture<CustomWebApplicationFactory>,
+      IAsyncLifetime
 {
+    private readonly CustomWebApplicationFactory _factory;
     private readonly HttpClient _client;
 
     public DocumentsCrudIntegrationTests(
         CustomWebApplicationFactory factory)
     {
-        _client = factory.CreateClient();
+        _factory = factory;
+
+        _client = factory.CreateClient(
+            new WebApplicationFactoryClientOptions
+            {
+                BaseAddress = new Uri("https://localhost")
+            });
+    }
+
+    public Task InitializeAsync()
+    {
+        return _factory.ResetDocumentsAsync();
+    }
+
+    public Task DisposeAsync()
+    {
+        _client.Dispose();
+        return Task.CompletedTask;
     }
 
     [Fact]
@@ -287,4 +311,252 @@ public class DocumentsCrudIntegrationTests
             .Should()
             .Be(HttpStatusCode.NotFound);
     }
+
+	[Fact]
+	public async Task Http_Reindexing_KeepsChunksAndEmbeddingsConsistent()
+	{
+	    var initialContent = new string('A', 620);
+	    var updatedContent = new string('B', 1030);
+	    var fake = new DeterministicEmbeddingService();
+
+	    // 1. Create the document through the real HTTP API.
+	    using var createResponse = await _client.PostAsJsonAsync(
+	        "/api/documents",
+	        new CreateDocumentDto
+	        {
+	            Title = "Titre initial",
+	            Content = initialContent
+	        });
+
+	    Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+
+	    var created = await createResponse.Content
+	        .ReadFromJsonAsync<ApiResponse<DocumentDto>>();
+
+	    Assert.NotNull(created);
+	    Assert.NotNull(created.Data);
+
+	    var documentId = created.Data.Id;
+	    Guid[] originalChunkIds;
+
+	    // 2. Verify the original chunks and their embeddings.
+	    using (var scope = _factory.Services.CreateScope())
+	    {
+	        var db = scope.ServiceProvider
+	            .GetRequiredService<KnowledgeDbContext>();
+
+	        var chunks = await db.DocumentChunks
+	            .AsNoTracking()
+	            .Where(x => x.DocumentId == documentId)
+	            .OrderBy(x => x.ChunkIndex)
+	            .ToArrayAsync();
+
+	        Assert.Equal(2, chunks.Length);
+	        Assert.Equal(
+	            initialContent,
+	            string.Concat(chunks.Select(x => x.Content)));
+
+	        originalChunkIds = chunks.Select(x => x.Id).ToArray();
+
+	        foreach (var chunk in chunks)
+	        {
+	            var embedding = await db.ChunkEmbeddings
+	                .AsNoTracking()
+	                .SingleAsync(x => x.ChunkId == chunk.Id);
+
+	            var expected = await fake.GenerateEmbeddingAsync(
+	                chunk.Content);
+
+	            Assert.Equal(768, embedding.Embedding.Length);
+	            Assert.True(expected.SequenceEqual(embedding.Embedding));
+	        }
+	    }
+
+	    // 3. Change the content through HTTP.
+	    using var updateResponse = await _client.PutAsJsonAsync(
+	        $"/api/documents/{documentId}",
+	        new UpdateDocumentDto
+	        {
+	            Title = "Titre modifié",
+	            Content = updatedContent
+	        });
+
+	    Assert.Equal(HttpStatusCode.OK, updateResponse.StatusCode);
+
+	    Guid[] replacementChunkIds;
+	    Guid[] replacementEmbeddingIds;
+
+	    // 4. Confirm complete replacement of the old index.
+	    using (var scope = _factory.Services.CreateScope())
+	    {
+	        var db = scope.ServiceProvider
+	            .GetRequiredService<KnowledgeDbContext>();
+
+	        Assert.False(await db.DocumentChunks
+	            .AnyAsync(x => originalChunkIds.Contains(x.Id)));
+
+	        Assert.False(await db.ChunkEmbeddings
+	            .AnyAsync(x => originalChunkIds.Contains(x.ChunkId)));
+
+	        var document = await db.Documents
+	            .AsNoTracking()
+	            .SingleAsync(x => x.Id == documentId);
+
+	        Assert.Equal("Titre modifié", document.Title);
+	        Assert.Equal(updatedContent, document.Content);
+
+	        var chunks = await db.DocumentChunks
+	            .AsNoTracking()
+	            .Where(x => x.DocumentId == documentId)
+	            .OrderBy(x => x.ChunkIndex)
+	            .ToArrayAsync();
+
+	        Assert.Equal(3, chunks.Length);
+	        Assert.Equal(new[] { 0, 1, 2 },
+	            chunks.Select(x => x.ChunkIndex).ToArray());
+
+	        Assert.Equal(
+	            updatedContent,
+	            string.Concat(chunks.Select(x => x.Content)));
+
+	        replacementChunkIds = chunks.Select(x => x.Id).ToArray();
+
+	        var embeddings = await db.ChunkEmbeddings
+	            .AsNoTracking()
+	            .Where(x => replacementChunkIds.Contains(x.ChunkId))
+	            .ToArrayAsync();
+
+	        Assert.Equal(3, embeddings.Length);
+
+	        foreach (var chunk in chunks)
+	        {
+				var embedding = Assert.Single(
+				    embeddings,
+				    x => x.ChunkId == chunk.Id);
+
+	            var expected = await fake.GenerateEmbeddingAsync(
+	                chunk.Content);
+
+	            Assert.True(expected.SequenceEqual(embedding.Embedding));
+	        }
+
+	        replacementEmbeddingIds = embeddings
+	            .Select(x => x.Id)
+	            .OrderBy(x => x)
+	            .ToArray();
+	    }
+
+	    // 5. Changing only the title must preserve the index.
+	    using var titleResponse = await _client.PutAsJsonAsync(
+	        $"/api/documents/{documentId}",
+	        new UpdateDocumentDto
+	        {
+	            Title = "Titre uniquement",
+	            Content = updatedContent
+	        });
+
+	    Assert.Equal(HttpStatusCode.OK, titleResponse.StatusCode);
+
+	    using (var scope = _factory.Services.CreateScope())
+	    {
+	        var db = scope.ServiceProvider
+	            .GetRequiredService<KnowledgeDbContext>();
+
+	        var chunkIds = await db.DocumentChunks
+	            .AsNoTracking()
+	            .Where(x => x.DocumentId == documentId)
+	            .OrderBy(x => x.ChunkIndex)
+	            .Select(x => x.Id)
+	            .ToArrayAsync();
+
+	        Assert.Equal(replacementChunkIds, chunkIds);
+
+	        var embeddingIds = await db.ChunkEmbeddings
+	            .AsNoTracking()
+	            .Where(x => replacementChunkIds.Contains(x.ChunkId))
+	            .Select(x => x.Id)
+	            .ToArrayAsync();
+
+	        Assert.Equal(
+	            replacementEmbeddingIds,
+	            embeddingIds.OrderBy(x => x).ToArray());
+
+	        var title = await db.Documents
+	            .AsNoTracking()
+	            .Where(x => x.Id == documentId)
+	            .Select(x => x.Title)
+	            .SingleAsync();
+
+	        Assert.Equal("Titre uniquement", title);
+	    }
+	}
+    [Fact]
+    public async Task VectorSearchCache_Reflects_EntireDocumentLifecycle()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var search = scope.ServiceProvider
+            .GetRequiredService<IVectorSearchService>();
+
+        // Populate an empty index snapshot before any write.
+        Assert.Empty(await search.SearchAsync("question", topK: 10));
+
+        using var create = await _client.PostAsJsonAsync(
+            "/api/documents",
+            new CreateDocumentDto
+            {
+                Title = "Titre initial",
+                Content = "Ancien contenu de recherche"
+            });
+
+        Assert.Equal(HttpStatusCode.Created, create.StatusCode);
+        var created = await create.Content
+            .ReadFromJsonAsync<ApiResponse<DocumentDto>>();
+        Assert.NotNull(created);
+        Assert.NotNull(created.Data);
+        var id = created.Data.Id;
+
+        var initial = Assert.Single(
+            await search.SearchAsync("question", topK: 10));
+        Assert.Equal(id, initial.DocumentId);
+        Assert.Equal("Titre initial", initial.Title);
+        Assert.Equal("Ancien contenu de recherche", initial.Content);
+
+        using var update = await _client.PutAsJsonAsync(
+            $"/api/documents/{id}",
+            new UpdateDocumentDto
+            {
+                Title = "Titre indexé",
+                Content = "Nouveau contenu de recherche"
+            });
+        Assert.Equal(HttpStatusCode.OK, update.StatusCode);
+
+        var replaced = Assert.Single(
+            await search.SearchAsync("question", topK: 10));
+        Assert.Equal(id, replaced.DocumentId);
+        Assert.Equal("Titre indexé", replaced.Title);
+        Assert.Equal("Nouveau contenu de recherche", replaced.Content);
+        Assert.NotEqual(initial.ChunkId, replaced.ChunkId);
+
+        // Metadata-only updates keep the chunk ID but refresh the title.
+        using var titleUpdate = await _client.PutAsJsonAsync(
+            $"/api/documents/{id}",
+            new UpdateDocumentDto
+            {
+                Title = "Titre seulement",
+                Content = "Nouveau contenu de recherche"
+            });
+        Assert.Equal(HttpStatusCode.OK, titleUpdate.StatusCode);
+
+        var renamed = Assert.Single(
+            await search.SearchAsync("question", topK: 10));
+        Assert.Equal(replaced.ChunkId, renamed.ChunkId);
+        Assert.Equal("Titre seulement", renamed.Title);
+        Assert.Equal(replaced.Content, renamed.Content);
+
+        using var deletion = await _client.DeleteAsync(
+            $"/api/documents/{id}");
+        Assert.Equal(HttpStatusCode.OK, deletion.StatusCode);
+        Assert.Empty(await search.SearchAsync("question", topK: 10));
+    }
+
 }

@@ -142,6 +142,55 @@ public class KnowledgeDocument
         DocumentTags.Clear();
     }
 
+	public void ReplaceChunks(
+	    IReadOnlyCollection<DocumentChunk> replacements)
+	{
+	    ArgumentNullException.ThrowIfNull(replacements);
+
+	    if (replacements.Count == 0)
+	    {
+	        throw new ArgumentException(
+	            "A document must have at least one chunk.",
+	            nameof(replacements));
+	    }
+
+	    var ordered = replacements
+	        .OrderBy(chunk => chunk.ChunkIndex)
+	        .ToArray();
+
+	    if (ordered.Any(chunk => chunk.DocumentId != Id))
+	    {
+	        throw new ArgumentException(
+	            "All chunks must belong to this document.",
+	            nameof(replacements));
+	    }
+
+	    if (ordered.Select(chunk => chunk.Id)
+	        .Distinct().Count() != ordered.Length)
+	    {
+	        throw new ArgumentException(
+	            "Duplicate chunk identifiers are not allowed.",
+	            nameof(replacements));
+	    }
+
+	    for (var index = 0; index < ordered.Length; index++)
+	    {
+	        if (ordered[index].ChunkIndex != index)
+	        {
+	            throw new ArgumentException(
+	                "Chunk indices must be consecutive and start at zero.",
+	                nameof(replacements));
+	        }
+	    }
+
+	    Chunks.Clear();
+
+	    foreach (var chunk in ordered)
+	    {
+	        Chunks.Add(chunk);
+	    }
+	}
+
     public void AddChunk(
         int chunkIndex,
         int tokenCount,

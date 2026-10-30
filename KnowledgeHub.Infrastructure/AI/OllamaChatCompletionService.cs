@@ -26,7 +26,7 @@ public sealed class OllamaChatCompletionService
         var request =
             new OllamaChatRequest
             {
-                Model = "qwen3:8b",
+                Model = "qwen3:4b-instruct",
 
                 Stream = false,
 
