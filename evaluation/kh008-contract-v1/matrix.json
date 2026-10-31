@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "kind": "synthetic-policy-oracle",
+  "integrationState": "not-implemented",
+  "authority": "test-fixtures-only",
+  "cases": [
+    {
+      "id": "KH008-C001",
+      "description": "Exact quote without semantic assurance must abstain",
+      "inputs": {
+        "anchorStatus": "VALID",
+        "semanticAssessment": "UNKNOWN",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "INSUFFICIENT_EVIDENCE",
+        "globalVerdict": "ABSTAIN"
+      }
+    },
+    {
+      "id": "KH008-C002",
+      "description": "Fabricated quote rejected",
+      "inputs": {
+        "anchorStatus": "INVALID",
+        "semanticAssessment": "UNKNOWN",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "INVALID_EVIDENCE",
+        "globalVerdict": "ABSTAIN"
+      }
+    },
+    {
+      "id": "KH008-C003",
+      "description": "Wrong document ID cannot be rescued by semantic score",
+      "inputs": {
+        "anchorStatus": "INVALID",
+        "semanticAssessment": "ENTAILS",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "INVALID_EVIDENCE",
+        "globalVerdict": "ABSTAIN"
+      }
+    },
+    {
+      "id": "KH008-C004",
+      "description": "Wrong chunk ID rejects same content elsewhere",
+      "inputs": {
+        "anchorStatus": "INVALID",
+        "semanticAssessment": "ENTAILS",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "INVALID_EVIDENCE",
+        "globalVerdict": "ABSTAIN"
+      }
+    },
+    {
+      "id": "KH008-C005",
+      "description": "Mismatched chunk digest or stale snapshot",
+      "inputs": {
+        "anchorStatus": "INVALID",
+        "semanticAssessment": "ENTAILS",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "INVALID_EVIDENCE",
+        "globalVerdict": "ABSTAIN"
+      }
+    },
+    {
+      "id": "KH008-C006",
+      "description": "Negative or overflowing UTF16 offsets",
+      "inputs": {
+        "anchorStatus": "INVALID",
+        "semanticAssessment": "ENTAILS",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "INVALID_EVIDENCE",
+        "globalVerdict": "ABSTAIN"
+      }
+    },
+    {
+      "id": "KH008-C007",
+      "description": "Missing mandatory citation fields",
+      "inputs": {
+        "anchorStatus": "INVALID",
+        "semanticAssessment": "ENTAILS",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "INVALID_EVIDENCE",
+        "globalVerdict": "ABSTAIN"
+      }
+    },
+    {
+      "id": "KH008-C008",
+      "description": "Qualifying semantic checker plus known complete coverage",
+      "inputs": {
+        "anchorStatus": "VALID",
+        "semanticAssessment": "ENTAILS",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "SUPPORTED",
+        "globalVerdict": "ANSWER"
+      }
+    },
+    {
+      "id": "KH008-C009",
+      "description": "Independent contradiction does not authorize affirmative claim",
+      "inputs": {
+        "anchorStatus": "VALID",
+        "semanticAssessment": "CONTRADICTS",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "CONTRADICTED",
+        "globalVerdict": "ABSTAIN"
+      }
+    },
+    {
+      "id": "KH008-C010",
+      "description": "Incompatible authenticated sources without safe arbitration",
+      "inputs": {
+        "anchorStatus": "VALID",
+        "semanticAssessment": "CONFLICT",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "CONFLICTING_EVIDENCE",
+        "globalVerdict": "CONFLICT"
+      }
+    },
+    {
+      "id": "KH008-C011",
+      "description": "Prompt injection in quoted document has no authority",
+      "inputs": {
+        "anchorStatus": "VALID",
+        "semanticAssessment": "UNKNOWN",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "INSUFFICIENT_EVIDENCE",
+        "globalVerdict": "ABSTAIN"
+      }
+    },
+    {
+      "id": "KH008-C012",
+      "description": "Legacy doc without reliably reconstructed version",
+      "inputs": {
+        "anchorStatus": "INVALID",
+        "semanticAssessment": "UNKNOWN",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "INVALID_EVIDENCE",
+        "globalVerdict": "ABSTAIN"
+      }
+    },
+    {
+      "id": "KH008-C013",
+      "description": "Valid UTF16 offsets for surrogate pair and CRLF",
+      "inputs": {
+        "anchorStatus": "VALID",
+        "semanticAssessment": "ENTAILS",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "SUPPORTED",
+        "globalVerdict": "ANSWER"
+      }
+    },
+    {
+      "id": "KH008-C014",
+      "description": "Malformed JSON cannot be silently repaired",
+      "inputs": {
+        "anchorStatus": "INVALID",
+        "semanticAssessment": "UNKNOWN",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "INVALID_EVIDENCE",
+        "globalVerdict": "ABSTAIN"
+      }
+    },
+    {
+      "id": "KH008-C015",
+      "description": "Another requested point remains unproven; only valid claim may publish",
+      "inputs": {
+        "anchorStatus": "VALID",
+        "semanticAssessment": "ENTAILS",
+        "coverageAssured": false,
+        "additionalUnresolvedPoints": true
+      },
+      "expected": {
+        "claimStatus": "SUPPORTED",
+        "globalVerdict": "PARTIAL"
+      }
+    },
+    {
+      "id": "KH008-C016",
+      "description": "Question coverage unchecked: cannot promote to complete answer",
+      "inputs": {
+        "anchorStatus": "VALID",
+        "semanticAssessment": "ENTAILS",
+        "coverageAssured": false,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "SUPPORTED",
+        "globalVerdict": "ABSTAIN"
+      }
+    },
+    {
+      "id": "KH008-C017",
+      "description": "No semantic verifier configured",
+      "inputs": {
+        "anchorStatus": "VALID",
+        "semanticAssessment": "UNKNOWN",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "INSUFFICIENT_EVIDENCE",
+        "globalVerdict": "ABSTAIN"
+      }
+    },
+    {
+      "id": "KH008-C018",
+      "description": "Source replaced after retrieval",
+      "inputs": {
+        "anchorStatus": "INVALID",
+        "semanticAssessment": "ENTAILS",
+        "coverageAssured": true,
+        "additionalUnresolvedPoints": false
+      },
+      "expected": {
+        "claimStatus": "INVALID_EVIDENCE",
+        "globalVerdict": "ABSTAIN"
+      }
+    }
+  ]
+}
