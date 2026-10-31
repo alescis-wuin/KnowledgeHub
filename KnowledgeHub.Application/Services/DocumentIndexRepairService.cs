@@ -1,6 +1,8 @@
 using KnowledgeHub.Application.Interfaces;
 using KnowledgeHub.Domain.Entities;
 using KnowledgeHub.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace KnowledgeHub.Application.Services;
 
@@ -14,17 +16,21 @@ public sealed class DocumentIndexRepairService
     private readonly ITextChunker _chunker;
     private readonly IChunkEmbeddingGenerator _embeddings;
     private readonly IVectorIndexCacheInvalidator _cache;
+    private readonly ILogger<DocumentIndexRepairService> _logger;
+    private static readonly EventId RepairedEvent = new(52005, "DocumentIndexRepaired");
 
     public DocumentIndexRepairService(
         IKnowledgeDocumentRepository documents,
         ITextChunker chunker,
         IChunkEmbeddingGenerator embeddings,
-        IVectorIndexCacheInvalidator cache)
+        IVectorIndexCacheInvalidator cache,
+        ILogger<DocumentIndexRepairService>? logger = null)
     {
         _documents = documents;
         _chunker = chunker;
         _embeddings = embeddings;
         _cache = cache;
+        _logger = logger ?? NullLogger<DocumentIndexRepairService>.Instance;
     }
 
     /// <returns>Null if missing, false if complete, true if repaired.</returns>
@@ -70,6 +76,9 @@ public sealed class DocumentIndexRepairService
         await _documents.UpdateIndexedAsync(
             document, embeddings, cancellationToken);
         await _cache.InvalidateAsync();
+        _logger.LogInformation(RepairedEvent,
+            "Document {DocumentId} index repaired with {ChunkCount} chunks",
+            document.Id, replacements.Length);
         return true;
     }
 }

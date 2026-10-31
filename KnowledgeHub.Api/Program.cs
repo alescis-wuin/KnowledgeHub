@@ -10,16 +10,23 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Scalar.AspNetCore;
 using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Json;
 using KnowledgeHub.Infrastructure.DependencyInjection;
 
-Log.Logger =
-    new LoggerConfiguration()
-        .WriteTo.Console()
-        .WriteTo.File(
-            "logs/log-.txt",
-            rollingInterval:
-                RollingInterval.Day)
-        .CreateLogger();
+// Existing Serilog sinks; JSONL is consumed by a collector without scraping text.
+// The default log context enriches downstream ILogger<T> events with CorrelationId.
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new JsonFormatter(renderMessage: true))
+    .WriteTo.File(
+        new JsonFormatter(renderMessage: true),
+        "logs/log-.jsonl",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7)
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,8 +70,9 @@ builder.Services.Configure<ApiBehaviorOptions>(
     });
 
 var app = builder.Build();
-app.UseMiddleware<
-    ExceptionHandlingMiddleware>();
+// Outer middleware sees the final status emitted by the exception handler.
+app.UseMiddleware<RequestCorrelationLoggingMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -93,12 +101,23 @@ using (var scope = app.Services.CreateScope())
         var canConnect =
             await context.Database.CanConnectAsync();
 
-        Console.WriteLine(
-            $"PostgreSQL connection : {canConnect}");
+        if (canConnect)
+        {
+            app.Logger.LogInformation(
+                "Database connectivity probe succeeded");
+        }
+        else
+        {
+            app.Logger.LogWarning(
+                "Database connectivity probe reported an unavailable database");
+        }
     }
     catch (Exception ex)
     {
-        Console.WriteLine(ex.Message);
+        // Do not print connection strings or exception messages.
+        app.Logger.LogWarning(
+            "Database connectivity probe failed: {ExceptionType}",
+            ex.GetType().Name);
     }
 }
 

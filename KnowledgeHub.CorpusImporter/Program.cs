@@ -1,4 +1,5 @@
 using KnowledgeHub.CorpusImporter.Services;
+using Microsoft.Extensions.Logging;
 
 if (args.Length > 1)
 {
@@ -44,18 +45,25 @@ using var http = new HttpClient(handler)
     Timeout = TimeSpan.FromMinutes(30)
 };
 
-Console.WriteLine($"API: {http.BaseAddress}");
-Console.WriteLine($"Corpus: {corpusPath}");
-Console.WriteLine($"Documents: {corpus.Documents.Count}");
+// Importer logs are JSONL as well; do not output corpus paths or payloads.
+using var loggerFactory = LoggerFactory.Create(logging =>
+{
+    logging.SetMinimumLevel(LogLevel.Information);
+    logging.AddJsonConsole(options =>
+    {
+        options.IncludeScopes = true;
+        options.TimestampFormat = "O";
+    });
+});
+var logger = loggerFactory.CreateLogger<CorpusImporter>();
+logger.LogInformation("Corpus import starting with {DocumentCount} documents",
+    corpus.Documents.Count);
 
-var report = await new CorpusImporter(http).ImportAsync(
+var report = await new CorpusImporter(http, logger).ImportAsync(
     corpus,
     cancellation.Token);
 
-Console.WriteLine(
-    $"Imported: {report.Created}; content updated: {report.UpdatedContent}; " +
-    $"metadata updated: {report.UpdatedMetadata}; repaired: {report.Repaired}; " +
-    $"unchanged: {report.Unchanged}; ignored: {report.Ignored}.");
-Console.WriteLine(
-    $"Metadata created: categories={report.CategoriesCreated}, " +
-    $"sources={report.SourcesCreated}, tags={report.TagsCreated}.");
+logger.LogInformation(
+    "Corpus metadata created: {CategoriesCreated} categories, " +
+    "{SourcesCreated} sources, {TagsCreated} tags",
+    report.CategoriesCreated, report.SourcesCreated, report.TagsCreated);

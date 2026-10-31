@@ -1,6 +1,8 @@
 using System.Net.Http.Json;
 using KnowledgeHub.Application.DTOs;
 using KnowledgeHub.CorpusImporter.Models;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace KnowledgeHub.CorpusImporter.Services;
 
@@ -11,11 +13,18 @@ namespace KnowledgeHub.CorpusImporter.Services;
 /// </summary>
 public sealed class CorpusImporter
 {
-    private readonly HttpClient _http;
+    private static readonly EventId ImportCompletedEvent =
+        new(54001, "CorpusImportCompleted");
+    private static readonly EventId DocumentProcessedEvent =
+        new(54002, "CorpusDocumentProcessed");
 
-    public CorpusImporter(HttpClient http)
+    private readonly HttpClient _http;
+    private readonly ILogger<CorpusImporter> _logger;
+
+    public CorpusImporter(HttpClient http, ILogger<CorpusImporter>? logger = null)
     {
         _http = http ?? throw new ArgumentNullException(nameof(http));
+        _logger = logger ?? NullLogger<CorpusImporter>.Instance;
         if (_http.BaseAddress is null)
         {
             throw new ArgumentException("An absolute API base address is required.", nameof(http));
@@ -181,6 +190,19 @@ public sealed class CorpusImporter
                     },
                     cancellationToken);
 
+                if (importResult.Outcome == ImportDocumentOutcome.Unchanged)
+                {
+                    _logger.LogDebug(DocumentProcessedEvent,
+                        "Corpus document {ExternalId} processed with {ImportOutcome}",
+                        item.Id, importResult.Outcome);
+                }
+                else
+                {
+                    _logger.LogInformation(DocumentProcessedEvent,
+                        "Corpus document {ExternalId} processed with {ImportOutcome}",
+                        item.Id, importResult.Outcome);
+                }
+
                 switch (importResult.Outcome)
                 {
                     case ImportDocumentOutcome.Created:
@@ -232,6 +254,12 @@ public sealed class CorpusImporter
             existing.Add(title, result.Id);
             createdCount++;
         }
+
+        _logger.LogInformation(ImportCompletedEvent,
+            "Corpus import finished: {Created} created, {UpdatedContent} content updates, " +
+            "{UpdatedMetadata} metadata updates, {Repaired} repairs, {Unchanged} unchanged, " +
+            "{Ignored} ignored",
+            createdCount, updatedContent, updatedMetadata, repaired, unchanged, ignored);
 
         return new CorpusImportReport(
             createdCount, repaired, unchanged, ignored,

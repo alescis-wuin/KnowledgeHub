@@ -1,7 +1,9 @@
-﻿using KnowledgeHub.Application.DTOs;
+using KnowledgeHub.Application.DTOs;
 using KnowledgeHub.Application.Interfaces;
 using KnowledgeHub.Domain.Entities;
 using KnowledgeHub.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace KnowledgeHub.Application.Services;
 
@@ -15,6 +17,12 @@ public class DocumentService
     private readonly ITextChunker _chunker;
     private readonly IChunkEmbeddingGenerator _embeddingGenerator;
     private readonly IVectorIndexCacheInvalidator _cacheInvalidator;
+    private readonly ILogger<DocumentService> _logger;
+
+    private static readonly EventId CreatedEvent = new(52001, "DocumentCreated");
+    private static readonly EventId ImportedEvent = new(52002, "DocumentImported");
+    private static readonly EventId UpdatedEvent = new(52003, "DocumentUpdated");
+    private static readonly EventId DeletedEvent = new(52004, "DocumentDeleted");
 
     public DocumentService(
         IKnowledgeDocumentRepository repository,
@@ -23,7 +31,8 @@ public class DocumentService
         ITagRepository tagRepository,
         ITextChunker chunker,
         IChunkEmbeddingGenerator embeddingGenerator,
-        IVectorIndexCacheInvalidator cacheInvalidator)
+        IVectorIndexCacheInvalidator cacheInvalidator,
+        ILogger<DocumentService>? logger = null)
     {
         _repository = repository;
         _categoryRepository = categoryRepository;
@@ -32,6 +41,7 @@ public class DocumentService
         _chunker = chunker;
         _embeddingGenerator = embeddingGenerator;
         _cacheInvalidator = cacheInvalidator;
+        _logger = logger ?? NullLogger<DocumentService>.Instance;
     }
 
     public async Task<List<DocumentDto>> GetAllAsync(
@@ -117,6 +127,9 @@ public class DocumentService
             cancellationToken);
 
         await _cacheInvalidator.InvalidateAsync();
+        _logger.LogInformation(CreatedEvent,
+            "Document {DocumentId} indexed with {ChunkCount} chunks",
+            document.Id, chunks.Count);
 
         return Map(document);
     }
@@ -177,6 +190,9 @@ public class DocumentService
 
         if (!contentChanged && !metadataChanged && indexComplete)
         {
+            _logger.LogDebug(ImportedEvent,
+                "Document {DocumentId} import outcome {ImportOutcome}",
+                document.Id, ImportDocumentOutcome.Unchanged);
             return new ImportDocumentResultDto(Map(document), ImportDocumentOutcome.Unchanged);
         }
 
@@ -241,6 +257,9 @@ public class DocumentService
             !indexComplete ? ImportDocumentOutcome.RepairedIndex :
             ImportDocumentOutcome.UpdatedMetadata;
 
+        _logger.LogInformation(ImportedEvent,
+            "Document {DocumentId} import outcome {ImportOutcome}; Reindexed={Reindexed}",
+            document.Id, outcome, replacementChunks is not null);
         return new ImportDocumentResultDto(Map(document), outcome);
     }
 
@@ -287,6 +306,9 @@ public class DocumentService
                 cancellationToken);
 
             await _cacheInvalidator.InvalidateAsync();
+            _logger.LogInformation(UpdatedEvent,
+                "Document {DocumentId} updated; Reindexed={Reindexed}",
+                document.Id, false);
 
             return Map(document);
         }
@@ -313,6 +335,9 @@ public class DocumentService
             cancellationToken);
 
         await _cacheInvalidator.InvalidateAsync();
+        _logger.LogInformation(UpdatedEvent,
+            "Document {DocumentId} updated; Reindexed={Reindexed}",
+            document.Id, true);
 
         return Map(document);
     }
@@ -326,6 +351,8 @@ public class DocumentService
             cancellationToken);
 
         await _cacheInvalidator.InvalidateAsync();
+        _logger.LogInformation(DeletedEvent,
+            "Document deletion requested for {DocumentId}", id);
     }
 
     public async Task<DocumentDetailsDto?> GetDetailsAsync(
