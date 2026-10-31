@@ -48,6 +48,8 @@ builder.Services.AddInfrastructure(
 
 builder.Services.AddApplicationServices();
 
+builder.Services.AddKnowledgeHubTracing(builder.Configuration);
+
 builder.Services.Configure<ApiBehaviorOptions>(
     options =>
     {

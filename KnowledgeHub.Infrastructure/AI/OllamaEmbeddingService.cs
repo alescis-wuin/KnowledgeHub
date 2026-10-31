@@ -1,3 +1,4 @@
+using KnowledgeHub.Application.Telemetry;
 using System.Net.Http.Json;
 using KnowledgeHub.Application.Interfaces;
 
@@ -19,6 +20,8 @@ public class OllamaEmbeddingService
             string text,
             CancellationToken cancellationToken = default)
     {
+        return await KnowledgeHubActivities.TraceAsync("ollama.embed", async () =>
+        {
         var response =
             await _httpClient.PostAsJsonAsync(
                 "/api/embeddings",
@@ -39,6 +42,7 @@ public class OllamaEmbeddingService
 
         return result?.Embedding
             ?? [];
+        }, cancellationToken);
     }
 
     private sealed class OllamaEmbeddingResponse

@@ -46,7 +46,9 @@ public sealed class RequestCorrelationLoggingMiddleware
         using var scope = _logger.BeginScope(
             new Dictionary<string, object>
             {
-                ["CorrelationId"] = correlationId
+                ["CorrelationId"] = correlationId,
+                ["TraceId"] = Activity.Current?.TraceId.ToHexString() ?? string.Empty,
+                ["SpanId"] = Activity.Current?.SpanId.ToHexString() ?? string.Empty
             });
 
         var start = Stopwatch.GetTimestamp();

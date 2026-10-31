@@ -1,3 +1,4 @@
+using KnowledgeHub.Application.Telemetry;
 
 using KnowledgeHub.Application.Interfaces;
 using KnowledgeHub.Domain.Entities;
@@ -19,6 +20,8 @@ public sealed class ChunkEmbeddingGenerator
         IReadOnlyCollection<DocumentChunk> chunks,
         CancellationToken cancellationToken = default)
     {
+        return await KnowledgeHubActivities.TraceAsync("document.embed_batch", async () =>
+        {
         ArgumentNullException.ThrowIfNull(chunks);
 
         if (chunks.Count == 0)
@@ -28,6 +31,7 @@ public sealed class ChunkEmbeddingGenerator
                 nameof(chunks));
         }
 
+        System.Diagnostics.Activity.Current?.SetTag("kh.embedding.chunk_count", chunks.Count);
         var orderedChunks = chunks
             .OrderBy(chunk => chunk.ChunkIndex)
             .ToArray();
@@ -84,6 +88,8 @@ public sealed class ChunkEmbeddingGenerator
                 vector.ToArray()));
         }
 
+        System.Diagnostics.Activity.Current?.SetTag("kh.embedding.dimension", expectedDimensions ?? 0);
         return results;
+        }, cancellationToken);
     }
 }

@@ -1,3 +1,4 @@
+using KnowledgeHub.Application.Telemetry;
 using KnowledgeHub.Application.DTOs;
 using KnowledgeHub.Application.Interfaces;
 using System.Diagnostics;
@@ -40,6 +41,8 @@ public sealed class RagService
         string question,
         CancellationToken cancellationToken = default)
     {
+        return await KnowledgeHubActivities.TraceAsync("rag.ask", async () =>
+        {
         var stopwatch = Stopwatch.StartNew();
 
         var context = await _contextBuilder.BuildAsync(
@@ -47,6 +50,7 @@ public sealed class RagService
             2,
             cancellationToken);
 
+        Activity.Current?.SetTag("kh.rag.source_count", context.Sources.Count);
         if (context.Sources.Count == 0 ||
             string.IsNullOrWhiteSpace(context.Context))
         {
@@ -65,9 +69,10 @@ public sealed class RagService
             };
         }
 
-        var answer = await _chatCompletionService.GenerateAnswerAsync(
-            question,
-            context.Context,
+        var answer = await KnowledgeHubActivities.TraceAsync<string>(
+            "rag.generate",
+            () => _chatCompletionService.GenerateAnswerAsync(
+                question, context.Context, cancellationToken),
             cancellationToken);
 
         stopwatch.Stop();
@@ -92,6 +97,7 @@ public sealed class RagService
                 })
                 .ToList()
         };
+        }, cancellationToken);
     }
 
 

@@ -1,4 +1,5 @@
-﻿using System.Text;
+using KnowledgeHub.Application.Telemetry;
+using System.Text;
 using KnowledgeHub.Application.DTOs;
 using KnowledgeHub.Application.Interfaces;
 
@@ -25,13 +26,13 @@ public sealed class ContextBuilderService
             CancellationToken cancellationToken =
                 default)
     {
-        var chunks =
-            await _vectorSearchService
-                .SearchAsync(
-                    question,
-                    topK,
-                    cancellationToken);
+        var chunks = await KnowledgeHubActivities.TraceAsync<IReadOnlyCollection<VectorSearchResultDto>>(
+            "rag.retrieve",
+            () => _vectorSearchService.SearchAsync(question, topK, cancellationToken),
+            cancellationToken);
 
+        return KnowledgeHubActivities.Trace("rag.context", () =>
+        {
         var sb =
             new StringBuilder();
 
@@ -73,5 +74,6 @@ public sealed class ContextBuilderService
             Sources =
                 chunks.ToList()
         };
+        });
     }
 }
