@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "corpus_id": "kh007-synthetic-v1",
+  "predictions": [
+    {
+      "id": "KH007-Q01",
+      "verdict": "answer",
+      "ranked_document_ids": [
+        "00000000-0000-0000-0000-000000000101"
+      ],
+      "evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000101",
+          "quote": "CancellationToken permet de demander une annulation cooperative."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q02",
+      "verdict": "answer",
+      "ranked_document_ids": [
+        "00000000-0000-0000-0000-000000000102"
+      ],
+      "evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000102",
+          "quote": "AsNoTracking evite le suivi des entites lors des lectures sans modification."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q03",
+      "verdict": "answer",
+      "ranked_document_ids": [
+        "00000000-0000-0000-0000-000000000103"
+      ],
+      "evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000103",
+          "quote": "Un jeton de concurrence permet a EF Core de detecter certaines modifications concurrentes"
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q04",
+      "verdict": "answer",
+      "ranked_document_ids": [
+        "00000000-0000-0000-0000-000000000104"
+      ],
+      "evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000104",
+          "quote": "Le client peut utiliser If-None-Match et recevoir 304 Not Modified"
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q05",
+      "verdict": "answer",
+      "ranked_document_ids": [
+        "00000000-0000-0000-0000-000000000105"
+      ],
+      "evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000105",
+          "quote": "COMMIT confirme les modifications de la transaction et ROLLBACK les annule."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q06",
+      "verdict": "answer",
+      "ranked_document_ids": [
+        "00000000-0000-0000-0000-000000000106"
+      ],
+      "evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000106",
+          "quote": "Un extrait exact doit etre present dans le document indique."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q07",
+      "verdict": "answer",
+      "ranked_document_ids": [
+        "00000000-0000-0000-0000-000000000107"
+      ],
+      "evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000107",
+          "quote": "eval_duration est exprime en nanosecondes dans la reponse native."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q08",
+      "verdict": "answer",
+      "ranked_document_ids": [
+        "00000000-0000-0000-0000-000000000108"
+      ],
+      "evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000108",
+          "quote": "Les metriques utilisent des etiquettes a cardinalite limitee."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q09",
+      "verdict": "answer",
+      "ranked_document_ids": [
+        "00000000-0000-0000-0000-000000000109"
+      ],
+      "evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000109",
+          "quote": "BM25 est une methode lexicale de classement des documents"
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q10",
+      "verdict": "answer",
+      "ranked_document_ids": [
+        "00000000-0000-0000-0000-000000000110"
+      ],
+      "evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000110",
+          "quote": "Un identifiant externe GUID stable permet une mise a jour incrementale de document"
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q11",
+      "verdict": "answer",
+      "ranked_document_ids": [
+        "00000000-0000-0000-0000-000000000106",
+        "00000000-0000-0000-0000-000000000108"
+      ],
+      "evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000106",
+          "quote": "Un extrait exact doit etre present dans le document indique."
+        },
+        {
+          "document_id": "00000000-0000-0000-0000-000000000108",
+          "quote": "Les metriques utilisent des etiquettes a cardinalite limitee."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q12",
+      "verdict": "answer",
+      "ranked_document_ids": [
+        "00000000-0000-0000-0000-000000000103",
+        "00000000-0000-0000-0000-000000000105"
+      ],
+      "evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000103",
+          "quote": "Un jeton de concurrence permet a EF Core de detecter certaines modifications concurrentes"
+        },
+        {
+          "document_id": "00000000-0000-0000-0000-000000000105",
+          "quote": "COMMIT confirme les modifications de la transaction et ROLLBACK les annule."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q13",
+      "verdict": "answer",
+      "ranked_document_ids": [
+        "00000000-0000-0000-0000-000000000104",
+        "00000000-0000-0000-0000-000000000110"
+      ],
+      "evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000104",
+          "quote": "Le client peut utiliser If-None-Match et recevoir 304 Not Modified"
+        },
+        {
+          "document_id": "00000000-0000-0000-0000-000000000110",
+          "quote": "Un identifiant externe GUID stable permet une mise a jour incrementale de document"
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q14",
+      "verdict": "abstain",
+      "ranked_document_ids": [],
+      "evidence": []
+    },
+    {
+      "id": "KH007-Q15",
+      "verdict": "abstain",
+      "ranked_document_ids": [],
+      "evidence": []
+    },
+    {
+      "id": "KH007-Q16",
+      "verdict": "abstain",
+      "ranked_document_ids": [],
+      "evidence": []
+    }
+  ]
+}

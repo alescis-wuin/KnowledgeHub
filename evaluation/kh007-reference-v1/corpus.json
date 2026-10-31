@@ -1,0 +1,173 @@
+{
+  "Categories": [
+    {
+      "Id": "10000000-0000-0000-0000-000000000001",
+      "Name": "Developpement"
+    },
+    {
+      "Id": "10000000-0000-0000-0000-000000000002",
+      "Name": "Donnees"
+    },
+    {
+      "Id": "10000000-0000-0000-0000-000000000003",
+      "Name": "Persistance"
+    },
+    {
+      "Id": "10000000-0000-0000-0000-000000000004",
+      "Name": "Protocoles"
+    },
+    {
+      "Id": "10000000-0000-0000-0000-000000000005",
+      "Name": "Recherche"
+    },
+    {
+      "Id": "10000000-0000-0000-0000-000000000006",
+      "Name": "Securite"
+    }
+  ],
+  "Sources": [
+    {
+      "Id": "20000000-0000-0000-0000-000000000001",
+      "Name": "KH007 reference synthetique",
+      "Url": "https://example.invalid/kh007-reference"
+    }
+  ],
+  "Tags": [
+    {
+      "Id": "30000000-0000-0000-0000-000000000001",
+      "Name": "kh007-reference"
+    }
+  ],
+  "Documents": [
+    {
+      "Id": "00000000-0000-0000-0000-000000000101",
+      "Title": "Annulation C#",
+      "Summary": "Reference synthetique pour tests hors ligne.",
+      "Content": "Dans un service asynchrone C#, CancellationToken permet de demander une annulation cooperative. Une operation longue doit transmettre le token aux appels asynchrones qui le prennent en charge. Une annulation ne constitue pas un echec fonctionnel du resultat.",
+      "SearchKeywords": "csharp",
+      "CategoryName": "Developpement",
+      "SourceName": "KH007 reference synthetique",
+      "TagNames": [
+        "kh007-reference"
+      ],
+      "CreatedAt": "2026-10-31T00:00:00Z"
+    },
+    {
+      "Id": "00000000-0000-0000-0000-000000000102",
+      "Title": "Lecture Entity Framework",
+      "Summary": "Reference synthetique pour tests hors ligne.",
+      "Content": "Dans Entity Framework Core, AsNoTracking evite le suivi des entites lors des lectures sans modification. Les requetes suivies restent utiles lorsqu un changement doit etre enregistre par SaveChanges. Le choix doit etre fait en fonction du scenario.",
+      "SearchKeywords": "database",
+      "CategoryName": "Persistance",
+      "SourceName": "KH007 reference synthetique",
+      "TagNames": [
+        "kh007-reference"
+      ],
+      "CreatedAt": "2026-10-31T00:00:00Z"
+    },
+    {
+      "Id": "00000000-0000-0000-0000-000000000103",
+      "Title": "Concurrence optimiste EF Core",
+      "Summary": "Reference synthetique pour tests hors ligne.",
+      "Content": "Un jeton de concurrence permet a EF Core de detecter certaines modifications concurrentes lors de SaveChanges. Une DbUpdateConcurrencyException signifie que la ligne attendue ne correspond plus a la version lue. Le traitement doit recharger, fusionner ou signaler le conflit.",
+      "SearchKeywords": "database",
+      "CategoryName": "Persistance",
+      "SourceName": "KH007 reference synthetique",
+      "TagNames": [
+        "kh007-reference"
+      ],
+      "CreatedAt": "2026-10-31T00:00:00Z"
+    },
+    {
+      "Id": "00000000-0000-0000-0000-000000000104",
+      "Title": "Cache HTTP ETag",
+      "Summary": "Reference synthetique pour tests hors ligne.",
+      "Content": "Un ETag represente un validateur de representation HTTP. Le client peut utiliser If-None-Match et recevoir 304 Not Modified si la representation est inchangée. Le cache doit respecter les directives de controle de cache de la reponse.",
+      "SearchKeywords": "web",
+      "CategoryName": "Protocoles",
+      "SourceName": "KH007 reference synthetique",
+      "TagNames": [
+        "kh007-reference"
+      ],
+      "CreatedAt": "2026-10-31T00:00:00Z"
+    },
+    {
+      "Id": "00000000-0000-0000-0000-000000000105",
+      "Title": "Transactions PostgreSQL",
+      "Summary": "Reference synthetique pour tests hors ligne.",
+      "Content": "Une transaction PostgreSQL regroupe plusieurs ecritures dans une unite logique. COMMIT confirme les modifications de la transaction et ROLLBACK les annule. Les niveaux d isolation peuvent changer les anomalies de concurrence observables.",
+      "SearchKeywords": "database",
+      "CategoryName": "Persistance",
+      "SourceName": "KH007 reference synthetique",
+      "TagNames": [
+        "kh007-reference"
+      ],
+      "CreatedAt": "2026-10-31T00:00:00Z"
+    },
+    {
+      "Id": "00000000-0000-0000-0000-000000000106",
+      "Title": "Citations documentaires RAG",
+      "Summary": "Reference synthetique pour tests hors ligne.",
+      "Content": "Une reponse RAG justifiee doit relier ses affirmations a des passages documentaires verifiables. Un extrait exact doit etre present dans le document indique. En l absence de sources pertinentes, le systeme doit pouvoir s abstenir de conclure.",
+      "SearchKeywords": "rag",
+      "CategoryName": "Recherche",
+      "SourceName": "KH007 reference synthetique",
+      "TagNames": [
+        "kh007-reference"
+      ],
+      "CreatedAt": "2026-10-31T00:00:00Z"
+    },
+    {
+      "Id": "00000000-0000-0000-0000-000000000107",
+      "Title": "Metriques Ollama",
+      "Summary": "Reference synthetique pour tests hors ligne.",
+      "Content": "Ollama peut retourner eval_count et eval_duration pour decrire les jetons generes et la duree de generation. eval_duration est exprime en nanosecondes dans la reponse native. Le debit de generation peut etre calcule en tokens par seconde lorsque la duree est strictement positive.",
+      "SearchKeywords": "rag",
+      "CategoryName": "Recherche",
+      "SourceName": "KH007 reference synthetique",
+      "TagNames": [
+        "kh007-reference"
+      ],
+      "CreatedAt": "2026-10-31T00:00:00Z"
+    },
+    {
+      "Id": "00000000-0000-0000-0000-000000000108",
+      "Title": "Confidentialite OpenTelemetry",
+      "Summary": "Reference synthetique pour tests hors ligne.",
+      "Content": "Les attributs de telemetrie doivent eviter les prompts, extraits documentaires et identifiants secrets. Les metriques utilisent des etiquettes a cardinalite limitee. Une trace peut relier une requete HTTP aux operations RAG sans enregistrer le corps de la question.",
+      "SearchKeywords": "security",
+      "CategoryName": "Securite",
+      "SourceName": "KH007 reference synthetique",
+      "TagNames": [
+        "kh007-reference"
+      ],
+      "CreatedAt": "2026-10-31T00:00:00Z"
+    },
+    {
+      "Id": "00000000-0000-0000-0000-000000000109",
+      "Title": "Recherche hybride",
+      "Summary": "Reference synthetique pour tests hors ligne.",
+      "Content": "BM25 est une methode lexicale de classement des documents par correspondance de termes. Une recherche vectorielle compare des representations numeriques de requetes et de textes. Un systeme hybride peut combiner les deux classements apres normalisation des scores.",
+      "SearchKeywords": "rag",
+      "CategoryName": "Recherche",
+      "SourceName": "KH007 reference synthetique",
+      "TagNames": [
+        "kh007-reference"
+      ],
+      "CreatedAt": "2026-10-31T00:00:00Z"
+    },
+    {
+      "Id": "00000000-0000-0000-0000-000000000110",
+      "Title": "Identite du corpus",
+      "Summary": "Reference synthetique pour tests hors ligne.",
+      "Content": "Un identifiant externe GUID stable permet une mise a jour incrementale de document sans utiliser son titre comme cle. Le titre peut etre renomme sans modifier l identite externe. Deux documents distincts peuvent porter le meme titre si leurs identifiants sont differents.",
+      "SearchKeywords": "data",
+      "CategoryName": "Donnees",
+      "SourceName": "KH007 reference synthetique",
+      "TagNames": [
+        "kh007-reference"
+      ],
+      "CreatedAt": "2026-10-31T00:00:00Z"
+    }
+  ]
+}
