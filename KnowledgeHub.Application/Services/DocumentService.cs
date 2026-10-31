@@ -13,7 +13,7 @@ public class DocumentService
     private readonly IKnowledgeSourceRepository _sourceRepository;
     private readonly ITagRepository _tagRepository;
     private readonly ITextChunker _chunker;
-	private readonly IChunkEmbeddingGenerator _embeddingGenerator;
+    private readonly IChunkEmbeddingGenerator _embeddingGenerator;
     private readonly IVectorIndexCacheInvalidator _cacheInvalidator;
 
     public DocumentService(
@@ -72,6 +72,9 @@ public class DocumentService
                 dto.Title,
                 dto.Content);
 
+        document.SetSummary(dto.Summary);
+        document.SetSearchKeywords(dto.SearchKeywords);
+
         document.AssignCategory(
             dto.CategoryId);
 
@@ -112,8 +115,6 @@ public class DocumentService
 
         return Map(document);
     }
-
-
 
     public async Task<DocumentDto?> UpdateAsync(
         Guid id,
@@ -200,8 +201,8 @@ public class DocumentService
     }
 
     public async Task<DocumentDetailsDto?> GetDetailsAsync(
-    Guid id,
-    CancellationToken cancellationToken = default)
+        Guid id,
+        CancellationToken cancellationToken = default)
     {
         var document =
             await _repository.GetByIdAsync(
@@ -266,8 +267,8 @@ public class DocumentService
     }
 
     public async Task<List<DocumentDto>> GetByCategoryAsync(
-    Guid categoryId,
-    CancellationToken cancellationToken = default)
+        Guid categoryId,
+        CancellationToken cancellationToken = default)
     {
         var documents =
             await _repository.GetByCategoryAsync(
@@ -280,8 +281,8 @@ public class DocumentService
     }
 
     public async Task<List<DocumentDto>> GetBySourceAsync(
-    Guid sourceId,
-    CancellationToken cancellationToken = default)
+        Guid sourceId,
+        CancellationToken cancellationToken = default)
     {
         var documents =
             await _repository.GetBySourceAsync(
@@ -294,8 +295,8 @@ public class DocumentService
     }
 
     public async Task<List<DocumentDto>> GetByTagAsync(
-    Guid tagId,
-    CancellationToken cancellationToken = default)
+        Guid tagId,
+        CancellationToken cancellationToken = default)
     {
         var documents =
             await _repository.GetByTagAsync(
@@ -309,7 +310,7 @@ public class DocumentService
 
     public async Task<KnowledgeStatisticsDto>
         GetStatisticsAsync(
-            CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
     {
         var statistics =
             await _repository.GetStatisticsAsync(
@@ -334,30 +335,30 @@ public class DocumentService
         };
     }
 
-	private IReadOnlyList<DocumentChunk> BuildChunks(
-	    Guid documentId,
-	    string content)
-	{
-	    var texts = _chunker.Chunk(content)
-	        .Select(chunk => chunk?.Trim())
-	        .Where(chunk => !string.IsNullOrWhiteSpace(chunk))
-	        .Select(chunk => chunk!)
-	        .ToArray();
+    private IReadOnlyList<DocumentChunk> BuildChunks(
+        Guid documentId,
+        string content)
+    {
+        var texts = _chunker.Chunk(content)
+            .Select(chunk => chunk?.Trim())
+            .Where(chunk => !string.IsNullOrWhiteSpace(chunk))
+            .Select(chunk => chunk!)
+            .ToArray();
 
-	    if (texts.Length == 0)
-	    {
-	        throw new InvalidOperationException(
-	            "Chunking produced no usable chunks.");
-	    }
+        if (texts.Length == 0)
+        {
+            throw new InvalidOperationException(
+                "Chunking produced no usable chunks.");
+        }
 
-	    return texts
-	        .Select((text, index) => new DocumentChunk(
-	            documentId,
-	            index,
-	            text.Length,
-	            text))
-	        .ToArray();
-	}
+        return texts
+            .Select((text, index) => new DocumentChunk(
+                documentId,
+                index,
+                text.Length,
+                text))
+            .ToArray();
+    }
 
     private static DocumentDto Map(
         KnowledgeDocument document)

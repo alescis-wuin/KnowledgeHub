@@ -1,82 +1,60 @@
-﻿using KnowledgeHub.Application.Interfaces;
-using KnowledgeHub.Application.Services;
 using KnowledgeHub.CorpusImporter.Services;
-using KnowledgeHub.Infrastructure.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
-var configuration =
-    new ConfigurationBuilder()
-        .SetBasePath(
-            AppContext.BaseDirectory)
-        .AddJsonFile(
-            "appsettings.json",
-            optional: false)
-        .Build();
+if (args.Length > 1)
+{
+    throw new ArgumentException("Usage: KnowledgeHub.CorpusImporter [corpus.json]");
+}
 
-var services =
-    new ServiceCollection();
+var corpusPath = Path.GetFullPath(args.Length == 1
+    ? args[0]
+    : Path.Combine("Data", "KnowledgeHub-corpus-documentaire.json"));
 
-services.AddInfrastructure(
-    configuration);
+var configuredUrl = Environment.GetEnvironmentVariable("KNOWLEDGEHUB_API_URL");
+if (!Uri.TryCreate(configuredUrl, UriKind.Absolute, out var apiUri) ||
+    apiUri.UserInfo.Length != 0 ||
+    apiUri.Query.Length != 0 ||
+    apiUri.Fragment.Length != 0 ||
+    (apiUri.Scheme != Uri.UriSchemeHttps && apiUri.Scheme != Uri.UriSchemeHttp))
+{
+    throw new InvalidOperationException(
+        "Set KNOWLEDGEHUB_API_URL to an absolute HTTP(S) URL for the API.");
+}
 
-services.AddScoped<
-    ITextChunker,
-    DefaultTextChunker>();
+// Cleartext HTTP must never carry document content to a non-local host.
+if (apiUri.Scheme == Uri.UriSchemeHttp &&
+    !apiUri.IsLoopback &&
+    !string.Equals(apiUri.Host, "localhost", StringComparison.OrdinalIgnoreCase))
+{
+    throw new InvalidOperationException(
+        "HTTP is permitted only for a loopback API. Use HTTPS for remote hosts.");
+}
 
-services.AddScoped<
-    CorpusReader>();
+using var cancellation = new CancellationTokenSource();
+Console.CancelKeyPress += (_, eventArgs) =>
+{
+    eventArgs.Cancel = true;
+    cancellation.Cancel();
+};
 
-services.AddScoped<
-    CorpusImporter>();
+var corpus = await new CorpusReader().ReadAsync(corpusPath);
+using var handler = new HttpClientHandler { AllowAutoRedirect = false };
+using var http = new HttpClient(handler)
+{
+    BaseAddress = new Uri(configuredUrl!.TrimEnd('/') + "/"),
+    Timeout = TimeSpan.FromMinutes(30)
+};
 
-services.AddScoped<
-    EmbeddingGenerationService>();
+Console.WriteLine($"API: {http.BaseAddress}");
+Console.WriteLine($"Corpus: {corpusPath}");
+Console.WriteLine($"Documents: {corpus.Documents.Count}");
 
-var provider =
-    services.BuildServiceProvider();
-
-using var scope =
-    provider.CreateScope();
-
-var reader =
-    scope.ServiceProvider
-        .GetRequiredService<
-            CorpusReader>();
-
-var importer =
-    scope.ServiceProvider
-        .GetRequiredService<
-            CorpusImporter>();
-
-var corpus =
-    await reader.ReadAsync(
-        @"Data\KnowledgeHub-corpus-documentaire.json");
-
-Console.WriteLine(
-    $"Categories : {corpus.Categories.Count}");
+var report = await new CorpusImporter(http).ImportAsync(
+    corpus,
+    cancellation.Token);
 
 Console.WriteLine(
-    $"Sources : {corpus.Sources.Count}");
-
+    $"Imported: {report.Created}; repaired: {report.Repaired}; " +
+    $"unchanged: {report.Unchanged}; ignored: {report.Ignored}.");
 Console.WriteLine(
-    $"Tags : {corpus.Tags.Count}");
-
-Console.WriteLine(
-    $"Documents : {corpus.Documents.Count}");
-
-await importer.ImportAsync(
-    corpus);
-
-Console.WriteLine(
-    "Import terminé.");
-
-var embeddingGenerator =
-    scope.ServiceProvider
-        .GetRequiredService<
-            EmbeddingGenerationService>();
-
-await embeddingGenerator.GenerateAsync();
-
-Console.WriteLine(
-    "Vectorisation terminée.");
+    $"Metadata created: categories={report.CategoriesCreated}, " +
+    $"sources={report.SourcesCreated}, tags={report.TagsCreated}.");

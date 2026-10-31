@@ -1,188 +1,242 @@
-﻿using KnowledgeHub.Application.Interfaces;
+using System.Net.Http.Json;
+using KnowledgeHub.Application.DTOs;
 using KnowledgeHub.CorpusImporter.Models;
-using KnowledgeHub.Domain.Entities;
-using KnowledgeHub.Infrastructure.Persistence.Context;
-using Microsoft.EntityFrameworkCore;
 
 namespace KnowledgeHub.CorpusImporter.Services;
 
-public class CorpusImporter
+/// <summary>
+/// HTTP client for the API's document lifecycle. This assembly has no database
+/// or embedding access: only the API may persist and invalidate vector indexes.
+/// A failed request ends the run; a subsequent run can resume safely.
+/// </summary>
+public sealed class CorpusImporter
 {
-    private readonly KnowledgeDbContext _context;
+    private readonly HttpClient _http;
 
-    private readonly ITextChunker _chunker;
-
-    public CorpusImporter(
-        KnowledgeDbContext context,
-        ITextChunker chunker)
+    public CorpusImporter(HttpClient http)
     {
-        _context = context;
-        _chunker = chunker;
+        _http = http ?? throw new ArgumentNullException(nameof(http));
+        if (_http.BaseAddress is null)
+        {
+            throw new ArgumentException("An absolute API base address is required.", nameof(http));
+        }
     }
 
-    public async Task ImportAsync(
-        CorpusRoot corpus)
+    public async Task<CorpusImportReport> ImportAsync(
+        CorpusRoot corpus,
+        CancellationToken cancellationToken = default)
     {
-        Console.WriteLine(
-            "Import Categories...");
+        ArgumentNullException.ThrowIfNull(corpus);
+        ArgumentNullException.ThrowIfNull(corpus.Categories);
+        ArgumentNullException.ThrowIfNull(corpus.Sources);
+        ArgumentNullException.ThrowIfNull(corpus.Tags);
+        ArgumentNullException.ThrowIfNull(corpus.Documents);
 
-        foreach (var item in corpus.Categories)
+        var categories = new Dictionary<string, Guid>(StringComparer.Ordinal);
+        foreach (var item in await GetAsync<List<CategoryDto>>(
+                     "api/categories", cancellationToken))
         {
-            if (await _context.Categories
-                .AnyAsync(x =>
-                    x.Name == item.Name))
-            {
-                continue;
-            }
-
-            _context.Categories.Add(
-                new Category(item.Name));
+            categories.TryAdd(item.Name, item.Id);
         }
 
-        await _context.SaveChangesAsync();
-
-        Console.WriteLine(
-            "Import Sources...");
-
-        foreach (var item in corpus.Sources)
+        var sources = new Dictionary<string, Guid>(StringComparer.Ordinal);
+        foreach (var item in await GetAsync<List<KnowledgeSourceDto>>(
+                     "api/sources", cancellationToken))
         {
-            if (await _context.Sources
-                .AnyAsync(x =>
-                    x.Name == item.Name))
-            {
-                continue;
-            }
-
-            _context.Sources.Add(
-                new KnowledgeSource(
-                    item.Name,
-                    item.Url));
+            sources.TryAdd(item.Name, item.Id);
         }
 
-        await _context.SaveChangesAsync();
-
-        Console.WriteLine(
-            "Import Tags...");
-
-        foreach (var item in corpus.Tags)
+        var tags = new Dictionary<string, Guid>(StringComparer.Ordinal);
+        foreach (var item in await GetAsync<List<TagDto>>(
+                     "api/tags", cancellationToken))
         {
-            if (await _context.Tags
-                .AnyAsync(x =>
-                    x.Name == item.Name))
-            {
-                continue;
-            }
-
-            _context.Tags.Add(
-                new Tag(item.Name));
+            tags.TryAdd(item.Name, item.Id);
         }
 
-        await _context.SaveChangesAsync();
+        var categoriesCreated = 0;
+        foreach (var name in corpus.Categories
+                     .Select(item => item.Name?.Trim())
+                     .Where(name => !string.IsNullOrWhiteSpace(name))
+                     .Select(name => name!)
+                     .Distinct(StringComparer.Ordinal))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (categories.ContainsKey(name)) continue;
 
-        Console.WriteLine(
-            "Import Documents...");
+            var created = await PostAsync<CategoryDto>(
+                "api/categories", new CreateCategoryDto { Name = name },
+                cancellationToken);
+            categories.Add(name, created.Id);
+            categoriesCreated++;
+        }
+
+        var sourcesCreated = 0;
+        foreach (var item in corpus.Sources
+                     .Where(item => !string.IsNullOrWhiteSpace(item.Name))
+                     .DistinctBy(item => item.Name.Trim(), StringComparer.Ordinal))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var name = item.Name.Trim();
+            if (sources.ContainsKey(name)) continue;
+
+            var created = await PostAsync<KnowledgeSourceDto>(
+                "api/sources",
+                new CreateKnowledgeSourceDto { Name = name, Url = item.Url },
+                cancellationToken);
+            sources.Add(name, created.Id);
+            sourcesCreated++;
+        }
+
+        var tagsCreated = 0;
+        foreach (var name in corpus.Tags
+                     .Select(item => item.Name?.Trim())
+                     .Where(name => !string.IsNullOrWhiteSpace(name))
+                     .Select(name => name!)
+                     .Distinct(StringComparer.Ordinal))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (tags.ContainsKey(name)) continue;
+
+            var created = await PostAsync<TagDto>(
+                "api/tags", new CreateTagDto { Name = name },
+                cancellationToken);
+            tags.Add(name, created.Id);
+            tagsCreated++;
+        }
+
+        var existing = new Dictionary<string, Guid>(StringComparer.Ordinal);
+        foreach (var document in await GetAsync<List<DocumentDto>>(
+                     "api/documents", cancellationToken))
+        {
+            existing.TryAdd(document.Title, document.Id);
+        }
+
+        var createdCount = 0;
+        var repaired = 0;
+        var unchanged = 0;
+        var ignored = 0;
 
         foreach (var item in corpus.Documents)
         {
-            if (await _context.Documents
-                .AnyAsync(x =>
-                    x.Title == item.Title))
+            cancellationToken.ThrowIfCancellationRequested();
+            if (string.IsNullOrWhiteSpace(item.Title) ||
+                string.IsNullOrWhiteSpace(item.Content))
             {
+                ignored++;
                 continue;
             }
 
-
-            if (string.IsNullOrWhiteSpace(item.Content))
+            var title = item.Title.Trim();
+            if (existing.TryGetValue(title, out var id))
             {
-                Console.WriteLine(
-                    $"Document ignoré : {item.Title}");
-
+                var wasRepaired = await PostAsync<bool>(
+                    $"api/documents/{id:D}/ensure-index", new { },
+                    cancellationToken);
+                if (wasRepaired) repaired++;
+                else unchanged++;
                 continue;
             }
 
-            var document =
-                new KnowledgeDocument(
-                    item.Title,
-                    item.Content);
+            Guid? categoryId = categories.TryGetValue(
+                item.CategoryName?.Trim() ?? string.Empty, out var category)
+                ? category : null;
+            Guid? sourceId = sources.TryGetValue(
+                item.SourceName?.Trim() ?? string.Empty, out var source)
+                ? source : null;
 
-            document.SetSummary(
-                item.Summary);
+            var tagIds = (item.TagNames ?? [])
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Select(name => tags.TryGetValue(name.Trim(), out var tag)
+                    ? (Guid?)tag : null)
+                .Where(value => value.HasValue)
+                .Select(value => value!.Value)
+                .Distinct()
+                .ToList();
 
-            document.SetSearchKeywords(
-                item.SearchKeywords);
-
-            var category =
-                await _context.Categories
-                    .FirstOrDefaultAsync(
-                        x => x.Name ==
-                            item.CategoryName);
-
-            if (category is not null)
-            {
-                document.AssignCategory(
-                    category.Id);
-            }
-
-            var source =
-                await _context.Sources
-                    .FirstOrDefaultAsync(
-                        x => x.Name ==
-                            item.SourceName);
-
-            if (source is not null)
-            {
-                document.AssignSource(
-                    source.Id);
-            }
-
-            foreach (var tagName
-                     in item.TagNames)
-            {
-                var tag =
-                    await _context.Tags
-                        .FirstOrDefaultAsync(
-                            x => x.Name ==
-                                tagName);
-
-                if (tag is not null)
+            var result = await PostAsync<DocumentDto>(
+                "api/documents",
+                new CreateDocumentDto
                 {
-                    document.AddTag(tag);
-                }
-            }
+                    Title = title,
+                    Content = item.Content,
+                    Summary = item.Summary,
+                    SearchKeywords = item.SearchKeywords,
+                    CategoryId = categoryId,
+                    SourceId = sourceId,
+                    TagIds = tagIds
+                },
+                cancellationToken);
 
-            Console.WriteLine($"Importing document: {item.Title}");
-            var chunks =
-                _chunker.Chunk(
-                    item.Content);
-
-            var index = 0;
-
-            foreach (var chunk in chunks)
-            {
-                var content =
-                    chunk?.Trim();
-
-                if (string.IsNullOrWhiteSpace(content))
-                {
-                    Console.WriteLine(
-                        "Chunk vide ignoré");
-
-                    continue;
-                }
-
-                Console.WriteLine(
-                    $"Chunk size: {content.Length}");
-
-                document.AddChunk(
-                    index++,
-                    content.Length,
-                    content);
-            }
-
-            _context.Documents.Add(
-                document);
+            existing.Add(title, result.Id);
+            createdCount++;
         }
 
-        await _context.SaveChangesAsync();
+        return new CorpusImportReport(
+            createdCount, repaired, unchanged, ignored,
+            categoriesCreated, sourcesCreated, tagsCreated);
+    }
+
+    private Task<T> GetAsync<T>(
+        string route, CancellationToken cancellationToken)
+    {
+        return SendAsync<T>(new HttpRequestMessage(HttpMethod.Get, route),
+            cancellationToken);
+    }
+
+    private Task<T> PostAsync<T>(
+        string route, object body, CancellationToken cancellationToken)
+    {
+        return SendAsync<T>(new HttpRequestMessage(HttpMethod.Post, route)
+        {
+            Content = JsonContent.Create(body)
+        }, cancellationToken);
+    }
+
+    private async Task<T> SendAsync<T>(
+        HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        using (request)
+        using (var response = await _http.SendAsync(
+                   request, HttpCompletionOption.ResponseHeadersRead,
+                   cancellationToken))
+        {
+            // Never log document payloads or confidential API response bodies.
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException(
+                    $"API {request.Method} {request.RequestUri}: HTTP " +
+                    $"{(int)response.StatusCode} ({response.ReasonPhrase}).",
+                    null, response.StatusCode);
+            }
+
+            var envelope = await response.Content
+                .ReadFromJsonAsync<ApiResponse<T>>(
+                    cancellationToken: cancellationToken);
+
+            if (envelope is null || !envelope.Success)
+            {
+                throw new InvalidOperationException(
+                    $"API {request.Method} {request.RequestUri} returned an invalid response.");
+            }
+
+            // Do not use envelope?.Data: T also represents value types (bool).
+            var data = envelope.Data;
+            if (data is null)
+            {
+                throw new InvalidOperationException(
+                    $"API {request.Method} {request.RequestUri} returned an invalid response.");
+            }
+
+            return data;
+        }
     }
 }
+
+public sealed record CorpusImportReport(
+    int Created,
+    int Repaired,
+    int Unchanged,
+    int Ignored,
+    int CategoriesCreated,
+    int SourcesCreated,
+    int TagsCreated);
