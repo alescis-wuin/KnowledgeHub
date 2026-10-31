@@ -1,16 +1,25 @@
-﻿using KnowledgeHub.Application.DTOs;
+using KnowledgeHub.Application.DTOs;
 using System.Text.Json;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace KnowledgeHub.Api.Middleware;
 
 public sealed class ExceptionHandlingMiddleware
 {
+    private static readonly EventId RejectedEvent =
+        new(51002, "HttpRequestRejected");
+    private static readonly EventId FailureEvent =
+        new(51003, "HttpRequestFailed");
+
     private readonly RequestDelegate _next;
+    private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
     public ExceptionHandlingMiddleware(
-        RequestDelegate next)
+        RequestDelegate next,
+        ILogger<ExceptionHandlingMiddleware>? logger = null)
     {
         _next = next;
+        _logger = logger ?? NullLogger<ExceptionHandlingMiddleware>.Instance;
     }
 
     public async Task InvokeAsync(
@@ -22,6 +31,8 @@ public sealed class ExceptionHandlingMiddleware
         }
         catch (ArgumentException ex)
         {
+            _logger.LogWarning(RejectedEvent,
+                "Request rejected: {ExceptionType}", ex.GetType().Name);
             await HandleException(
                 context,
                 StatusCodes.Status400BadRequest,
@@ -29,10 +40,14 @@ public sealed class ExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
+            // Error text may contain the corpus or connection credentials.
+            // Keep it out of both the server log and the public 500 response.
+            _logger.LogError(FailureEvent,
+                "Unexpected request failure: {ExceptionType}", ex.GetType().Name);
             await HandleException(
                 context,
                 StatusCodes.Status500InternalServerError,
-                ex.Message);
+                "Une erreur interne est survenue.");
         }
     }
 

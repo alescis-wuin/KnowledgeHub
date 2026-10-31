@@ -1,6 +1,8 @@
-﻿using KnowledgeHub.Application.DTOs;
+using KnowledgeHub.Application.DTOs;
 using KnowledgeHub.Application.Interfaces;
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace KnowledgeHub.Infrastructure.AI;
 
@@ -13,18 +15,24 @@ public sealed class RagService
     private readonly
         IChatCompletionService
         _chatCompletionService;
+    private readonly ILogger<RagService> _logger;
+
+    private static readonly EventId SkippedEvent = new(53001, "RagSkipped");
+    private static readonly EventId CompletedEvent = new(53002, "RagCompleted");
 
     public RagService(
         IContextBuilderService
             contextBuilder,
         IChatCompletionService
-            chatCompletionService)
+            chatCompletionService,
+        ILogger<RagService>? logger = null)
     {
         _contextBuilder =
             contextBuilder;
 
         _chatCompletionService =
             chatCompletionService;
+        _logger = logger ?? NullLogger<RagService>.Instance;
     }
 
 
@@ -44,8 +52,9 @@ public sealed class RagService
         {
             stopwatch.Stop();
 
-            Console.WriteLine(
-                $"RAG skipped: no usable context ({stopwatch.Elapsed})");
+            _logger.LogInformation(SkippedEvent,
+                "RAG skipped: no usable context; DurationMs={DurationMs}",
+                Math.Round(stopwatch.Elapsed.TotalMilliseconds, 2));
 
             return new AskQuestionResponseDto
             {
@@ -63,8 +72,10 @@ public sealed class RagService
 
         stopwatch.Stop();
 
-        Console.WriteLine(
-            $"RAG completed in {stopwatch.Elapsed}");
+        _logger.LogInformation(CompletedEvent,
+            "RAG completed; SourceCount={SourceCount}; DurationMs={DurationMs}",
+            context.Sources.Count,
+            Math.Round(stopwatch.Elapsed.TotalMilliseconds, 2));
 
         return new AskQuestionResponseDto
         {

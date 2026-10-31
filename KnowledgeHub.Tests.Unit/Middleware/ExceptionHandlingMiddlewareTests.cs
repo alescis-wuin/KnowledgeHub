@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using KnowledgeHub.Api.Middleware;
 using KnowledgeHub.Application.DTOs;
 using Microsoft.AspNetCore.Http;
@@ -133,7 +133,50 @@ public class ExceptionHandlingMiddlewareTests
 
         response.Errors.First()
             .Should()
-            .Be("Erreur technique");
+            .Be("Une erreur interne est survenue.");
+    }
+
+    [Fact]
+    public async Task ServerError_DoesNotExposeExceptionMessageToLogOrClient()
+    {
+        const string secret = "CONNECTION_PASSWORD_AND_PRIVATE_DOCUMENT";
+        var context = new DefaultHttpContext();
+        context.Response.Body = new MemoryStream();
+        var logger = new RecordingLogger();
+        var middleware = new ExceptionHandlingMiddleware(
+            _ => throw new InvalidOperationException(secret), logger);
+
+        await middleware.InvokeAsync(context);
+
+        var logged = Assert.Single(logger.Entries);
+        Assert.Equal(51003, logged.EventId.Id);
+        Assert.DoesNotContain(secret, logged.Message);
+        Assert.DoesNotContain(secret, await GetBodyAsync(context.Response));
+    }
+
+    private sealed class RecordingLogger
+        : Microsoft.Extensions.Logging.ILogger<ExceptionHandlingMiddleware>
+    {
+        public List<(Microsoft.Extensions.Logging.EventId EventId, string Message)> Entries { get; } = [];
+
+        public IDisposable BeginScope<TState>(TState state) where TState : notnull =>
+            NoopScope.Instance;
+
+        public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel level) => true;
+
+        public void Log<TState>(
+            Microsoft.Extensions.Logging.LogLevel level,
+            Microsoft.Extensions.Logging.EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter) =>
+            Entries.Add((eventId, formatter(state, exception)));
+
+        private sealed class NoopScope : IDisposable
+        {
+            public static readonly NoopScope Instance = new();
+            public void Dispose() { }
+        }
     }
 
     private static async Task<string> GetBodyAsync(
