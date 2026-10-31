@@ -53,7 +53,8 @@ var report = await new CorpusImporter(http).ImportAsync(
     cancellation.Token);
 
 Console.WriteLine(
-    $"Imported: {report.Created}; repaired: {report.Repaired}; " +
+    $"Imported: {report.Created}; content updated: {report.UpdatedContent}; " +
+    $"metadata updated: {report.UpdatedMetadata}; repaired: {report.Repaired}; " +
     $"unchanged: {report.Unchanged}; ignored: {report.Ignored}.");
 Console.WriteLine(
     $"Metadata created: categories={report.CategoriesCreated}, " +

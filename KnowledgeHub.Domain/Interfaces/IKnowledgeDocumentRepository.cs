@@ -12,6 +12,10 @@ public interface IKnowledgeDocumentRepository
         Guid id,
         CancellationToken cancellationToken = default);
 
+    Task<KnowledgeDocument?> GetByExternalIdAsync(
+        Guid externalId,
+        CancellationToken cancellationToken = default);
+
     Task<bool> HasCompleteIndexAsync(
         Guid id,
         CancellationToken cancellationToken = default);

@@ -72,6 +72,11 @@ public class DocumentService
                 dto.Title,
                 dto.Content);
 
+        if (dto.ExternalId.HasValue)
+        {
+            document.AssignExternalId(dto.ExternalId.Value);
+        }
+
         document.SetSummary(dto.Summary);
         document.SetSearchKeywords(dto.SearchKeywords);
 
@@ -114,6 +119,129 @@ public class DocumentService
         await _cacheInvalidator.InvalidateAsync();
 
         return Map(document);
+    }
+
+    /// <summary>
+    /// Upsert by immutable external GUID. Does not re-embed metadata-only changes.
+    /// The legacy title-based import remains in CorpusImporter for empty GUIDs.
+    /// </summary>
+    public async Task<ImportDocumentResultDto> ImportAsync(
+        CreateDocumentDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+
+        if (dto.ExternalId is not Guid externalId || externalId == Guid.Empty)
+        {
+            throw new ArgumentException("A non-empty ExternalId is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.Title) || dto.Title.Trim().Length > 300 ||
+            string.IsNullOrWhiteSpace(dto.Content))
+        {
+            throw new ArgumentException("A valid title and non-empty content are required.");
+        }
+
+        var document = await _repository.GetByExternalIdAsync(
+            externalId, cancellationToken);
+        if (document is null)
+        {
+            var created = await CreateAsync(dto, cancellationToken);
+            return new ImportDocumentResultDto(created, ImportDocumentOutcome.Created);
+        }
+
+        var desiredContent = dto.Content.Trim();
+        var desiredHash = KnowledgeDocument.ComputeContentSha256(desiredContent);
+        var existingHash = document.ContentSha256 ??
+            KnowledgeDocument.ComputeContentSha256(document.Content);
+
+        var contentChanged =
+            !string.Equals(existingHash, desiredHash, StringComparison.Ordinal) ||
+            !string.Equals(document.Content, desiredContent, StringComparison.Ordinal);
+
+        var desiredTags = (dto.TagIds ?? []).ToHashSet();
+        var existingTags = document.DocumentTags.Select(x => x.TagId).ToHashSet();
+
+        var metadataChanged =
+            !string.Equals(document.Title, dto.Title.Trim(), StringComparison.Ordinal) ||
+            document.CategoryId != dto.CategoryId ||
+            document.SourceId != dto.SourceId ||
+            !string.Equals(document.Summary ?? string.Empty,
+                dto.Summary ?? string.Empty, StringComparison.Ordinal) ||
+            !string.Equals(document.SearchKeywords ?? string.Empty,
+                dto.SearchKeywords ?? string.Empty, StringComparison.Ordinal) ||
+            !existingTags.SetEquals(desiredTags);
+
+        var indexComplete = await _repository.HasCompleteIndexAsync(
+            document.Id, cancellationToken);
+
+        if (!contentChanged && !metadataChanged && indexComplete)
+        {
+            return new ImportDocumentResultDto(Map(document), ImportDocumentOutcome.Unchanged);
+        }
+
+        // Validate all requested tags before any tracked entity is modified.
+        var newTags = new List<Tag>();
+        foreach (var tagId in desiredTags.Except(existingTags))
+        {
+            var tag = await _tagRepository.GetByIdAsync(tagId, cancellationToken);
+            if (tag is null)
+            {
+                throw new ArgumentException($"Unknown tag ID: {tagId}.");
+            }
+
+            newTags.Add(tag);
+        }
+
+        IReadOnlyList<DocumentChunk>? replacementChunks = null;
+        IReadOnlyList<ChunkEmbedding>? replacementEmbeddings = null;
+        if (contentChanged || !indexComplete)
+        {
+            // Ollama calls finish before touching the tracked document.
+            replacementChunks = BuildChunks(document.Id, desiredContent);
+            replacementEmbeddings = await _embeddingGenerator.GenerateAsync(
+                replacementChunks, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+
+        if (replacementChunks is not null)
+        {
+            document.Update(dto.Title, desiredContent);
+        }
+
+        document.UpdateMetadata(
+            dto.Title, dto.CategoryId, dto.SourceId,
+            dto.Summary, dto.SearchKeywords);
+
+        foreach (var removed in document.DocumentTags
+                     .Where(x => !desiredTags.Contains(x.TagId)).ToArray())
+        {
+            document.DocumentTags.Remove(removed);
+        }
+
+        foreach (var tag in newTags)
+        {
+            document.AddTag(tag);
+        }
+
+        if (replacementChunks is not null && replacementEmbeddings is not null)
+        {
+            document.ReplaceChunks(replacementChunks);
+            await _repository.UpdateIndexedAsync(
+                document, replacementEmbeddings, cancellationToken);
+        }
+        else
+        {
+            await _repository.UpdateAsync(document, cancellationToken);
+        }
+
+        await _cacheInvalidator.InvalidateAsync();
+
+        var outcome = contentChanged ? ImportDocumentOutcome.UpdatedContent :
+            !indexComplete ? ImportDocumentOutcome.RepairedIndex :
+            ImportDocumentOutcome.UpdatedMetadata;
+
+        return new ImportDocumentResultDto(Map(document), outcome);
     }
 
     public async Task<DocumentDto?> UpdateAsync(
@@ -366,6 +494,8 @@ public class DocumentService
         return new DocumentDto
         {
             Id = document.Id,
+            ExternalId = document.ExternalId,
+            ContentSha256 = document.ContentSha256,
             Title = document.Title,
             Content = document.Content,
             CreatedAt = document.CreatedAt,

@@ -4,6 +4,8 @@
 
     public string Content { get; set; } = string.Empty;
 
+    public Guid? ExternalId { get; set; }
+
     public Guid? CategoryId { get; set; }
 
     public Guid? SourceId { get; set; }

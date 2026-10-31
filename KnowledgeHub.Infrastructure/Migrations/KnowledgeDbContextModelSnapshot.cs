@@ -107,8 +107,15 @@ namespace KnowledgeHub.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("ContentSha256")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ExternalId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("SearchKeywords")
                         .HasColumnType("text");
@@ -130,6 +137,9 @@ namespace KnowledgeHub.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("ExternalId")
+                        .IsUnique();
 
                     b.HasIndex("SourceId");
 

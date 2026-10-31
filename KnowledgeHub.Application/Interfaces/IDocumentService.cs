@@ -19,6 +19,10 @@ public interface IDocumentService
         CreateDocumentDto dto,
         CancellationToken cancellationToken = default);
 
+    Task<ImportDocumentResultDto> ImportAsync(
+        CreateDocumentDto dto,
+        CancellationToken cancellationToken = default);
+
     Task<DocumentDto?> UpdateAsync(
         Guid id,
         UpdateDocumentDto dto,
