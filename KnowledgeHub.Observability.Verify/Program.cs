@@ -118,7 +118,10 @@ internal static class Program
             await SendAsync(observedClient, correlationId, traced: true);
 
             var exported = await collector.WaitForTelemetryAsync(
-                TimeSpan.FromSeconds(25), TraceId, "kh.rag.requests", "kh.ollama.requests");
+                TimeSpan.FromSeconds(25), TraceId,
+                "kh.rag.requests", "kh.ollama.requests",
+                "kh.ollama.native.duration", "kh.ollama.native.tokens",
+                "kh.ollama.native.output.tokens_per_second");
 
             var traceSpans = exported.Spans.Where(s => s.TraceId == TraceId).ToList();
             var server = SingleSpan(traceSpans, "http.server.request");
@@ -175,7 +178,12 @@ internal static class Program
                     trace_requests = collector.Count("/v1/traces"),
                     metrics_requests = collector.Count("/v1/metrics"),
                     verified_spans = traceSpans.Select(s => s.Name).OrderBy(s => s).ToArray(),
-                    required_metrics = new[] { "kh.rag.requests", "kh.ollama.requests" },
+                    required_metrics = new[]
+                    {
+                        "kh.rag.requests", "kh.ollama.requests",
+                        "kh.ollama.native.duration", "kh.ollama.native.tokens",
+                        "kh.ollama.native.output.tokens_per_second"
+                    },
                     private_sentinels_absent = true
                 },
                 benchmark = new
@@ -633,7 +641,14 @@ internal static class Program
                     _ollamaTraceparents.Enqueue(context.Request.Headers["traceparent"] ?? "");
                     var response = JsonSerializer.SerializeToUtf8Bytes(new
                     {
-                        message = new { role = "assistant", content = _answer }
+                        message = new { role = "assistant", content = _answer },
+                        total_duration = 3_500_000_000L,
+                        load_duration = 500_000_000L,
+                        prompt_eval_count = 120L,
+                        prompt_eval_cached_count = 10L,
+                        prompt_eval_duration = 900_000_000L,
+                        eval_count = 84L,
+                        eval_duration = 2_000_000_000L
                     });
                     context.Response.StatusCode = 200;
                     context.Response.ContentType = "application/json";
