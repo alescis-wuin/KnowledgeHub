@@ -1,3 +1,4 @@
+using KnowledgeHub.Application.Telemetry;
 using KnowledgeHub.Application.DTOs;
 using KnowledgeHub.Application.Interfaces;
 using KnowledgeHub.Infrastructure.Persistence.Context;
@@ -25,6 +26,10 @@ public sealed class VectorSearchService : IVectorSearchService
         int topK = 5,
         CancellationToken cancellationToken = default)
     {
+        return await KnowledgeHubActivities.TraceAsync<IReadOnlyCollection<VectorSearchResultDto>>(
+            "vector_search.search", async () =>
+        {
+        System.Diagnostics.Activity.Current?.SetTag("kh.retrieval.top_k", topK);
         if (string.IsNullOrWhiteSpace(question) || topK <= 0)
         {
             return [];
@@ -42,7 +47,8 @@ public sealed class VectorSearchService : IVectorSearchService
         var questionEmbedding = await _embeddingService
             .GenerateEmbeddingAsync(question, cancellationToken);
 
-        return entries
+        var ranked = KnowledgeHubActivities.Trace("vector_search.rank", () =>
+            entries
             .Select(entry => new VectorSearchResultDto
             {
                 ChunkId = entry.ChunkId,
@@ -55,7 +61,10 @@ public sealed class VectorSearchService : IVectorSearchService
             .GroupBy(result => result.DocumentId)
             .Select(group => group.First())
             .Take(topK)
-            .ToList();
+            .ToList());
+        System.Diagnostics.Activity.Current?.SetTag("kh.retrieval.result_count", ranked.Count);
+        return ranked;
+        }, cancellationToken);
     }
 
     private static double CosineSimilarity(float[] vectorA, float[] vectorB)

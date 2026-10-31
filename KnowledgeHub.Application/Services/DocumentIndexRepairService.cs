@@ -1,3 +1,4 @@
+using KnowledgeHub.Application.Telemetry;
 using KnowledgeHub.Application.Interfaces;
 using KnowledgeHub.Domain.Entities;
 using KnowledgeHub.Domain.Interfaces;
@@ -38,6 +39,8 @@ public sealed class DocumentIndexRepairService
         Guid id,
         CancellationToken cancellationToken = default)
     {
+        return await KnowledgeHubActivities.TraceAsync<bool?>("document.index.repair", async () =>
+        {
         var document = await _documents.GetByIdAsync(id, cancellationToken);
         if (document is null)
         {
@@ -76,9 +79,11 @@ public sealed class DocumentIndexRepairService
         await _documents.UpdateIndexedAsync(
             document, embeddings, cancellationToken);
         await _cache.InvalidateAsync();
+        System.Diagnostics.Activity.Current?.SetTag("kh.document.chunk_count", replacements.Length);
         _logger.LogInformation(RepairedEvent,
             "Document {DocumentId} index repaired with {ChunkCount} chunks",
             document.Id, replacements.Length);
         return true;
+        }, cancellationToken);
     }
 }

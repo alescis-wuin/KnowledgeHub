@@ -1,3 +1,4 @@
+using KnowledgeHub.Application.Telemetry;
 using KnowledgeHub.Application.Interfaces;
 using KnowledgeHub.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,9 @@ public sealed class VectorIndexCache : IVectorIndexCacheInvalidator, IDisposable
         KnowledgeDbContext context,
         CancellationToken cancellationToken = default)
     {
+        return await KnowledgeHubActivities.TraceAsync<IReadOnlyList<VectorIndexEntry>>(
+            "vector_index.load", async () =>
+        {
         ArgumentNullException.ThrowIfNull(context);
 
         await _gate.WaitAsync(cancellationToken);
@@ -44,6 +48,8 @@ public sealed class VectorIndexCache : IVectorIndexCacheInvalidator, IDisposable
                     out IReadOnlyList<VectorIndexEntry>? cached) &&
                 cached is not null)
             {
+                System.Diagnostics.Activity.Current?.SetTag("kh.cache.hit", true);
+                System.Diagnostics.Activity.Current?.SetTag("kh.cache.entry_count", cached.Count);
                 return cached;
             }
 
@@ -58,16 +64,21 @@ public sealed class VectorIndexCache : IVectorIndexCacheInvalidator, IDisposable
                 .ToArrayAsync(cancellationToken);
 
             _cache.Set(CacheKey, entries, Lifetime);
+            System.Diagnostics.Activity.Current?.SetTag("kh.cache.hit", false);
+            System.Diagnostics.Activity.Current?.SetTag("kh.cache.entry_count", entries.Length);
             return entries;
         }
         finally
         {
             _gate.Release();
         }
+        }, cancellationToken);
     }
 
     public async Task InvalidateAsync()
     {
+        await KnowledgeHubActivities.TraceAsync("vector_index.invalidate", async () =>
+        {
         await _gate.WaitAsync(CancellationToken.None);
         try
         {
@@ -77,6 +88,7 @@ public sealed class VectorIndexCache : IVectorIndexCacheInvalidator, IDisposable
         {
             _gate.Release();
         }
+        });
     }
 
     public void Dispose()

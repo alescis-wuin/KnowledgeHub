@@ -1,3 +1,4 @@
+using KnowledgeHub.Application.Telemetry;
 using KnowledgeHub.Application.DTOs;
 using KnowledgeHub.Application.Interfaces;
 using KnowledgeHub.Domain.Entities;
@@ -77,6 +78,8 @@ public class DocumentService
     CreateDocumentDto dto,
     CancellationToken cancellationToken = default)
     {
+        return await KnowledgeHubActivities.TraceAsync("document.index", async () =>
+        {
         var document =
             new KnowledgeDocument(
                 dto.Title,
@@ -127,11 +130,13 @@ public class DocumentService
             cancellationToken);
 
         await _cacheInvalidator.InvalidateAsync();
+        System.Diagnostics.Activity.Current?.SetTag("kh.document.chunk_count", chunks.Count);
         _logger.LogInformation(CreatedEvent,
             "Document {DocumentId} indexed with {ChunkCount} chunks",
             document.Id, chunks.Count);
 
         return Map(document);
+        }, cancellationToken);
     }
 
     /// <summary>
@@ -142,6 +147,8 @@ public class DocumentService
         CreateDocumentDto dto,
         CancellationToken cancellationToken = default)
     {
+        return await KnowledgeHubActivities.TraceAsync("document.import", async () =>
+        {
         ArgumentNullException.ThrowIfNull(dto);
 
         if (dto.ExternalId is not Guid externalId || externalId == Guid.Empty)
@@ -190,6 +197,7 @@ public class DocumentService
 
         if (!contentChanged && !metadataChanged && indexComplete)
         {
+            System.Diagnostics.Activity.Current?.SetTag("kh.import.outcome", "Unchanged");
             _logger.LogDebug(ImportedEvent,
                 "Document {DocumentId} import outcome {ImportOutcome}",
                 document.Id, ImportDocumentOutcome.Unchanged);
@@ -253,14 +261,18 @@ public class DocumentService
 
         await _cacheInvalidator.InvalidateAsync();
 
+        System.Diagnostics.Activity.Current?.SetTag(
+            "kh.document.reindexed", replacementChunks is not null);
         var outcome = contentChanged ? ImportDocumentOutcome.UpdatedContent :
             !indexComplete ? ImportDocumentOutcome.RepairedIndex :
             ImportDocumentOutcome.UpdatedMetadata;
 
+        System.Diagnostics.Activity.Current?.SetTag("kh.import.outcome", outcome.ToString());
         _logger.LogInformation(ImportedEvent,
             "Document {DocumentId} import outcome {ImportOutcome}; Reindexed={Reindexed}",
             document.Id, outcome, replacementChunks is not null);
         return new ImportDocumentResultDto(Map(document), outcome);
+        }, cancellationToken);
     }
 
     public async Task<DocumentDto?> UpdateAsync(
@@ -268,6 +280,8 @@ public class DocumentService
         UpdateDocumentDto dto,
         CancellationToken cancellationToken = default)
     {
+        return await KnowledgeHubActivities.TraceAsync<KnowledgeHub.Application.DTOs.DocumentDto?>("document.update", async () =>
+        {
         ArgumentNullException.ThrowIfNull(dto);
 
         var document = await _repository.GetByIdAsync(
@@ -340,6 +354,7 @@ public class DocumentService
             document.Id, true);
 
         return Map(document);
+        }, cancellationToken);
     }
 
     public async Task DeleteAsync(

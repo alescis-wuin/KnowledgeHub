@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+using KnowledgeHub.Application.Telemetry;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using KnowledgeHub.Application.Interfaces;
@@ -24,6 +25,8 @@ public sealed class OllamaChatCompletionService
             CancellationToken cancellationToken =
                 default)
     {
+        return await KnowledgeHubActivities.TraceAsync("ollama.chat", async () =>
+        {
         var request =
             new OllamaChatRequest
             {
@@ -113,6 +116,7 @@ QUESTION
         }
 
         return result.Message.Content;
+        }, cancellationToken);
     }
 
     private sealed class OllamaChatRequest
