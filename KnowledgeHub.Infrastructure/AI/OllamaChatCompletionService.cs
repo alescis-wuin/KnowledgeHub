@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using KnowledgeHub.Application.Interfaces;
 
@@ -80,7 +81,7 @@ QUESTION
                     }
             };
 
-        var response =
+        using var response =
             await _httpClient.PostAsJsonAsync(
                 "/api/chat",
                 request,
@@ -88,41 +89,30 @@ QUESTION
 
         response.EnsureSuccessStatusCode();
 
-        var raw =
-            await response.Content
-                .ReadAsStringAsync(
-                    cancellationToken);
-
-        Console.WriteLine(
-            "==================================");
-
-        Console.WriteLine(
-            "OLLAMA CHAT RAW RESPONSE");
-
-        Console.WriteLine(
-            raw);
-
-        Console.WriteLine(
-            "==================================");
-
-        var result =
-            System.Text.Json.JsonSerializer.Deserialize<
-                OllamaChatResponse>(
-                    raw);
-
-        if (!string.IsNullOrWhiteSpace(
-                result?.Message?.Content))
+        // Never print or persist the raw response: it may contain reasoning,
+        // private document excerpts or model-generated confidential content.
+        OllamaChatResponse? result;
+        try
         {
-            return result.Message.Content;
+            result = await response.Content
+                .ReadFromJsonAsync<OllamaChatResponse>(
+                    cancellationToken: cancellationToken);
+        }
+        catch (JsonException)
+        {
+            // Do not expose the parser's original diagnostic or payload.
+            throw new InvalidDataException(
+                "Ollama chat returned invalid JSON.");
         }
 
-        if (!string.IsNullOrWhiteSpace(
-                result?.Message?.Thinking))
+        if (string.IsNullOrWhiteSpace(result?.Message?.Content))
         {
-            return result.Message.Thinking;
+            // A reasoning-only answer is not a user-facing answer.
+            throw new InvalidDataException(
+                "Ollama chat did not return a usable answer.");
         }
 
-        return string.Empty;
+        return result.Message.Content;
     }
 
     private sealed class OllamaChatRequest
@@ -179,13 +169,6 @@ QUESTION
         }
         = string.Empty;
 
-        [JsonPropertyName("thinking")]
-        public string Thinking
-        {
-            get;
-            set;
-        }
-        = string.Empty;
     }
 
     private sealed class OllamaOptions
