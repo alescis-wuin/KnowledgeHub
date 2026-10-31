@@ -26,12 +26,16 @@ public sealed class ContextBuilderService
             CancellationToken cancellationToken =
                 default)
     {
-        var chunks = await KnowledgeHubActivities.TraceAsync<IReadOnlyCollection<VectorSearchResultDto>>(
-            "rag.retrieve",
-            () => _vectorSearchService.SearchAsync(question, topK, cancellationToken),
+        var chunks = await KnowledgeHubMetrics.MeasureStageAsync(
+            "retrieve",
+            () => KnowledgeHubActivities.TraceAsync<IReadOnlyCollection<VectorSearchResultDto>>(
+                "rag.retrieve",
+                () => _vectorSearchService.SearchAsync(question, topK, cancellationToken),
+                cancellationToken),
             cancellationToken);
 
-        return KnowledgeHubActivities.Trace("rag.context", () =>
+        return KnowledgeHubMetrics.MeasureStage("context", () =>
+            KnowledgeHubActivities.Trace("rag.context", () =>
         {
         var sb =
             new StringBuilder();
@@ -74,6 +78,6 @@ public sealed class ContextBuilderService
             Sources =
                 chunks.ToList()
         };
-        });
+        }));
     }
 }

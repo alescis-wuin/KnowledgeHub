@@ -26,7 +26,8 @@ public sealed class VectorSearchService : IVectorSearchService
         int topK = 5,
         CancellationToken cancellationToken = default)
     {
-        return await KnowledgeHubActivities.TraceAsync<IReadOnlyCollection<VectorSearchResultDto>>(
+        return await KnowledgeHubMetrics.MeasureRetrievalAsync(() =>
+            KnowledgeHubActivities.TraceAsync<IReadOnlyCollection<VectorSearchResultDto>>(
             "vector_search.search", async () =>
         {
         System.Diagnostics.Activity.Current?.SetTag("kh.retrieval.top_k", topK);
@@ -64,7 +65,7 @@ public sealed class VectorSearchService : IVectorSearchService
             .ToList());
         System.Diagnostics.Activity.Current?.SetTag("kh.retrieval.result_count", ranked.Count);
         return ranked;
-        }, cancellationToken);
+        }, cancellationToken), cancellationToken);
     }
 
     private static double CosineSimilarity(float[] vectorA, float[] vectorB)
