@@ -2,6 +2,7 @@ using KnowledgeHub.Api.Telemetry;
 using KnowledgeHub.Application.Telemetry;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -40,6 +41,21 @@ public static class TracingServiceCollectionExtensions
             }
         }
 
+        // OTLP/HTTP requires an explicit signal-specific path; gRPC remains default.
+        var protocol = configuration["Tracing:OtlpProtocol"] switch
+        {
+            null or "" or "grpc" => OtlpExportProtocol.Grpc,
+            "http/protobuf" => OtlpExportProtocol.HttpProtobuf,
+            _ => throw new InvalidOperationException(
+                "Tracing:OtlpProtocol must be grpc or http/protobuf.")
+        };
+        if (endpoint is not null && protocol == OtlpExportProtocol.HttpProtobuf &&
+            endpoint.AbsolutePath != "/v1/traces")
+        {
+            throw new InvalidOperationException(
+                "Tracing:OtlpEndpoint must end with /v1/traces for http/protobuf.");
+        }
+
         // Propagate W3C tracecontext only; never forward caller-supplied baggage.
         Sdk.SetDefaultTextMapPropagator(new TraceContextPropagator());
 
@@ -63,7 +79,11 @@ public static class TracingServiceCollectionExtensions
                 // Export is disabled by default. The operator must opt in.
                 if (endpoint is not null)
                 {
-                    tracing.AddOtlpExporter(options => options.Endpoint = endpoint);
+                    tracing.AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = endpoint;
+                        options.Protocol = protocol;
+                    });
                 }
             });
         return services;

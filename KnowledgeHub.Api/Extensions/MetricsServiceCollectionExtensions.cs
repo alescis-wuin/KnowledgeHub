@@ -1,5 +1,6 @@
 using KnowledgeHub.Application.Telemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 
 namespace KnowledgeHub.Api.Extensions;
@@ -37,6 +38,28 @@ public static class MetricsServiceCollectionExtensions
             }
         }
 
+        var protocol = configuration["Metrics:OtlpProtocol"] switch
+        {
+            null or "" or "grpc" => OtlpExportProtocol.Grpc,
+            "http/protobuf" => OtlpExportProtocol.HttpProtobuf,
+            _ => throw new InvalidOperationException(
+                "Metrics:OtlpProtocol must be grpc or http/protobuf.")
+        };
+        if (endpoint is not null && protocol == OtlpExportProtocol.HttpProtobuf &&
+            endpoint.AbsolutePath != "/v1/metrics")
+        {
+            throw new InvalidOperationException(
+                "Metrics:OtlpEndpoint must end with /v1/metrics for http/protobuf.");
+        }
+
+        var exportInterval = configuration.GetValue<int?>("Metrics:ExportIntervalMilliseconds")
+            ?? 60000;
+        if (exportInterval is < 1000 or > 60000)
+        {
+            throw new InvalidOperationException(
+                "Metrics:ExportIntervalMilliseconds must be between 1000 and 60000.");
+        }
+
         services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService("KnowledgeHub.Api"))
             .WithMetrics(metrics =>
@@ -46,7 +69,13 @@ public static class MetricsServiceCollectionExtensions
                 // Export is off unless the operator supplies an explicit safe endpoint.
                 if (endpoint is not null)
                 {
-                    metrics.AddOtlpExporter(options => options.Endpoint = endpoint);
+                    metrics.AddOtlpExporter((options, readerOptions) =>
+                    {
+                        options.Endpoint = endpoint;
+                        options.Protocol = protocol;
+                        readerOptions.PeriodicExportingMetricReaderOptions
+                            .ExportIntervalMilliseconds = exportInterval;
+                    });
                 }
             });
 
