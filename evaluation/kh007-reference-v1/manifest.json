@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "corpus_id": "kh007-synthetic-v1",
+  "files": {
+    "corpus.json": "190ae39a787249285ab2bcc9edda9ad53f7925a7fadb688ae04768ee80691cdc",
+    "cases.json": "5c13cdaa51193a4d6bf9dd7442b22cee1ae5bdfd7707dc9dd893be90e6b25cc2",
+    "oracle-predictions.json": "56a07412baa9431d728b248bad17da3f2bc9d1b63874596d61c9bf14f54baeb1"
+  }
+}

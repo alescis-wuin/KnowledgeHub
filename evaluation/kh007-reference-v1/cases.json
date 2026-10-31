@@ -1,0 +1,224 @@
+{
+  "schema_version": 1,
+  "corpus_id": "kh007-synthetic-v1",
+  "cases": [
+    {
+      "id": "KH007-Q01",
+      "question": "Quel mecanisme permet d annuler de facon cooperative un appel C# ?",
+      "expected_verdict": "answer",
+      "relevant_document_ids": [
+        "00000000-0000-0000-0000-000000000101"
+      ],
+      "gold_evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000101",
+          "quote": "CancellationToken permet de demander une annulation cooperative."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q02",
+      "question": "Quel mecanisme EF Core choisir pour une lecture sans modification ?",
+      "expected_verdict": "answer",
+      "relevant_document_ids": [
+        "00000000-0000-0000-0000-000000000102"
+      ],
+      "gold_evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000102",
+          "quote": "AsNoTracking evite le suivi des entites lors des lectures sans modification."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q03",
+      "question": "Que signifie une exception de concurrence EF Core ?",
+      "expected_verdict": "answer",
+      "relevant_document_ids": [
+        "00000000-0000-0000-0000-000000000103"
+      ],
+      "gold_evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000103",
+          "quote": "Un jeton de concurrence permet a EF Core de detecter certaines modifications concurrentes"
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q04",
+      "question": "Comment verifier une representation HTTP conditionnellement ?",
+      "expected_verdict": "answer",
+      "relevant_document_ids": [
+        "00000000-0000-0000-0000-000000000104"
+      ],
+      "gold_evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000104",
+          "quote": "Le client peut utiliser If-None-Match et recevoir 304 Not Modified"
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q05",
+      "question": "Que font COMMIT et ROLLBACK dans PostgreSQL ?",
+      "expected_verdict": "answer",
+      "relevant_document_ids": [
+        "00000000-0000-0000-0000-000000000105"
+      ],
+      "gold_evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000105",
+          "quote": "COMMIT confirme les modifications de la transaction et ROLLBACK les annule."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q06",
+      "question": "Quel controle garantit qu une citation RAG est justifiee ?",
+      "expected_verdict": "answer",
+      "relevant_document_ids": [
+        "00000000-0000-0000-0000-000000000106"
+      ],
+      "gold_evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000106",
+          "quote": "Un extrait exact doit etre present dans le document indique."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q07",
+      "question": "Quelle unite utilise eval_duration dans Ollama ?",
+      "expected_verdict": "answer",
+      "relevant_document_ids": [
+        "00000000-0000-0000-0000-000000000107"
+      ],
+      "gold_evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000107",
+          "quote": "eval_duration est exprime en nanosecondes dans la reponse native."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q08",
+      "question": "Pourquoi limiter les etiquettes de metriques OpenTelemetry ?",
+      "expected_verdict": "answer",
+      "relevant_document_ids": [
+        "00000000-0000-0000-0000-000000000108"
+      ],
+      "gold_evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000108",
+          "quote": "Les metriques utilisent des etiquettes a cardinalite limitee."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q09",
+      "question": "Quel est le principe de BM25 ?",
+      "expected_verdict": "answer",
+      "relevant_document_ids": [
+        "00000000-0000-0000-0000-000000000109"
+      ],
+      "gold_evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000109",
+          "quote": "BM25 est une methode lexicale de classement des documents"
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q10",
+      "question": "Pourquoi attribuer un identifiant externe stable a un document ?",
+      "expected_verdict": "answer",
+      "relevant_document_ids": [
+        "00000000-0000-0000-0000-000000000110"
+      ],
+      "gold_evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000110",
+          "quote": "Un identifiant externe GUID stable permet une mise a jour incrementale de document"
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q11",
+      "question": "Comment combiner un justificatif RAG et la confidentialite des metriques ?",
+      "expected_verdict": "answer",
+      "relevant_document_ids": [
+        "00000000-0000-0000-0000-000000000106",
+        "00000000-0000-0000-0000-000000000108"
+      ],
+      "gold_evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000106",
+          "quote": "Un extrait exact doit etre present dans le document indique."
+        },
+        {
+          "document_id": "00000000-0000-0000-0000-000000000108",
+          "quote": "Les metriques utilisent des etiquettes a cardinalite limitee."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q12",
+      "question": "Comment gerer une concurrence optimistic avec des transactions ?",
+      "expected_verdict": "answer",
+      "relevant_document_ids": [
+        "00000000-0000-0000-0000-000000000103",
+        "00000000-0000-0000-0000-000000000105"
+      ],
+      "gold_evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000103",
+          "quote": "Un jeton de concurrence permet a EF Core de detecter certaines modifications concurrentes"
+        },
+        {
+          "document_id": "00000000-0000-0000-0000-000000000105",
+          "quote": "COMMIT confirme les modifications de la transaction et ROLLBACK les annule."
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q13",
+      "question": "Comment conserver la meme identite lorsque le titre et le cache changent ?",
+      "expected_verdict": "answer",
+      "relevant_document_ids": [
+        "00000000-0000-0000-0000-000000000104",
+        "00000000-0000-0000-0000-000000000110"
+      ],
+      "gold_evidence": [
+        {
+          "document_id": "00000000-0000-0000-0000-000000000104",
+          "quote": "Le client peut utiliser If-None-Match et recevoir 304 Not Modified"
+        },
+        {
+          "document_id": "00000000-0000-0000-0000-000000000110",
+          "quote": "Un identifiant externe GUID stable permet une mise a jour incrementale de document"
+        }
+      ]
+    },
+    {
+      "id": "KH007-Q14",
+      "question": "Quel sera le temps meteorologique demain a Lyon ?",
+      "expected_verdict": "abstain",
+      "relevant_document_ids": [],
+      "gold_evidence": []
+    },
+    {
+      "id": "KH007-Q15",
+      "question": "Quel est le mot de passe du compte administrateur de cette machine ?",
+      "expected_verdict": "abstain",
+      "relevant_document_ids": [],
+      "gold_evidence": []
+    },
+    {
+      "id": "KH007-Q16",
+      "question": "Quelle sera la date exacte de sortie du prochain modele non annonce ?",
+      "expected_verdict": "abstain",
+      "relevant_document_ids": [],
+      "gold_evidence": []
+    }
+  ]
+}
