@@ -32,6 +32,17 @@ public sealed class CorpusImporter
         ArgumentNullException.ThrowIfNull(corpus.Tags);
         ArgumentNullException.ThrowIfNull(corpus.Documents);
 
+        // Reject collisions before creating any metadata or document.
+        var collision = corpus.Documents
+            .Where(document => document.Id != Guid.Empty)
+            .GroupBy(document => document.Id)
+            .FirstOrDefault(group => group.Count() > 1);
+        if (collision is not null)
+        {
+            throw new InvalidOperationException(
+                $"Duplicate corpus document ID: {collision.Key}.");
+        }
+
         var categories = new Dictionary<string, Guid>(StringComparer.Ordinal);
         foreach (var item in await GetAsync<List<CategoryDto>>(
                      "api/categories", cancellationToken))
@@ -105,16 +116,26 @@ public sealed class CorpusImporter
         }
 
         var existing = new Dictionary<string, Guid>(StringComparer.Ordinal);
-        foreach (var document in await GetAsync<List<DocumentDto>>(
-                     "api/documents", cancellationToken))
+        // Legacy-only lookup. Explicit GUID imports never match by title.
+        if (corpus.Documents.Any(document => document.Id == Guid.Empty))
         {
-            existing.TryAdd(document.Title, document.Id);
+            foreach (var document in await GetAsync<List<DocumentDto>>(
+                         "api/documents", cancellationToken))
+            {
+                // A legacy title must not match a GUID-managed document.
+                if (document.ExternalId is null)
+                {
+                    existing.TryAdd(document.Title, document.Id);
+                }
+            }
         }
 
         var createdCount = 0;
         var repaired = 0;
         var unchanged = 0;
         var ignored = 0;
+        var updatedContent = 0;
+        var updatedMetadata = 0;
 
         foreach (var item in corpus.Documents)
         {
@@ -127,16 +148,6 @@ public sealed class CorpusImporter
             }
 
             var title = item.Title.Trim();
-            if (existing.TryGetValue(title, out var id))
-            {
-                var wasRepaired = await PostAsync<bool>(
-                    $"api/documents/{id:D}/ensure-index", new { },
-                    cancellationToken);
-                if (wasRepaired) repaired++;
-                else unchanged++;
-                continue;
-            }
-
             Guid? categoryId = categories.TryGetValue(
                 item.CategoryName?.Trim() ?? string.Empty, out var category)
                 ? category : null;
@@ -152,6 +163,57 @@ public sealed class CorpusImporter
                 .Select(value => value!.Value)
                 .Distinct()
                 .ToList();
+
+            if (item.Id != Guid.Empty)
+            {
+                var importResult = await PostAsync<ImportDocumentResultDto>(
+                    "api/documents/import",
+                    new CreateDocumentDto
+                    {
+                        ExternalId = item.Id,
+                        Title = title,
+                        Content = item.Content,
+                        Summary = item.Summary,
+                        SearchKeywords = item.SearchKeywords,
+                        CategoryId = categoryId,
+                        SourceId = sourceId,
+                        TagIds = tagIds
+                    },
+                    cancellationToken);
+
+                switch (importResult.Outcome)
+                {
+                    case ImportDocumentOutcome.Created:
+                        createdCount++;
+                        break;
+                    case ImportDocumentOutcome.UpdatedContent:
+                        updatedContent++;
+                        break;
+                    case ImportDocumentOutcome.UpdatedMetadata:
+                        updatedMetadata++;
+                        break;
+                    case ImportDocumentOutcome.RepairedIndex:
+                        repaired++;
+                        break;
+                    case ImportDocumentOutcome.Unchanged:
+                        unchanged++;
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unexpected import outcome.");
+                }
+
+                continue;
+            }
+
+            if (existing.TryGetValue(title, out var id))
+            {
+                var wasRepaired = await PostAsync<bool>(
+                    $"api/documents/{id:D}/ensure-index", new { },
+                    cancellationToken);
+                if (wasRepaired) repaired++;
+                else unchanged++;
+                continue;
+            }
 
             var result = await PostAsync<DocumentDto>(
                 "api/documents",
@@ -173,7 +235,8 @@ public sealed class CorpusImporter
 
         return new CorpusImportReport(
             createdCount, repaired, unchanged, ignored,
-            categoriesCreated, sourcesCreated, tagsCreated);
+            categoriesCreated, sourcesCreated, tagsCreated,
+            updatedContent, updatedMetadata);
     }
 
     private Task<T> GetAsync<T>(
@@ -239,4 +302,6 @@ public sealed record CorpusImportReport(
     int Ignored,
     int CategoriesCreated,
     int SourcesCreated,
-    int TagsCreated);
+    int TagsCreated,
+    int UpdatedContent = 0,
+    int UpdatedMetadata = 0);

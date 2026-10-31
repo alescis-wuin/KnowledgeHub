@@ -79,6 +79,19 @@ public class DocumentsController : ControllerBase
             response);
     }
 
+    [HttpPost("import")]
+    public async Task<IActionResult> Import(
+        CreateDocumentDto dto,
+        CancellationToken cancellationToken)
+    {
+        var result = await _service.ImportAsync(dto, cancellationToken);
+
+        return Ok(ApiResponses.Success(
+            result,
+            StatusCodes.Status200OK,
+            HttpContext.TraceIdentifier));
+    }
+
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(
         Guid id,

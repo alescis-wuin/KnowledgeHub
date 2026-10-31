@@ -14,6 +14,14 @@ public class KnowledgeDocumentConfiguration
 
         builder.HasKey(x => x.Id);
 
+        builder.Property(x => x.ExternalId)
+            .HasColumnType("uuid");
+
+        builder.HasIndex(x => x.ExternalId).IsUnique();
+
+        builder.Property(x => x.ContentSha256)
+            .HasMaxLength(64);
+
         builder.Property(x => x.Title)
             .IsRequired()
             .HasMaxLength(300);

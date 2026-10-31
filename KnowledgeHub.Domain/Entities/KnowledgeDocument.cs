@@ -1,10 +1,17 @@
-﻿namespace KnowledgeHub.Domain.Entities;
+﻿using System.Security.Cryptography;
+using System.Text;
+
+namespace KnowledgeHub.Domain.Entities;
 
 public class KnowledgeDocument
 {
     public Guid Id { get; private set; }
 
     public string Title { get; private set; } = string.Empty;
+
+    public Guid? ExternalId { get; private set; }
+
+    public string? ContentSha256 { get; private set; }
 
     public string Content { get; private set; } = string.Empty;
 
@@ -89,6 +96,22 @@ public class KnowledgeDocument
         CreatedAt = DateTime.UtcNow;
     }
 
+    public void AssignExternalId(Guid externalId)
+    {
+        if (externalId == Guid.Empty)
+            throw new ArgumentException("External identity cannot be empty.", nameof(externalId));
+
+        if (ExternalId.HasValue && ExternalId.Value != externalId)
+            throw new InvalidOperationException("External identity is immutable.");
+
+        ExternalId = externalId;
+    }
+
+    public static string ComputeContentSha256(string content) =>
+        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(
+            (content ?? throw new ArgumentNullException(nameof(content))).Trim())))
+            .ToLowerInvariant();
+
     public void Update(
         string title,
         string content)
@@ -103,7 +126,26 @@ public class KnowledgeDocument
 
         Title = title.Trim();
         Content = content.Trim();
+        ContentSha256 = ComputeContentSha256(Content);
 
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateMetadata(
+        string title,
+        Guid? categoryId,
+        Guid? sourceId,
+        string? summary,
+        string? searchKeywords)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            throw new ArgumentException("Title is required.", nameof(title));
+
+        Title = title.Trim();
+        CategoryId = categoryId;
+        SourceId = sourceId;
+        Summary = summary;
+        SearchKeywords = searchKeywords;
         UpdatedAt = DateTime.UtcNow;
     }
 

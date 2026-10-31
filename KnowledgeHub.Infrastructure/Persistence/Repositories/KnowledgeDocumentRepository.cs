@@ -50,6 +50,21 @@ public class KnowledgeDocumentRepository : IKnowledgeDocumentRepository
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
+    public async Task<KnowledgeDocument?> GetByExternalIdAsync(
+        Guid externalId,
+        CancellationToken cancellationToken = default)
+    {
+        if (externalId == Guid.Empty)
+            throw new ArgumentException("External identity cannot be empty.", nameof(externalId));
+
+        return await _context.Documents
+            .AsSplitQuery()
+            .Include(x => x.Chunks)
+            .Include(x => x.DocumentTags)
+                .ThenInclude(x => x.Tag)
+            .FirstOrDefaultAsync(x => x.ExternalId == externalId, cancellationToken);
+    }
+
     // Evaluates legacy index completeness without loading embedding arrays.
     public async Task<bool> HasCompleteIndexAsync(
         Guid id,
