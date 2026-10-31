@@ -41,8 +41,12 @@ public sealed class RagService
         string question,
         CancellationToken cancellationToken = default)
     {
-        return await KnowledgeHubActivities.TraceAsync("rag.ask", async () =>
+        var metricsTimer = Stopwatch.StartNew();
+        var metricsOutcome = "error";
+        try
         {
+            return await KnowledgeHubActivities.TraceAsync("rag.ask", async () =>
+            {
         var stopwatch = Stopwatch.StartNew();
 
         var context = await _contextBuilder.BuildAsync(
@@ -54,6 +58,7 @@ public sealed class RagService
         if (context.Sources.Count == 0 ||
             string.IsNullOrWhiteSpace(context.Context))
         {
+            metricsOutcome = "no_context";
             stopwatch.Stop();
 
             _logger.LogInformation(SkippedEvent,
@@ -69,10 +74,13 @@ public sealed class RagService
             };
         }
 
-        var answer = await KnowledgeHubActivities.TraceAsync<string>(
-            "rag.generate",
-            () => _chatCompletionService.GenerateAnswerAsync(
-                question, context.Context, cancellationToken),
+        var answer = await KnowledgeHubMetrics.MeasureStageAsync(
+            "generate",
+            () => KnowledgeHubActivities.TraceAsync<string>(
+                "rag.generate",
+                () => _chatCompletionService.GenerateAnswerAsync(
+                    question, context.Context, cancellationToken),
+                cancellationToken),
             cancellationToken);
 
         stopwatch.Stop();
@@ -82,6 +90,7 @@ public sealed class RagService
             context.Sources.Count,
             Math.Round(stopwatch.Elapsed.TotalMilliseconds, 2));
 
+        metricsOutcome = "ok";
         return new AskQuestionResponseDto
         {
             Question = question,
@@ -97,7 +106,18 @@ public sealed class RagService
                 })
                 .ToList()
         };
-        }, cancellationToken);
+            }, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            metricsOutcome = "cancelled";
+            throw;
+        }
+        finally
+        {
+            KnowledgeHubMetrics.RecordRagRequest(
+                metricsOutcome, metricsTimer.Elapsed.TotalMilliseconds);
+        }
     }
 
 

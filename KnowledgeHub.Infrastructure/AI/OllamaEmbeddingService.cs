@@ -20,7 +20,8 @@ public class OllamaEmbeddingService
             string text,
             CancellationToken cancellationToken = default)
     {
-        return await KnowledgeHubActivities.TraceAsync("ollama.embed", async () =>
+        return await KnowledgeHubMetrics.MeasureOllamaAsync("embedding", () =>
+            KnowledgeHubActivities.TraceAsync("ollama.embed", async () =>
         {
         var response =
             await _httpClient.PostAsJsonAsync(
@@ -42,7 +43,7 @@ public class OllamaEmbeddingService
 
         return result?.Embedding
             ?? [];
-        }, cancellationToken);
+        }, cancellationToken), cancellationToken);
     }
 
     private sealed class OllamaEmbeddingResponse

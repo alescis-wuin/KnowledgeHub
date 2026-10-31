@@ -25,7 +25,8 @@ public sealed class OllamaChatCompletionService
             CancellationToken cancellationToken =
                 default)
     {
-        return await KnowledgeHubActivities.TraceAsync("ollama.chat", async () =>
+        return await KnowledgeHubMetrics.MeasureOllamaAsync("chat", () =>
+            KnowledgeHubActivities.TraceAsync("ollama.chat", async () =>
         {
         var request =
             new OllamaChatRequest
@@ -116,7 +117,7 @@ QUESTION
         }
 
         return result.Message.Content;
-        }, cancellationToken);
+        }, cancellationToken), cancellationToken);
     }
 
     private sealed class OllamaChatRequest

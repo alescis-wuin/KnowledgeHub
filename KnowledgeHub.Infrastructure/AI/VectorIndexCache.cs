@@ -50,10 +50,15 @@ public sealed class VectorIndexCache : IVectorIndexCacheInvalidator, IDisposable
             {
                 System.Diagnostics.Activity.Current?.SetTag("kh.cache.hit", true);
                 System.Diagnostics.Activity.Current?.SetTag("kh.cache.entry_count", cached.Count);
+                KnowledgeHubMetrics.RecordCacheLookup(hit: true);
                 return cached;
             }
 
-            var entries = await context.ChunkEmbeddings
+            KnowledgeHubMetrics.RecordCacheLookup(hit: false);
+            var started = System.Diagnostics.Stopwatch.GetTimestamp();
+            try
+            {
+                var entries = await context.ChunkEmbeddings
                 .AsNoTracking()
                 .Select(embedding => new VectorIndexEntry(
                     embedding.ChunkId,
@@ -66,7 +71,23 @@ public sealed class VectorIndexCache : IVectorIndexCacheInvalidator, IDisposable
             _cache.Set(CacheKey, entries, Lifetime);
             System.Diagnostics.Activity.Current?.SetTag("kh.cache.hit", false);
             System.Diagnostics.Activity.Current?.SetTag("kh.cache.entry_count", entries.Length);
-            return entries;
+                KnowledgeHubMetrics.RecordCacheLoad("ok",
+                    System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds,
+                    entries.Length);
+                return entries;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                KnowledgeHubMetrics.RecordCacheLoad("cancelled",
+                    System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds, 0);
+                throw;
+            }
+            catch
+            {
+                KnowledgeHubMetrics.RecordCacheLoad("error",
+                    System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds, 0);
+                throw;
+            }
         }
         finally
         {
@@ -83,6 +104,7 @@ public sealed class VectorIndexCache : IVectorIndexCacheInvalidator, IDisposable
         try
         {
             _cache.Remove(CacheKey);
+            KnowledgeHubMetrics.RecordCacheInvalidation();
         }
         finally
         {
