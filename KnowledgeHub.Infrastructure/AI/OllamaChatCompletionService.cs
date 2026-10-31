@@ -116,6 +116,7 @@ QUESTION
                 "Ollama chat did not return a usable answer.");
         }
 
+        OllamaNativeTelemetry.Record("chat", result.NativeFields);
         return result.Message.Content;
         }, cancellationToken), cancellationToken);
     }
@@ -203,5 +204,8 @@ QUESTION
             set;
         }
         = new();
+
+        [JsonExtensionData]
+        public Dictionary<string, JsonElement>? NativeFields { get; set; }
     }
 }

@@ -25,7 +25,15 @@ public sealed class SafeTraceProcessor : BaseProcessor<Activity>
         "kh.embedding.dimension",
         "kh.document.chunk_count",
         "kh.document.reindexed",
-        "kh.import.outcome"
+        "kh.import.outcome",
+        "kh.ollama.prompt_tokens",
+        "kh.ollama.cached_prompt_tokens",
+        "kh.ollama.output_tokens",
+        "kh.ollama.total_duration_ms",
+        "kh.ollama.load_duration_ms",
+        "kh.ollama.prompt_eval_duration_ms",
+        "kh.ollama.eval_duration_ms",
+        "kh.ollama.output_tokens_per_second"
     };
 
     private static readonly HashSet<string> AllowedOperations = new(StringComparer.Ordinal)

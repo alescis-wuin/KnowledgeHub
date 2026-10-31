@@ -42,6 +42,16 @@ public static class KnowledgeHubMetrics
     private static readonly Histogram<double> OllamaDuration =
         Meter.CreateHistogram<double>("kh.ollama.duration", unit: "ms");
 
+    // Native Ollama values are distinct from client-side wall-clock duration.
+    // Each record is one response, with only fixed low-cardinality dimensions.
+    private static readonly Histogram<double> OllamaNativeDuration =
+        Meter.CreateHistogram<double>("kh.ollama.native.duration", unit: "ms");
+    private static readonly Histogram<long> OllamaNativeTokens =
+        Meter.CreateHistogram<long>("kh.ollama.native.tokens", unit: "{token}");
+    private static readonly Histogram<double> OllamaNativeThroughput =
+        Meter.CreateHistogram<double>(
+            "kh.ollama.native.output.tokens_per_second", unit: "{token}/s");
+
     public static void RecordRagRequest(string outcome, double elapsedMilliseconds)
     {
         outcome = RequireRagOutcome(outcome);
@@ -132,12 +142,7 @@ public static class KnowledgeHubMetrics
         Func<Task<T>> action,
         CancellationToken cancellationToken = default)
     {
-        operation = operation switch
-        {
-            "chat" => "chat",
-            "embedding" => "embedding",
-            _ => throw new ArgumentOutOfRangeException(nameof(operation))
-        };
+        operation = RequireOllamaOperation(operation);
         return ObserveAsync(action, cancellationToken, (outcome, elapsed) =>
         {
             OllamaRequests.Add(1,
@@ -147,6 +152,58 @@ public static class KnowledgeHubMetrics
                 new KeyValuePair<string, object?>("operation", operation),
                 new KeyValuePair<string, object?>("outcome", outcome));
         });
+    }
+
+    /// <summary>
+    /// Records optional native Ollama usage for one *successful* API response.
+    /// Missing data is not reported as zero; malformed values are ignored by
+    /// the caller before creating this numeric-only record.
+    /// </summary>
+    public static void RecordOllamaNativeUsage(string operation, OllamaNativeUsage usage)
+    {
+        operation = RequireOllamaOperation(operation);
+        RecordNativeDuration(operation, "total", usage.TotalDurationNanoseconds);
+        RecordNativeDuration(operation, "load", usage.LoadDurationNanoseconds);
+        RecordNativeDuration(operation, "prompt_eval",
+            usage.PromptEvaluationDurationNanoseconds);
+        RecordNativeDuration(operation, "eval", usage.GenerationDurationNanoseconds);
+
+        RecordNativeTokens(operation, "prompt", usage.PromptTokenCount);
+        RecordNativeTokens(operation, "cached_prompt", usage.CachedPromptTokenCount);
+        RecordNativeTokens(operation, "output", usage.OutputTokenCount);
+
+        // Ollama defines output throughput as eval_count / eval_duration (ns).
+        // Do not estimate it when either native input is absent or zero.
+        if (operation == "chat" && usage.OutputTokenCount is > 0 &&
+            usage.GenerationDurationNanoseconds is > 0)
+        {
+            var tokensPerSecond = (double)usage.OutputTokenCount.Value *
+                1_000_000_000d / usage.GenerationDurationNanoseconds.Value;
+            OllamaNativeThroughput.Record(tokensPerSecond,
+                new KeyValuePair<string, object?>("operation", operation));
+        }
+    }
+
+    private static void RecordNativeDuration(
+        string operation, string phase, long? nanoseconds)
+    {
+        if (nanoseconds is >= 0)
+        {
+            OllamaNativeDuration.Record(nanoseconds.Value / 1_000_000d,
+                new KeyValuePair<string, object?>("operation", operation),
+                new KeyValuePair<string, object?>("phase", phase));
+        }
+    }
+
+    private static void RecordNativeTokens(
+        string operation, string kind, long? count)
+    {
+        if (count is >= 0)
+        {
+            OllamaNativeTokens.Record(count.Value,
+                new KeyValuePair<string, object?>("operation", operation),
+                new KeyValuePair<string, object?>("kind", kind));
+        }
     }
 
     private static async Task<T> ObserveAsync<T>(
@@ -173,6 +230,13 @@ public static class KnowledgeHubMetrics
             record(outcome, Stopwatch.GetElapsedTime(started).TotalMilliseconds);
         }
     }
+
+    private static string RequireOllamaOperation(string operation) => operation switch
+    {
+        "chat" => "chat",
+        "embedding" => "embedding",
+        _ => throw new ArgumentOutOfRangeException(nameof(operation))
+    };
 
     private static string RequireStage(string stage) => stage switch
     {

@@ -1,5 +1,7 @@
 using KnowledgeHub.Application.Telemetry;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using KnowledgeHub.Application.Interfaces;
 
 namespace KnowledgeHub.Infrastructure.AI;
@@ -23,7 +25,7 @@ public class OllamaEmbeddingService
         return await KnowledgeHubMetrics.MeasureOllamaAsync("embedding", () =>
             KnowledgeHubActivities.TraceAsync("ollama.embed", async () =>
         {
-        var response =
+        using var response =
             await _httpClient.PostAsJsonAsync(
                 "/api/embeddings",
                 new
@@ -41,6 +43,11 @@ public class OllamaEmbeddingService
                     OllamaEmbeddingResponse>(
                         cancellationToken);
 
+        if (result is not null)
+        {
+            OllamaNativeTelemetry.Record("embedding", result.NativeFields);
+        }
+
         return result?.Embedding
             ?? [];
         }, cancellationToken), cancellationToken);
@@ -54,5 +61,8 @@ public class OllamaEmbeddingService
             set;
         }
         = [];
+
+        [JsonExtensionData]
+        public Dictionary<string, JsonElement>? NativeFields { get; set; }
     }
 }
