@@ -1,6 +1,9 @@
 ﻿using KnowledgeHub.Application.Interfaces;
+using KnowledgeHub.Application.Services;
+using KnowledgeHub.Application.Verification;
 using KnowledgeHub.Domain.Interfaces;
 using KnowledgeHub.Infrastructure.AI;
+using KnowledgeHub.Infrastructure.Persistence;
 using KnowledgeHub.Infrastructure.Persistence.Context;
 using KnowledgeHub.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -77,6 +80,29 @@ public static class InfrastructureServiceCollectionExtensions
             EmbeddingCacheWarmupService>();
 
         services.AddScoped<RagService>();
+
+        services.AddScoped<IEvidenceSnapshotProvider, EvidenceSnapshotProvider>();
+
+        services.AddHttpClient<IClaimProposalGenerator, OllamaClaimProposalGenerator>(
+            client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:11434");
+                client.Timeout = TimeSpan.FromMinutes(3);
+            });
+
+        services.AddScoped(provider => new VerifiedVerdictService(
+            provider.GetRequiredService<IEvidenceSnapshotProvider>(),
+            provider.GetService<IQualifiedEvidenceAssessor>(),
+            configuration["Verification:TrustedSemanticPolicyId"] ?? string.Empty));
+
+        services.AddScoped(provider => new VerifiedRagService(
+            provider.GetRequiredService<IVectorSearchService>(),
+            provider.GetRequiredService<IEvidenceSnapshotProvider>(),
+            provider.GetRequiredService<IClaimProposalGenerator>(),
+            provider.GetRequiredService<VerifiedVerdictService>(),
+            provider.GetService<IQualifiedEvidenceAssessor>() is not null &&
+                !string.IsNullOrWhiteSpace(
+                    configuration["Verification:TrustedSemanticPolicyId"])));
 
         return services;
     }
