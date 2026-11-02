@@ -1,4 +1,5 @@
 ﻿using KnowledgeHub.Domain.Entities;
+using KnowledgeHub.Infrastructure.Persistence.Configurations.Workspaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace KnowledgeHub.Infrastructure.Persistence.Context;
@@ -33,8 +34,11 @@ public class KnowledgeDbContext : DbContext
     protected override void OnModelCreating(
         ModelBuilder modelBuilder)
     {
+        // Workspace maps are staged until KH-009.1.5 updates the snapshot.
+        // EF 9+ rejects MigrateAsync if model and migrations disagree.
         modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(KnowledgeDbContext).Assembly);
+            typeof(KnowledgeDbContext).Assembly,
+            type => !typeof(IWorkspaceStagedConfiguration).IsAssignableFrom(type));
         base.OnModelCreating(modelBuilder);
     }
 }
