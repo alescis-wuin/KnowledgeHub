@@ -1,5 +1,6 @@
 using KnowledgeHub.Application.Authorization;
 using KnowledgeHub.Application.Identity;
+using KnowledgeHub.Infrastructure.Persistence.Workspaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
@@ -70,7 +71,7 @@ public static class Kh009AuthenticationExtensions
             });
 
         services.AddAuthorization(WorkspaceAuthorizationPolicies.AddPolicies);
-        services.AddScoped<IWorkspaceAccessStore, DenyAllWorkspaceAccessStore>();
+        services.AddScoped<IWorkspaceAccessStore, EfWorkspaceAccessStore>();
         services.AddScoped<IAuthorizationHandler, WorkspaceAuthorizationHandler>();
         services.AddSingleton<IAuthorizationMiddlewareResultHandler, WorkspaceAuthorizationResultHandler>();
         return services;

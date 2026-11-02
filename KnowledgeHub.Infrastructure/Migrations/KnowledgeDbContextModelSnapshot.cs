@@ -22,6 +22,55 @@ namespace KnowledgeHub.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.AppUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("EmailNormalized")
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
+
+                    b.Property<bool>("EmailVerified")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Issuer")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .UseCollation("C");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .UseCollation("C");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Issuer", "Subject")
+                        .IsUnique()
+                        .HasDatabaseName("UX_AppUsers_OidcIdentity");
+
+                    b.ToTable("AppUsers", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_AppUsers_DisplayNameNotBlank", "length(btrim(\"DisplayName\")) > 0");
+
+                            t.HasCheckConstraint("CK_AppUsers_IdentityNotBlank", "length(btrim(\"Issuer\")) > 0 AND length(btrim(\"Subject\")) > 0");
+
+                            t.HasCheckConstraint("CK_AppUsers_VerifiedEmail", "NOT \"EmailVerified\" OR \"EmailNormalized\" IS NOT NULL");
+                        });
+                });
+
             modelBuilder.Entity("KnowledgeHub.Domain.Entities.Category", b =>
                 {
                     b.Property<Guid>("Id")
@@ -68,7 +117,6 @@ namespace KnowledgeHub.Infrastructure.Migrations
             modelBuilder.Entity("KnowledgeHub.Domain.Entities.DocumentChunk", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<int>("ChunkIndex")
@@ -132,6 +180,7 @@ namespace KnowledgeHub.Infrastructure.Migrations
                         .HasColumnType("character varying(300)");
 
                     b.Property<DateTime?>("UpdatedAt")
+                        .IsConcurrencyToken()
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -200,6 +249,176 @@ namespace KnowledgeHub.Infrastructure.Migrations
                     b.ToTable("Tags", (string)null);
                 });
 
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.Workspace", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ArchivedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsVerifiedOrganization")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("SlugNormalized")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .UseCollation("C");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("SlugNormalized")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Workspaces_SlugNormalized");
+
+                    b.ToTable("Workspaces", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Workspaces_ArchivedAfterCreated", "\"ArchivedAtUtc\" IS NULL OR \"ArchivedAtUtc\" >= \"CreatedAtUtc\"");
+
+                            t.HasCheckConstraint("CK_Workspaces_NameNotBlank", "length(btrim(\"Name\")) > 0");
+
+                            t.HasCheckConstraint("CK_Workspaces_SlugFormat", "length(\"SlugNormalized\") BETWEEN 3 AND 80 AND \"SlugNormalized\" ~ '^[a-z0-9]+(-[a-z0-9]+)*$'");
+
+                            t.HasCheckConstraint("CK_Workspaces_VersionPositive", "\"Version\" >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceInvitation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("AcceptedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("AcceptedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EmailNormalized")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .UseCollation("C");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("InviterUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("RevokedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .UseCollation("C");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AcceptedByUserId");
+
+                    b.HasIndex("InviterUserId");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("UX_WorkspaceInvitations_TokenHash");
+
+                    b.HasIndex("WorkspaceId", "EmailNormalized");
+
+                    b.ToTable("WorkspaceInvitations", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_WorkspaceInvitations_AcceptedByConsistency", "(\"AcceptedAtUtc\" IS NULL) = (\"AcceptedByUserId\" IS NULL)");
+
+                            t.HasCheckConstraint("CK_WorkspaceInvitations_EmailNotBlank", "length(btrim(\"EmailNormalized\")) > 3 AND position('@' in \"EmailNormalized\") > 1");
+
+                            t.HasCheckConstraint("CK_WorkspaceInvitations_ExpiresLater", "\"ExpiresAtUtc\" > \"CreatedAtUtc\" AND \"ExpiresAtUtc\" <= \"CreatedAtUtc\" + INTERVAL '14 days'");
+
+                            t.HasCheckConstraint("CK_WorkspaceInvitations_NotAcceptedAndRevoked", "\"AcceptedAtUtc\" IS NULL OR \"RevokedAtUtc\" IS NULL");
+
+                            t.HasCheckConstraint("CK_WorkspaceInvitations_RoleNoOwner", "\"Role\" BETWEEN 0 AND 3");
+
+                            t.HasCheckConstraint("CK_WorkspaceInvitations_TokenHash", "\"TokenHash\" ~ '^[0-9a-f]{64}$'");
+
+                            t.HasCheckConstraint("CK_WorkspaceInvitations_VersionPositive", "\"Version\" >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceMember", b =>
+                {
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("JoinedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.HasKey("WorkspaceId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("WorkspaceMembers", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_WorkspaceMembers_OwnerMustBeActive", "\"Role\" <> 4 OR \"Status\" = 1");
+
+                            t.HasCheckConstraint("CK_WorkspaceMembers_ValidRole", "\"Role\" BETWEEN 0 AND 4");
+
+                            t.HasCheckConstraint("CK_WorkspaceMembers_ValidStatus", "\"Status\" BETWEEN 0 AND 2");
+
+                            t.HasCheckConstraint("CK_WorkspaceMembers_VersionPositive", "\"Version\" >= 1");
+                        });
+                });
+
             modelBuilder.Entity("KnowledgeHub.Domain.Entities.ChunkEmbedding", b =>
                 {
                     b.HasOne("KnowledgeHub.Domain.Entities.DocumentChunk", "Chunk")
@@ -256,6 +475,50 @@ namespace KnowledgeHub.Infrastructure.Migrations
                     b.Navigation("Document");
 
                     b.Navigation("Tag");
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.Workspace", b =>
+                {
+                    b.HasOne("KnowledgeHub.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceInvitation", b =>
+                {
+                    b.HasOne("KnowledgeHub.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AcceptedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("KnowledgeHub.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("InviterUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("KnowledgeHub.Domain.Entities.Workspace", null)
+                        .WithMany()
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceMember", b =>
+                {
+                    b.HasOne("KnowledgeHub.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("KnowledgeHub.Domain.Entities.Workspace", null)
+                        .WithMany()
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("KnowledgeHub.Domain.Entities.KnowledgeDocument", b =>

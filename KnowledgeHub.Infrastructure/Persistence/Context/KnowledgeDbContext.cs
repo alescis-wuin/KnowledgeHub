@@ -1,5 +1,4 @@
-﻿using KnowledgeHub.Domain.Entities;
-using KnowledgeHub.Infrastructure.Persistence.Configurations.Workspaces;
+using KnowledgeHub.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace KnowledgeHub.Infrastructure.Persistence.Context;
@@ -31,14 +30,21 @@ public class KnowledgeDbContext : DbContext
         ChunkEmbeddings =>
             Set<ChunkEmbedding>();
 
+    public DbSet<AppUser> AppUsers => Set<AppUser>();
+
+    public DbSet<Workspace> Workspaces => Set<Workspace>();
+
+    public DbSet<WorkspaceMember> WorkspaceMembers => Set<WorkspaceMember>();
+
+    public DbSet<WorkspaceInvitation> WorkspaceInvitations => Set<WorkspaceInvitation>();
+
     protected override void OnModelCreating(
         ModelBuilder modelBuilder)
     {
-        // Workspace maps are staged until KH-009.1.5 updates the snapshot.
-        // EF 9+ rejects MigrateAsync if model and migrations disagree.
+        // KH-009.1.5: include the validated workspace mappings together with
+        // their additive migration and EF Core model snapshot.
         modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(KnowledgeDbContext).Assembly,
-            type => !typeof(IWorkspaceStagedConfiguration).IsAssignableFrom(type));
+            typeof(KnowledgeDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
     }
 }

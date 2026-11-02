@@ -8,16 +8,16 @@ namespace KnowledgeHub.Tests.Unit.Workspaces;
 public sealed class Kh009WorkspaceModelTests
 {
     [Fact]
-    public void Production_model_excludes_staged_workspace_tables_until_migration()
+    public void Production_model_includes_workspace_tables_after_migration()
     {
         var options = new DbContextOptionsBuilder<KnowledgeDbContext>()
             .UseNpgsql("Host=localhost;Database=not_connected;Username=test;Password=test")
             .Options;
         using var db = new KnowledgeDbContext(options);
-        Assert.Null(db.Model.FindEntityType(typeof(Workspace)));
-        Assert.Null(db.Model.FindEntityType(typeof(WorkspaceMember)));
-        Assert.Null(db.Model.FindEntityType(typeof(WorkspaceInvitation)));
-        Assert.Null(db.Model.FindEntityType(typeof(AppUser)));
+        Assert.NotNull(db.Model.FindEntityType(typeof(Workspace)));
+        Assert.NotNull(db.Model.FindEntityType(typeof(WorkspaceMember)));
+        Assert.NotNull(db.Model.FindEntityType(typeof(WorkspaceInvitation)));
+        Assert.NotNull(db.Model.FindEntityType(typeof(AppUser)));
         Assert.NotNull(db.Model.FindEntityType(typeof(KnowledgeDocument)));
     }
 
