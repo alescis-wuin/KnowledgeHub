@@ -1,0 +1,1020 @@
+{
+  "contractId": "KnowledgeHub.Workspaces.API.v1",
+  "status": "KH009_0_BASELINE_NOT_IMPLEMENTED",
+  "date": "2026-11-02",
+  "basePath": "/api/v1/workspaces",
+  "targetFrameworks": [
+    "net10.0",
+    "net10.0-windows10.0.19041.0"
+  ],
+  "storage": "PostgreSQL 17 + Entity Framework Core 10 (one shared DB with WorkspaceId partition)",
+  "security": {
+    "type": "OAuth2/OIDC Bearer JWT access token",
+    "publicAuthEndpoints": [],
+    "serverEnforcement": [
+      "Validate iss/aud/exp/signature and scopes",
+      "Resolve sub to stable AppUser ID",
+      "Check ACTIVE membership for each workspace request",
+      "Roles must be server-enforced, never trusted from client",
+      "Require email_verified for invitation acceptance",
+      "Rate limit create/upload/invite/RAG",
+      "Fail closed on unknown tenant or unknown resource",
+      "No direct public media URLs for private assets"
+    ],
+    "roles": {
+      "OWNER": [
+        "ALL",
+        "TRANSFER_OWNERSHIP",
+        "ARCHIVE"
+      ],
+      "ADMIN": [
+        "MANAGE_BRANDING",
+        "MANAGE_HOME",
+        "MANAGE_MEMBERS",
+        "MANAGE_CONTENT"
+      ],
+      "EDITOR": [
+        "EDIT_CONTENT",
+        "MANAGE_HOME"
+      ],
+      "MEMBER": [
+        "READ",
+        "ASK_RAG"
+      ],
+      "VIEWER": [
+        "READ"
+      ]
+    },
+    "roleOrder": [
+      "VIEWER",
+      "MEMBER",
+      "EDITOR",
+      "ADMIN",
+      "OWNER"
+    ],
+    "identityKey": "(trusted issuer, stable subject) pair; email and client-provided role must not be used as authorization keys",
+    "authorizationSemantics": {
+      "noToken": "401 with WWW-Authenticate: Bearer",
+      "nonMember": "404 (do not disclose tenant existence)",
+      "memberInsufficientRole": "403",
+      "missingIfMatch": "428",
+      "staleIfMatch": "412",
+      "resourceInDifferentWorkspace": "404",
+      "archivedWorkspace": "deny until explicitly restored by authorized owner",
+      "roleSource": "active membership persisted on server, never JWT role claim alone",
+      "globalLegacyRoutes": "No access to tenant-owned data via /api/* legacy endpoints"
+    },
+    "unresolvedDecisions": [
+      "External OIDC issuer/audience selection for KH009.1; never hardcode credentials",
+      "Legacy data assignment must be reviewed before enforce migration",
+      "Content authorization policy for tenant-scoped embeddings endpoint"
+    ]
+  },
+  "conventions": {
+    "successEnvelope": {
+      "success": true,
+      "statusCode": 200,
+      "traceId": "correlation-id",
+      "data": "<T>",
+      "errors": []
+    },
+    "errorEnvelope": {
+      "success": false,
+      "statusCode": 403,
+      "traceId": "correlation-id",
+      "data": null,
+      "errors": [
+        "Accès refusé."
+      ]
+    },
+    "legacyRawJsonRoutes": [
+      "askClassicRagScoped",
+      "askVerifiedRagScoped",
+      "vectorSearchScoped",
+      "buildContextScoped",
+      "generateEmbeddingScoped"
+    ],
+    "binaryRoutes": [
+      "getAssetContent"
+    ],
+    "correlationHeader": "X-Correlation-ID",
+    "strongETagOnRead": [
+      "getWorkspace",
+      "getBranding",
+      "getHomepage",
+      "listMembers"
+    ],
+    "IfMatchRequiredFor": [
+      "updateWorkspace",
+      "archiveWorkspace",
+      "putBranding",
+      "putHomepage",
+      "changeRole"
+    ],
+    "httpStatusMeaning": {
+      "400": "Invalid payload",
+      "401": "Authentication required",
+      "403": "Insufficient role",
+      "404": "Unknown/inaccessible tenant or object",
+      "409": "Slug/asset/membership conflict",
+      "412": "ETag mismatch",
+      "413": "Media too large",
+      "415": "Unsupported media type",
+      "422": "Schema, contrast or business-rule failure",
+      "429": "Rate limited",
+      "428": "If-Match required but missing"
+    },
+    "idFields": "UUID format for workspaceId, documentId, assetId, invitationId and userId",
+    "assetCache": "private, no-store for private images; never embed access token in URL",
+    "tenantBehavior": "No silent fallback to legacy global endpoints when active workspace is missing."
+  },
+  "dtoExamples": {
+    "CreateWorkspaceRequestDto": {
+      "name": "Equipe Demo",
+      "slug": "equipe-demo",
+      "description": "Espace de démonstration"
+    },
+    "WorkspaceSummaryDto": {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "name": "Equipe Demo",
+      "slug": "equipe-demo",
+      "description": "Espace de démonstration",
+      "role": "OWNER",
+      "isVerifiedOrganization": false
+    },
+    "WorkspaceBrandingDto": {
+      "displayName": "Equipe Demo",
+      "logoAssetId": null,
+      "bannerAssetId": null,
+      "primaryColor": "#2563EB",
+      "secondaryColor": "#64748B",
+      "accentColor": "#0D9488",
+      "backgroundColor": "#F8FAFC",
+      "surfaceColor": "#FFFFFF",
+      "textColor": "#0F172A",
+      "textOnPrimaryColor": "#FFFFFF"
+    },
+    "WorkspaceHomepageDto": {
+      "headerTitle": "Bienvenue dans votre espace",
+      "subtitle": "Documentation et assistant IA",
+      "welcomeMessage": "Retrouvez vos informations en un seul endroit.",
+      "sections": [
+        {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "type": "TEXT",
+          "title": "Actualités",
+          "body": "Consultez les dernières annonces.",
+          "sortOrder": 0,
+          "links": []
+        }
+      ]
+    },
+    "WorkspaceAssetDto": {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "purpose": "LOGO",
+      "contentType": "image/png",
+      "length": 102400
+    },
+    "WorkspaceMemberDto": {
+      "userId": "44444444-4444-4444-8444-444444444444",
+      "displayName": "Membre Exemple",
+      "email": "demo@example.org",
+      "role": "EDITOR",
+      "status": "ACTIVE"
+    },
+    "CreateWorkspaceInvitationRequestDto": {
+      "email": "invite@example.org",
+      "role": "MEMBER"
+    },
+    "WorkspaceInvitationDto": {
+      "id": "55555555-5555-4555-8555-555555555555",
+      "email": "invite@example.org",
+      "role": "MEMBER",
+      "status": "PENDING",
+      "expiresAt": "2026-11-09T12:00:00Z"
+    },
+    "AcceptWorkspaceInvitationRequestDto": {
+      "token": "<one-time-code-sent-by-email>"
+    },
+    "UpdateWorkspaceRequestDto": {
+      "name": "Nouveau nom",
+      "description": "Nouvelle description"
+    },
+    "ChangeWorkspaceRoleRequestDto": {
+      "role": "EDITOR"
+    },
+    "WorkspaceOperationDto": {
+      "operationId": "66666666-6666-4666-8666-666666666666",
+      "status": "PENDING"
+    }
+  },
+  "routes": [
+    {
+      "group": "identity",
+      "operationId": "listMyWorkspaces",
+      "method": "GET",
+      "path": "/api/v1/workspaces/me",
+      "permission": "Authenticated",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "WorkspaceSummaryDto[]"
+      },
+      "requiredHeaders": [],
+      "notes": "Only workspaces where the current subject has an ACTIVE membership; never all tenants."
+    },
+    {
+      "group": "identity",
+      "operationId": "createWorkspace",
+      "method": "POST",
+      "path": "/api/v1/workspaces",
+      "permission": "Authenticated",
+      "request": {
+        "contentType": "application/json",
+        "schema": "CreateWorkspaceRequestDto"
+      },
+      "success": {
+        "httpStatus": 201,
+        "responseData": "WorkspaceSummaryDto"
+      },
+      "requiredHeaders": [],
+      "notes": "Server derives OwnerId from JWT and creates owner membership, branding and homepage in one transaction."
+    },
+    {
+      "group": "identity",
+      "operationId": "getWorkspace",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}",
+      "permission": "AnyMember",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "WorkspaceSummaryDto"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "identity",
+      "operationId": "updateWorkspace",
+      "method": "PATCH",
+      "path": "/api/v1/workspaces/{workspaceId}",
+      "permission": "OWNER|ADMIN",
+      "request": {
+        "contentType": "application/json",
+        "schema": "UpdateWorkspaceRequestDto"
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "WorkspaceSummaryDto"
+      },
+      "requiredHeaders": [
+        "If-Match"
+      ],
+      "notes": "Strong ETag required; changes name/description, slug immutable after creation."
+    },
+    {
+      "group": "identity",
+      "operationId": "archiveWorkspace",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/archive",
+      "permission": "OWNER",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 202,
+        "responseData": "WorkspaceOperationDto"
+      },
+      "requiredHeaders": [
+        "If-Match"
+      ],
+      "notes": "Soft-delete; retain audit entries, enforce retention and disallow immediate hard delete."
+    },
+    {
+      "group": "identity",
+      "operationId": "restoreWorkspace",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/restore",
+      "permission": "OWNER",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "WorkspaceSummaryDto"
+      },
+      "requiredHeaders": [],
+      "notes": "Only during retention window and with revalidated owner role."
+    },
+    {
+      "group": "branding",
+      "operationId": "getBranding",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/branding",
+      "permission": "AnyMember",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "WorkspaceBrandingDto"
+      },
+      "requiredHeaders": [],
+      "notes": "Return strong ETag, e.g. \"\"10\"\"."
+    },
+    {
+      "group": "branding",
+      "operationId": "putBranding",
+      "method": "PUT",
+      "path": "/api/v1/workspaces/{workspaceId}/branding",
+      "permission": "OWNER|ADMIN",
+      "request": {
+        "contentType": "application/json",
+        "schema": "WorkspaceBrandingDto"
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "WorkspaceBrandingDto"
+      },
+      "requiredHeaders": [
+        "If-Match"
+      ],
+      "notes": "Full replacement, validated colors and owned image asset IDs; return a new strong ETag."
+    },
+    {
+      "group": "homepage",
+      "operationId": "getHomepage",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/homepage",
+      "permission": "AnyMember",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "WorkspaceHomepageDto"
+      },
+      "requiredHeaders": [],
+      "notes": "Return strong ETag."
+    },
+    {
+      "group": "homepage",
+      "operationId": "putHomepage",
+      "method": "PUT",
+      "path": "/api/v1/workspaces/{workspaceId}/homepage",
+      "permission": "OWNER|ADMIN|EDITOR",
+      "request": {
+        "contentType": "application/json",
+        "schema": "WorkspaceHomepageDto"
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "WorkspaceHomepageDto"
+      },
+      "requiredHeaders": [
+        "If-Match"
+      ],
+      "notes": "Constrained widget schema, 20 sections maximum, no raw HTML or script; return new strong ETag."
+    },
+    {
+      "group": "assets",
+      "operationId": "uploadAsset",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/assets",
+      "permission": "OWNER|ADMIN",
+      "request": {
+        "contentType": "multipart/form-data",
+        "schema": {
+          "purpose": "LOGO|BANNER",
+          "file": "binary (PNG|JPEG|WebP)"
+        }
+      },
+      "success": {
+        "httpStatus": 201,
+        "responseData": "WorkspaceAssetDto"
+      },
+      "requiredHeaders": [],
+      "notes": "Server sniff magic bytes, strip EXIF, re-encode to clean raster, cap logo 5 MiB/banner 10 MiB; return ID only, not arbitrary URL."
+    },
+    {
+      "group": "assets",
+      "operationId": "getAssetContent",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/assets/{assetId}/content",
+      "permission": "AnyMember",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "image/png|image/jpeg|image/webp (binary; NOT ApiResponse envelope)"
+      },
+      "requiredHeaders": [],
+      "notes": "Authorize asset workspace ownership; Cache-Control private, no-store by default; X-Content-Type-Options nosniff."
+    },
+    {
+      "group": "assets",
+      "operationId": "deleteAsset",
+      "method": "DELETE",
+      "path": "/api/v1/workspaces/{workspaceId}/assets/{assetId}",
+      "permission": "OWNER|ADMIN",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 204,
+        "responseData": "none"
+      },
+      "requiredHeaders": [],
+      "notes": "Reject in-use assets with 409 or detach in a controlled transaction; orphan cleanup asynchronous."
+    },
+    {
+      "group": "members",
+      "operationId": "listMembers",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/members",
+      "permission": "AnyMember",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "WorkspaceMemberDto[]"
+      },
+      "requiredHeaders": [],
+      "notes": "PII exposure must be role-aware; viewer should not see email unless authorized."
+    },
+    {
+      "group": "members",
+      "operationId": "changeRole",
+      "method": "PATCH",
+      "path": "/api/v1/workspaces/{workspaceId}/members/{userId}",
+      "permission": "OWNER|ADMIN",
+      "request": {
+        "contentType": "application/json",
+        "schema": "ChangeWorkspaceRoleRequestDto"
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "WorkspaceMemberDto"
+      },
+      "requiredHeaders": [
+        "If-Match"
+      ],
+      "notes": "Only owner can transfer ownership; prevent removing/downgrading last owner."
+    },
+    {
+      "group": "members",
+      "operationId": "removeMember",
+      "method": "DELETE",
+      "path": "/api/v1/workspaces/{workspaceId}/members/{userId}",
+      "permission": "OWNER|ADMIN",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 204,
+        "responseData": "none"
+      },
+      "requiredHeaders": [],
+      "notes": "Cannot remove last owner; revoke membership and invalidate authorization caches immediately."
+    },
+    {
+      "group": "members",
+      "operationId": "leaveWorkspace",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/leave",
+      "permission": "AnyMember",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 204,
+        "responseData": "none"
+      },
+      "requiredHeaders": [],
+      "notes": "Owner must transfer ownership first; no destructive archival."
+    },
+    {
+      "group": "invitations",
+      "operationId": "listInvitations",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/invitations",
+      "permission": "OWNER|ADMIN",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "WorkspaceInvitationDto[]"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "invitations",
+      "operationId": "createInvitation",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/invitations",
+      "permission": "OWNER|ADMIN",
+      "request": {
+        "contentType": "application/json",
+        "schema": "CreateWorkspaceInvitationRequestDto"
+      },
+      "success": {
+        "httpStatus": 201,
+        "responseData": "WorkspaceInvitationDto"
+      },
+      "requiredHeaders": [],
+      "notes": "Server sends email; never returns or logs plaintext invitation token."
+    },
+    {
+      "group": "invitations",
+      "operationId": "revokeInvitation",
+      "method": "DELETE",
+      "path": "/api/v1/workspaces/{workspaceId}/invitations/{invitationId}",
+      "permission": "OWNER|ADMIN",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 204,
+        "responseData": "none"
+      },
+      "requiredHeaders": [],
+      "notes": "Revoke pending hashed token."
+    },
+    {
+      "group": "invitations",
+      "operationId": "acceptInvitation",
+      "method": "POST",
+      "path": "/api/v1/workspaces/invitations/accept",
+      "permission": "Authenticated",
+      "request": {
+        "contentType": "application/json",
+        "schema": "AcceptWorkspaceInvitationRequestDto"
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "WorkspaceSummaryDto"
+      },
+      "requiredHeaders": [],
+      "notes": "Accept by one-time token in JSON body, verify authenticated email and token hash/expiry; no tokens in URL or logs."
+    },
+    {
+      "group": "documents",
+      "operationId": "listDocumentsScoped",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/documents",
+      "permission": "VIEWER+",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "DocumentDto[] (inside ApiResponse envelope)"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "documents",
+      "operationId": "searchDocumentsScoped",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/documents/search?q={query}",
+      "permission": "VIEWER+",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "DocumentDto[]"
+      },
+      "requiredHeaders": [],
+      "notes": "URL-encoded q query, max length and rate limit."
+    },
+    {
+      "group": "documents",
+      "operationId": "getDocumentScoped",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/documents/{documentId}",
+      "permission": "VIEWER+",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "DocumentDto"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "documents",
+      "operationId": "getDocumentDetailsScoped",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/documents/{documentId}/details",
+      "permission": "VIEWER+",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "DocumentDetailsDto"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "documents",
+      "operationId": "createDocumentScoped",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/documents",
+      "permission": "EDITOR+",
+      "request": {
+        "contentType": "application/json",
+        "schema": "CreateDocumentDto"
+      },
+      "success": {
+        "httpStatus": 201,
+        "responseData": "DocumentDto"
+      },
+      "requiredHeaders": [],
+      "notes": "WorkspaceId derived from route + validated membership; reject client-supplied WorkspaceId."
+    },
+    {
+      "group": "documents",
+      "operationId": "importDocumentScoped",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/documents/import",
+      "permission": "EDITOR+",
+      "request": {
+        "contentType": "application/json",
+        "schema": "CreateDocumentDto"
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "ImportDocumentResultDto"
+      },
+      "requiredHeaders": [],
+      "notes": "Unique external ID is (WorkspaceId, ExternalId); never overwrite other tenant."
+    },
+    {
+      "group": "documents",
+      "operationId": "updateDocumentScoped",
+      "method": "PUT",
+      "path": "/api/v1/workspaces/{workspaceId}/documents/{documentId}",
+      "permission": "EDITOR+",
+      "request": {
+        "contentType": "application/json",
+        "schema": "UpdateDocumentDto"
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "DocumentDto"
+      },
+      "requiredHeaders": [],
+      "notes": "Check document belongs to route workspace before any writes/reindex."
+    },
+    {
+      "group": "documents",
+      "operationId": "deleteDocumentScoped",
+      "method": "DELETE",
+      "path": "/api/v1/workspaces/{workspaceId}/documents/{documentId}",
+      "permission": "EDITOR+",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "string"
+      },
+      "requiredHeaders": [],
+      "notes": "Maintain legacy envelope compatibility; prefer 204 in future v2."
+    },
+    {
+      "group": "documents",
+      "operationId": "ensureDocumentIndexScoped",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/documents/{documentId}/ensure-index",
+      "permission": "EDITOR+",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "bool"
+      },
+      "requiredHeaders": [],
+      "notes": "Reindex only workspace-owned document; scoped cache invalidation."
+    },
+    {
+      "group": "documents",
+      "operationId": "filterDocumentsByCategoryScoped",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/documents/category/{categoryId}",
+      "permission": "VIEWER+",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "DocumentDto[]"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "documents",
+      "operationId": "filterDocumentsByTagScoped",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/documents/tag/{tagId}",
+      "permission": "VIEWER+",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "DocumentDto[]"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "documents",
+      "operationId": "filterDocumentsBySourceScoped",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/documents/source/{sourceId}",
+      "permission": "VIEWER+",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "DocumentDto[]"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "rag",
+      "operationId": "askClassicRagScoped",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/rag/ask",
+      "permission": "MEMBER+",
+      "request": {
+        "contentType": "application/json",
+        "schema": "AskQuestionRequestDto"
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "AskQuestionResponseDto (raw JSON, no envelope)"
+      },
+      "requiredHeaders": [],
+      "notes": "Retrieve only documents/chunks/embeddings of route workspace; verify access on every request."
+    },
+    {
+      "group": "rag",
+      "operationId": "askVerifiedRagScoped",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/rag/ask/verified",
+      "permission": "MEMBER+",
+      "request": {
+        "contentType": "application/json",
+        "schema": "AskQuestionRequestDto"
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "VerifiedRagResponseDto (raw JSON, no envelope)"
+      },
+      "requiredHeaders": [],
+      "notes": "Fail closed ABSTAIN when qualified assessor absent. Do not expose model rejected claims."
+    },
+    {
+      "group": "rag",
+      "operationId": "vectorSearchScoped",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/vector/search",
+      "permission": "EDITOR+",
+      "request": {
+        "contentType": "application/json",
+        "schema": "VectorSearchRequestDto"
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "VectorSearchResultDto[] (raw JSON, no envelope)"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "rag",
+      "operationId": "buildContextScoped",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/context",
+      "permission": "EDITOR+",
+      "request": {
+        "contentType": "application/json",
+        "schema": "AskQuestionRequestDto"
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "RetrievedContextDto (raw JSON, no envelope)"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "rag",
+      "operationId": "generateEmbeddingScoped",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/embeddings",
+      "permission": "ADMIN+",
+      "request": {
+        "contentType": "application/json",
+        "schema": "EmbeddingRequestDto"
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "EmbeddingResponseDto (raw JSON, no envelope)"
+      },
+      "requiredHeaders": [],
+      "notes": "Optional diagnostic only, rate-limited. Avoid exposing embeddings to ordinary members."
+    },
+    {
+      "group": "catalog",
+      "operationId": "listCategoriesScoped",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/categories",
+      "permission": "VIEWER+",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "CategoryDto[]"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "catalog",
+      "operationId": "createCategoryScoped",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/categories",
+      "permission": "EDITOR+",
+      "request": {
+        "contentType": "application/json",
+        "schema": "CreateCategoryDto"
+      },
+      "success": {
+        "httpStatus": 201,
+        "responseData": "CategoryDto"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "catalog",
+      "operationId": "listTagsScoped",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/tags",
+      "permission": "VIEWER+",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "TagDto[]"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "catalog",
+      "operationId": "createTagScoped",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/tags",
+      "permission": "EDITOR+",
+      "request": {
+        "contentType": "application/json",
+        "schema": "CreateTagDto"
+      },
+      "success": {
+        "httpStatus": 201,
+        "responseData": "TagDto"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "catalog",
+      "operationId": "listSourcesScoped",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/sources",
+      "permission": "VIEWER+",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "KnowledgeSourceDto[]"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "catalog",
+      "operationId": "createSourceScoped",
+      "method": "POST",
+      "path": "/api/v1/workspaces/{workspaceId}/sources",
+      "permission": "EDITOR+",
+      "request": {
+        "contentType": "application/json",
+        "schema": "CreateKnowledgeSourceDto"
+      },
+      "success": {
+        "httpStatus": 201,
+        "responseData": "KnowledgeSourceDto"
+      },
+      "requiredHeaders": [],
+      "notes": ""
+    },
+    {
+      "group": "stats",
+      "operationId": "getStatisticsScoped",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/statistics",
+      "permission": "VIEWER+",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "KnowledgeStatisticsDto"
+      },
+      "requiredHeaders": [],
+      "notes": "Counts and aggregations filtered by workspace."
+    },
+    {
+      "group": "diagnostics",
+      "operationId": "getDatabaseStatusScoped",
+      "method": "GET",
+      "path": "/api/v1/workspaces/{workspaceId}/diagnostics/database",
+      "permission": "ADMIN+",
+      "request": {
+        "contentType": null,
+        "schema": null
+      },
+      "success": {
+        "httpStatus": 200,
+        "responseData": "DatabaseStatusDto"
+      },
+      "requiredHeaders": [],
+      "notes": "Sanitized health info only. Do not expose server internals or connection strings."
+    }
+  ],
+  "migrationPolicy": {
+    "noAutomaticMigrations": true,
+    "tenantBoundary": "WorkspaceId must be resolved from authorized server request and never from client DTO",
+    "legacyDataHandling": "Stage and attribute old global records to a reviewed legacy workspace, never assume ownership from titles/emails."
+  },
+  "designReferences": [
+    "https://learn.microsoft.com/en-us/ef/core/miscellaneous/multitenancy",
+    "https://learn.microsoft.com/en-us/ef/core/querying/filters",
+    "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/theming"
+  ],
+  "baselineFrom": "KnowledgeHub.Workspaces.API.v1 proposed contract (2026-11-02); revised for KH-009.0 review",
+  "baseCommit": "53f032f2861ad823f78338b5ac0058e275afe059"
+}
