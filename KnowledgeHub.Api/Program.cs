@@ -2,6 +2,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using KnowledgeHub.Api.Extensions;
 using KnowledgeHub.Api.Middleware;
+using KnowledgeHub.Api.Security;
 using KnowledgeHub.Application.DTOs;
 using KnowledgeHub.Application.Validators;
 using KnowledgeHub.Infrastructure.Persistence.Context;
@@ -14,8 +15,6 @@ using Serilog.Events;
 using Serilog.Formatting.Json;
 using KnowledgeHub.Infrastructure.DependencyInjection;
 
-// Existing Serilog sinks; JSONL is consumed by a collector without scraping text.
-// The default log context enriches downstream ILogger<T> events with CorrelationId.
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
@@ -48,6 +47,10 @@ builder.Services.AddInfrastructure(
 
 builder.Services.AddApplicationServices();
 
+// JWT is fail-closed when no OIDC provider is configured. Existing /api/*
+// endpoints remain intentionally unchanged until the tenant migration.
+builder.Services.AddKh009Security();
+
 builder.Services.AddKnowledgeHubTracing(builder.Configuration);
 builder.Services.AddKnowledgeHubMetrics(builder.Configuration);
 
@@ -73,7 +76,11 @@ builder.Services.Configure<ApiBehaviorOptions>(
     });
 
 var app = builder.Build();
-// Outer middleware sees the final status emitted by the exception handler.
+
+// Validate the complete OIDC configuration after all host configuration sources
+// (including integration-test overrides) have been added. Partial configuration
+// still fails startup rather than relaxing JWT checks.
+_ = Kh009JwtSettings.Read(app.Configuration);
 app.UseMiddleware<RequestCorrelationLoggingMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
@@ -87,12 +94,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
-//
-// Vérification connexion BDD
-//
 using (var scope = app.Services.CreateScope())
 {
     var context =
@@ -117,7 +123,6 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        // Do not print connection strings or exception messages.
         app.Logger.LogWarning(
             "Database connectivity probe failed: {ExceptionType}",
             ex.GetType().Name);
