@@ -52,3 +52,25 @@ ou des versions immuables référencées et identifiables.
 - Aucun schéma EF, migration, suppression de volumes ou écriture en base de
   développement dans ce jalon. L'E2E HTTP utilise une base Testcontainers isolée.
 - La qualité d'un futur évaluateur sémantique devra être démontrée séparément.
+## Compatibilite Windows 11 et revue Codex
+
+Les deux observations Codex sur les propositions Ollama sont traitees dans le code :
+la generation utilise `KnowledgeHubMetrics.MeasureOllamaAsync("chat", ...)`,
+`KnowledgeHubActivities.TraceAsync("ollama.chat", ...)` et la telemetrie native
+bornee, sans exporter le contenu des documents ou des reponses. Un jeton lie
+impose une limite temporelle durant la reception des en-tetes, la lecture du
+corps et son analyse JSON (meme avec `ResponseHeadersRead`). Les tests unitaires
+couvrent le timeout du corps, l'annulation par l'appelant et la telemetrie.
+
+Sur Windows, le verificateur KH-005.4 ouvre les journaux Serilog avec
+`FileShare.ReadWrite | FileShare.Delete` pour permettre leur lecture concurrente.
+Le corpus oracle KH-007 utilise des empreintes SHA-256 sur les octets exacts :
+`.gitattributes` impose `eol=lf` pour les trois fichiers JSON de reference.
+Les donnees de reference ne doivent pas etre reecrites pour faire passer le test.
+
+Aucune CI GitHub Actions n'est configuree pour ce jalon. Les validations de la PR
+sont des preuves locales : compilation Release avec avertissements traites comme
+erreurs, `dotnet format`, tests unitaires et d'integration, reference offline
+KH-007 et verification synthetique KH-005.4 via Testcontainers. Le client MAUI
+Windows est un lot distinct. Aucun evaluateur semantique qualifie n'est encore
+livre : la reponse verifiee conserve son abstention par defaut.
