@@ -341,7 +341,12 @@ internal static class Program
         }
         foreach (var path in Directory.EnumerateFiles(logFolder, "log-*.jsonl"))
         {
-            foreach (var line in File.ReadLines(path))
+            using var stream = new FileStream(
+                path, FileMode.Open, FileAccess.Read,
+                FileShare.ReadWrite | FileShare.Delete);
+            using var reader = new StreamReader(stream);
+            string? line;
+            while ((line = reader.ReadLine()) is not null)
             {
                 if (!line.Contains(correlationId, StringComparison.Ordinal))
                 {
@@ -549,21 +554,21 @@ internal static class Program
         internal static IEnumerable<SpanRecord> DecodeSpans(byte[] payload)
         {
             foreach (var root in Fields(payload).Where(field => field.Number == 1))
-            foreach (var scope in Fields(root.Value).Where(field => field.Number == 2))
-            foreach (var entry in Fields(scope.Value).Where(field => field.Number == 2))
-            {
-                var fields = Fields(entry.Value).ToArray();
-                var name = fields.FirstOrDefault(field => field.Number == 5)?.Value;
-                var trace = fields.FirstOrDefault(field => field.Number == 1)?.Value;
-                var span = fields.FirstOrDefault(field => field.Number == 2)?.Value;
-                var parent = fields.FirstOrDefault(field => field.Number == 4)?.Value;
-                if (name is not null && trace is not null && span is not null)
-                {
-                    yield return new SpanRecord(Encoding.UTF8.GetString(name),
-                        Convert.ToHexStringLower(trace), Convert.ToHexStringLower(span),
-                        parent is null ? "" : Convert.ToHexStringLower(parent));
-                }
-            }
+                foreach (var scope in Fields(root.Value).Where(field => field.Number == 2))
+                    foreach (var entry in Fields(scope.Value).Where(field => field.Number == 2))
+                    {
+                        var fields = Fields(entry.Value).ToArray();
+                        var name = fields.FirstOrDefault(field => field.Number == 5)?.Value;
+                        var trace = fields.FirstOrDefault(field => field.Number == 1)?.Value;
+                        var span = fields.FirstOrDefault(field => field.Number == 2)?.Value;
+                        var parent = fields.FirstOrDefault(field => field.Number == 4)?.Value;
+                        if (name is not null && trace is not null && span is not null)
+                        {
+                            yield return new SpanRecord(Encoding.UTF8.GetString(name),
+                                Convert.ToHexStringLower(trace), Convert.ToHexStringLower(span),
+                                parent is null ? "" : Convert.ToHexStringLower(parent));
+                        }
+                    }
         }
     }
 
@@ -676,13 +681,13 @@ internal static class Program
         public bool ContainsAny(IEnumerable<string> secrets)
         {
             foreach (var payload in _requests)
-            foreach (var secret in secrets)
-            {
-                if (payload.Body.AsSpan().IndexOf(Encoding.UTF8.GetBytes(secret)) >= 0)
+                foreach (var secret in secrets)
                 {
-                    return true;
+                    if (payload.Body.AsSpan().IndexOf(Encoding.UTF8.GetBytes(secret)) >= 0)
+                    {
+                        return true;
+                    }
                 }
-            }
             return false;
         }
 
