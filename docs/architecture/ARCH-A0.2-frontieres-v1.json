@@ -1,0 +1,1240 @@
+{
+  "document_kind": "ARCH-A0.2-normative-approved",
+  "status": "baseline_1_0_0_rc1_approved_candidate_1_1_0_rc1_pending_maintainer_approval_unmerged_not_implemented",
+  "baseline": {
+    "repository": "alescis-wuin/KnowledgeHub",
+    "ref": "main",
+    "observed_commit": "0f359979235d189cb3059c86224dba738d176e4c",
+    "git_tree": "833b6a0fda44b88cdcd60bb9c255b540e1aa3cec",
+    "source_audit_commit": "e422eaca948884ca954b2b97d74852ed364151d5",
+    "prepared_base_sha": null,
+    "qualification_reexecuted_for_documents": false,
+    "documentation_branch_first_commit": "81c806779e25a92501e1aa040ad138ae5465f5a8"
+  },
+  "accepted_decisions": {
+    "backend_topology": "modular_monolith",
+    "repository_topology": "monorepo",
+    "validation_location": "local",
+    "github_actions_required": false,
+    "reports_and_trx": "outside_repository_bound_to_tested_sha",
+    "migration_owner_count": 1,
+    "migration_coordination": [
+      "KH009.3",
+      "KH009.4"
+    ],
+    "poc_avalonia": "offline_preserved_no_assumed_repo_path"
+  },
+  "first_wave_production_projects": [
+    {
+      "name": "KnowledgeHub.Contracts.Http",
+      "path": "KnowledgeHub.Contracts.Http",
+      "status_at_baseline": "proposed",
+      "exists_at_baseline": false
+    },
+    {
+      "name": "KnowledgeHub.Client.Http",
+      "path": "KnowledgeHub.Client.Http",
+      "status_at_baseline": "proposed",
+      "exists_at_baseline": false
+    },
+    {
+      "name": "KnowledgeHub.Rag.Contracts",
+      "path": "KnowledgeHub.Rag.Contracts",
+      "status_at_baseline": "proposed",
+      "exists_at_baseline": false
+    },
+    {
+      "name": "KnowledgeHub.Verification",
+      "path": "KnowledgeHub.Verification",
+      "status_at_baseline": "proposed",
+      "exists_at_baseline": false
+    }
+  ],
+  "proposed_autonomous_test_projects": [
+    {
+      "name": "KnowledgeHub.Client.Http.Tests",
+      "path": "KnowledgeHub.Client.Http.Tests",
+      "status_at_baseline": "proposed",
+      "exists_at_baseline": false,
+      "separate_from_four_production_projects": true
+    },
+    {
+      "name": "KnowledgeHub.Verification.Tests",
+      "path": "KnowledgeHub.Verification.Tests",
+      "status_at_baseline": "proposed",
+      "exists_at_baseline": false,
+      "separate_from_four_production_projects": true
+    }
+  ],
+  "phase_gates": [
+    {
+      "id": "A0",
+      "owner": "integrator",
+      "scope": [
+        "refresh_base_sha",
+        "inventory_local_worktrees_without_mutation",
+        "freeze_path_ownership",
+        "freeze_v1_wire_and_internal_contracts"
+      ],
+      "excluded": [
+        "replay_KH009_0_1_6",
+        "database_reset",
+        "UI_changes"
+      ],
+      "exit": "Référence et ownership explicites."
+    },
+    {
+      "id": "A1",
+      "depends_on": [
+        "A0"
+      ],
+      "owner": "integrator",
+      "scope": [
+        "local_validation_plan",
+        "targeted_review_triage",
+        "common_project_scaffolding_after_authorization",
+        "project_reference_wiring",
+        "architecture_and_contract_fixtures"
+      ],
+      "excluded": [
+        "all_debt_as_prerequisite",
+        "new_tenantisation",
+        "new_model_qualification",
+        "new_migration"
+      ],
+      "exit": "G1 compilable et validé localement, SHA réel enregistré."
+    },
+    {
+      "id": "A2",
+      "depends_on": [
+        "G1"
+      ],
+      "parallel_with": [
+        "A3"
+      ],
+      "exit": "SDK/importeur migré sans référence serveur ; JSON et erreurs conformes ; raccordement intégré."
+    },
+    {
+      "id": "A3",
+      "depends_on": [
+        "G1"
+      ],
+      "parallel_with": [
+        "A2"
+      ],
+      "exit": "Verification indépendante via Rag.Contracts ; comportement v1 et abstention préservés ; raccordement intégré."
+    },
+    {
+      "id": "A6",
+      "depends_on": [
+        "KH009.3/4_contract_coordination",
+        "stabilized_rag_scope_contracts"
+      ],
+      "owner": "data_migration_owner",
+      "notes": [
+        "Coordonne les espaces, profils et garanties de publication ; aucune conception parallèle concurrente."
+      ]
+    }
+  ],
+  "project_reference_graphs": {
+    "baseline_observed": {
+      "KnowledgeHub.Api": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Infrastructure"
+      ],
+      "KnowledgeHub.Application": [
+        "KnowledgeHub.Domain"
+      ],
+      "KnowledgeHub.Client": [],
+      "KnowledgeHub.CorpusImporter": [
+        "KnowledgeHub.Application"
+      ],
+      "KnowledgeHub.Domain": [],
+      "KnowledgeHub.Evaluation": [],
+      "KnowledgeHub.Infrastructure": [
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Application"
+      ],
+      "KnowledgeHub.Observability.Verify": [
+        "KnowledgeHub.Tests.Integration"
+      ],
+      "KnowledgeHub.Tests.Integration": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Api",
+        "KnowledgeHub.CorpusImporter",
+        "KnowledgeHub.Infrastructure"
+      ],
+      "KnowledgeHub.Tests.Unit": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Api"
+      ]
+    },
+    "A1_G1_allowed": {
+      "KnowledgeHub.Api": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Infrastructure",
+        "KnowledgeHub.Contracts.Http",
+        "KnowledgeHub.Rag.Contracts",
+        "KnowledgeHub.Verification"
+      ],
+      "KnowledgeHub.Application": [
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Rag.Contracts",
+        "KnowledgeHub.Verification"
+      ],
+      "KnowledgeHub.Client": [],
+      "KnowledgeHub.CorpusImporter": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Client.Http",
+        "KnowledgeHub.Contracts.Http"
+      ],
+      "KnowledgeHub.Domain": [],
+      "KnowledgeHub.Evaluation": [],
+      "KnowledgeHub.Infrastructure": [
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Rag.Contracts",
+        "KnowledgeHub.Verification"
+      ],
+      "KnowledgeHub.Observability.Verify": [
+        "KnowledgeHub.Tests.Integration"
+      ],
+      "KnowledgeHub.Tests.Integration": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Api",
+        "KnowledgeHub.CorpusImporter",
+        "KnowledgeHub.Infrastructure"
+      ],
+      "KnowledgeHub.Tests.Unit": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Api"
+      ],
+      "KnowledgeHub.Contracts.Http": [],
+      "KnowledgeHub.Client.Http": [
+        "KnowledgeHub.Contracts.Http"
+      ],
+      "KnowledgeHub.Rag.Contracts": [],
+      "KnowledgeHub.Verification": [
+        "KnowledgeHub.Rag.Contracts"
+      ],
+      "KnowledgeHub.Client.Http.Tests": [
+        "KnowledgeHub.Client.Http",
+        "KnowledgeHub.Contracts.Http"
+      ],
+      "KnowledgeHub.Verification.Tests": [
+        "KnowledgeHub.Verification",
+        "KnowledgeHub.Rag.Contracts"
+      ]
+    },
+    "A2_A3_integrated_allowed": {
+      "KnowledgeHub.Api": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Infrastructure",
+        "KnowledgeHub.Contracts.Http",
+        "KnowledgeHub.Rag.Contracts",
+        "KnowledgeHub.Verification"
+      ],
+      "KnowledgeHub.Application": [
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Rag.Contracts",
+        "KnowledgeHub.Verification"
+      ],
+      "KnowledgeHub.Client": [],
+      "KnowledgeHub.CorpusImporter": [
+        "KnowledgeHub.Client.Http",
+        "KnowledgeHub.Contracts.Http"
+      ],
+      "KnowledgeHub.Domain": [],
+      "KnowledgeHub.Evaluation": [],
+      "KnowledgeHub.Infrastructure": [
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Rag.Contracts",
+        "KnowledgeHub.Verification"
+      ],
+      "KnowledgeHub.Observability.Verify": [
+        "KnowledgeHub.Tests.Integration"
+      ],
+      "KnowledgeHub.Tests.Integration": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Api",
+        "KnowledgeHub.CorpusImporter",
+        "KnowledgeHub.Infrastructure"
+      ],
+      "KnowledgeHub.Tests.Unit": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Api"
+      ],
+      "KnowledgeHub.Contracts.Http": [],
+      "KnowledgeHub.Client.Http": [
+        "KnowledgeHub.Contracts.Http"
+      ],
+      "KnowledgeHub.Rag.Contracts": [],
+      "KnowledgeHub.Verification": [
+        "KnowledgeHub.Rag.Contracts"
+      ],
+      "KnowledgeHub.Client.Http.Tests": [
+        "KnowledgeHub.Client.Http",
+        "KnowledgeHub.Contracts.Http"
+      ],
+      "KnowledgeHub.Verification.Tests": [
+        "KnowledgeHub.Verification",
+        "KnowledgeHub.Rag.Contracts"
+      ]
+    },
+    "edges_are": "direct_ProjectReference",
+    "all_listed_graphs_acyclic_by_static_check": true
+  },
+  "future_project_reference_targets_not_for_current_tasks": {
+    "KnowledgeHub.Retrieval": [
+      "KnowledgeHub.Rag.Contracts"
+    ],
+    "KnowledgeHub.Inference.Ollama": [
+      "KnowledgeHub.Rag.Contracts"
+    ],
+    "KnowledgeHub.Rag.Core": [
+      "KnowledgeHub.Rag.Contracts"
+    ]
+  },
+  "project_reference_invariants": [
+    "Contracts.Http et Rag.Contracts n’ont aucune ProjectReference et ne se référencent pas entre eux.",
+    "Client.Http ne référence aucun projet serveur/UI.",
+    "Verification ne référence que Rag.Contracts parmi les projets de production.",
+    "Domain n’acquiert aucune référence Application/Infrastructure/HTTP/RAG.",
+    "Les références des projets historiques vers Verification sont transitoires ; elles ne sont pas autorisées pour le futur Rag.Core.",
+    "Les règles structurelles inspectent l’assembly effective et les types exposés, pas uniquement le namespace.",
+    "Aucune dépendance nouvelle de production vers tests ; le lien existant Observability.Verify → Tests.Integration est une exception d’outillage documentée."
+  ],
+  "global_path_rules": {
+    "default": "deny_unlisted",
+    "precedence": "reserved_file_or_glob_overrides_directory_allow",
+    "reserved_globs": [
+      "**/*.csproj"
+    ],
+    "reserved_files": [
+      "KnowledgeHub.Api/Extensions/ApplicationServiceCollectionExtensions.cs",
+      "KnowledgeHub.Api/Program.cs",
+      "KnowledgeHub.Application/Services/VerifiedRagService.cs",
+      "KnowledgeHub.Infrastructure/DependencyInjection/InfrastructureServiceCollectionExtensions.cs",
+      "KnowledgeHub.Infrastructure/Migrations/KnowledgeDbContextModelSnapshot.cs",
+      "KnowledgeHub.Infrastructure/Persistence/Context/KnowledgeDbContext.cs",
+      "KnowledgeHub.Infrastructure/Persistence/Context/KnowledgeDbContextFactory.cs",
+      "KnowledgeHub.Infrastructure/Persistence/EvidenceSnapshotProvider.cs",
+      "KnowledgeHub.Tests.Integration/CustomWebApplicationFactory.cs",
+      "KnowledgeHub.Tests.Integration/IsolatedPostgresFixture.cs",
+      "KnowledgeHub.slnx",
+      "docker-compose.yml",
+      "docs/KH009-0-api-contract.v1.json",
+      "docs/KH009-1-6-architecture.md",
+      "docs/architecture/ARCH-A0.2-contrats-v1.json",
+      "docs/architecture/ARCH-A0.2-decisions-v1.md",
+      "docs/architecture/ARCH-A0.2-fixtures-v1.json",
+      "docs/architecture/ARCH-A0.2-frontieres-v1.json",
+      "docs/architecture/ARCH-A0.2-norme-v1.md",
+      "docs/architecture/ARCH-A0.2-tests-et-gates-v1.json",
+      "global.json"
+    ],
+    "additional_reserved_prefixes": [
+      "KnowledgeHub.Application/DTOs/",
+      "KnowledgeHub.Api/Controllers/",
+      "KnowledgeHub.Infrastructure/Migrations/",
+      "KnowledgeHub.Infrastructure/Persistence/Configurations/"
+    ],
+    "rule_changes_owner": "integrator",
+    "is_security_or_git_lock": false,
+    "documentary_owner": "integrator",
+    "documentary_rule": "docs/architecture/ exclusive to integrator; existing 6 reserved files remain; future additions governed by CR"
+  },
+  "path_ownership": [
+    {
+      "path": "KnowledgeHub.slnx",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "global.json",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "docker-compose.yml",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Api/Program.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Api/Extensions/ApplicationServiceCollectionExtensions.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Infrastructure/DependencyInjection/InfrastructureServiceCollectionExtensions.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Application/Services/VerifiedRagService.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Infrastructure/Persistence/EvidenceSnapshotProvider.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Tests.Integration/CustomWebApplicationFactory.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Tests.Integration/IsolatedPostgresFixture.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Infrastructure/Persistence/Context/KnowledgeDbContext.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "data_migration_owner",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Infrastructure/Persistence/Context/KnowledgeDbContextFactory.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "data_migration_owner",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Infrastructure/Migrations/KnowledgeDbContextModelSnapshot.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "data_migration_owner",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "docs/KH009-0-api-contract.v1.json",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "docs/KH009-1-6-architecture.md",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Infrastructure/Migrations",
+      "path_kind": "directory",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "data_migration_owner",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Infrastructure/Persistence/Configurations",
+      "path_kind": "directory",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "data_migration_owner",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Application/DTOs",
+      "path_kind": "directory",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Api/Controllers",
+      "path_kind": "directory",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Contracts.Http",
+      "path_kind": "directory",
+      "status_at_baseline": "proposed",
+      "exists_at_baseline": false,
+      "owner": "a2",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Client.Http",
+      "path_kind": "directory",
+      "status_at_baseline": "proposed",
+      "exists_at_baseline": false,
+      "owner": "a2",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Client.Http.Tests",
+      "path_kind": "directory",
+      "status_at_baseline": "proposed",
+      "exists_at_baseline": false,
+      "owner": "a2",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Rag.Contracts",
+      "path_kind": "directory",
+      "status_at_baseline": "proposed",
+      "exists_at_baseline": false,
+      "owner": "a3",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Verification",
+      "path_kind": "directory",
+      "status_at_baseline": "proposed",
+      "exists_at_baseline": false,
+      "owner": "a3",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Verification.Tests",
+      "path_kind": "directory",
+      "status_at_baseline": "proposed",
+      "exists_at_baseline": false,
+      "owner": "a3",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Application/Verification",
+      "path_kind": "directory",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "a3",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Tests.Unit/Verification",
+      "path_kind": "directory",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Tests.Integration/Verification",
+      "path_kind": "directory",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "integrator",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Api/Security",
+      "path_kind": "directory",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "kh009",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Application/Identity",
+      "path_kind": "directory",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "kh009",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Application/Authorization",
+      "path_kind": "directory",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "kh009",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Client",
+      "path_kind": "directory",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "maui_owner",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "evaluation/kh007-reference-v1",
+      "path_kind": "directory",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "evaluation_owner",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.CorpusImporter/Program.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "a2",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.CorpusImporter/Services/CorpusImporter.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "a2",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Application/Interfaces/IEvidenceSnapshotProvider.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "a3",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Application/Interfaces/IQualifiedEvidenceAssessor.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "a3",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Application/Interfaces/IClaimProposalGenerator.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "a3",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Domain/Entities/Workspace.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "kh009_data",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Domain/Entities/WorkspaceMember.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "kh009_data",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Domain/Entities/WorkspaceInvitation.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "kh009_data",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Domain/Entities/WorkspaceHomepage.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "kh009_data",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Domain/Entities/WorkspaceHomeSection.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "kh009_data",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Domain/Entities/WorkspaceBranding.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "kh009_data",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Domain/Entities/WorkspaceAsset.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "kh009_data",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Domain/Entities/WorkspaceAuditEvent.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "kh009_data",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Domain/Entities/AppUser.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "kh009_data",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "KnowledgeHub.Domain/ValueObjects/OidcIdentityKey.cs",
+      "path_kind": "file",
+      "status_at_baseline": "existing",
+      "exists_at_baseline": true,
+      "owner": "kh009_data",
+      "phase": "A2/A3",
+      "notes": []
+    },
+    {
+      "path": "docs/architecture/",
+      "path_kind": "directory",
+      "status_at_baseline": "proposed",
+      "exists_at_baseline": false,
+      "owner": "integrator",
+      "phase": "A0.2+",
+      "notes": [
+        "Contrats versionnés, changement par CR uniquement"
+      ]
+    }
+  ],
+  "local_unverified_scopes": [
+    {
+      "name": "Avalonia_PoC",
+      "path": null,
+      "owner": "avalonia_owner",
+      "resolution_phase": "A0",
+      "status": "local_announced_not_verified",
+      "allowed_mutation": false
+    }
+  ],
+  "collision_avoidance": {
+    "legacy_dto_policy": "Application/DTOs gelé pour A2/A3 ; mapper/cutover appartenant à intégrateur.",
+    "http_projection": "A2 crée des payloads passifs dans un namespace distinct ; ne copie pas FromVerifiedDecision dans Contracts.Http.",
+    "clr_transition": "A3 peut préserver temporairement les namespaces existants en transférant la définition vers une seule assembly ; reconstruction complète consommateurs.",
+    "wire_contract": "Observed legacy errors are not target; integrate SDK only after server normalizes 201 metadata and RFC9457 ProblemDetails responses. New DTOs keep exact successful JSON.",
+    "snapshot_port": "IEvidenceRevalidator approuvé dans Rag.Contracts ; IEvidenceSnapshotProvider hérité conserve CaptureAsync(VectorSearchResultDto) dans Application jusqu’à A4/A6.",
+    "verdict_port": "IVerifiedVerdictEvaluator NOT in v1; documentary reservation for A3.2 only; requires separate CR and maintainer approval.",
+    "unknown_scope": "Aucun scope optionnel avec repli global dans les nouvelles routes privées.",
+    "sdk_http_surface": "Five specialized clients sharing one internal transport; one method owner per 22 routes; no monolithic client."
+  },
+  "work_orders": {
+    "A2": {
+      "proposed_branch": "feature/a2-http-contracts-sdk",
+      "base_sha": null,
+      "base_source": "baseline.prepared_base_sha",
+      "own_worktree_required": true,
+      "allow_prefixes": [
+        "KnowledgeHub.Contracts.Http/",
+        "KnowledgeHub.Client.Http/",
+        "KnowledgeHub.Client.Http.Tests/"
+      ],
+      "allow_files": [
+        "KnowledgeHub.CorpusImporter/Program.cs",
+        "KnowledgeHub.CorpusImporter/Services/CorpusImporter.cs"
+      ],
+      "deny": "Tout chemin non autorisé et toute règle globale réservée",
+      "frozen_interfaces": [
+        "existing_HTTP_routes",
+        "v1_JSON_envelopes_errors",
+        "incremental_import_identity",
+        "cancellation_and_empty_results"
+      ],
+      "tests": [
+        "JSON_roundtrip",
+        "missing_unknown_fields",
+        "HTTP_error_and_envelope",
+        "timeout_cancellation",
+        "idempotent_import",
+        "API_integration_by_integrator"
+      ],
+      "deliverables": [
+        "bounded_diff",
+        "consumer_inventory",
+        "wire_fixtures",
+        "integration_change_request",
+        "external_SHA_bound_validation_report"
+      ],
+      "special_limits": [
+        "No_new_Workspaces_endpoint_claim",
+        "No_UI_migration",
+        "No_server_DTO_global_rename"
+      ]
+    },
+    "A3": {
+      "proposed_branch": "feature/a3-verification-extraction",
+      "base_sha": null,
+      "base_source": "baseline.prepared_base_sha",
+      "own_worktree_required": true,
+      "allow_prefixes": [
+        "KnowledgeHub.Rag.Contracts/",
+        "KnowledgeHub.Verification/",
+        "KnowledgeHub.Verification.Tests/",
+        "KnowledgeHub.Application/Verification/"
+      ],
+      "allow_files": [
+        "KnowledgeHub.Application/Interfaces/IEvidenceSnapshotProvider.cs",
+        "KnowledgeHub.Application/Interfaces/IQualifiedEvidenceAssessor.cs",
+        "KnowledgeHub.Application/Interfaces/IClaimProposalGenerator.cs"
+      ],
+      "deny": "Tout chemin non autorisé et toute règle globale réservée",
+      "frozen_interfaces": [
+        "proposal_schema_v1",
+        "UTF16_anchors",
+        "current_hash_semantics",
+        "parser_limits",
+        "verdict_precedence",
+        "revalidate_after_assessor",
+        "default_abstain",
+        "cancellation"
+      ],
+      "substeps": [
+        "pure_values_parser_anchors_policy",
+        "revalidation_port_and_verdict_orchestration"
+      ],
+      "tests": [
+        "behavior_characterization",
+        "isolated_unit_tests",
+        "unavailable_or_mismatched_assessor",
+        "stale_snapshot",
+        "exceptions_cancellation",
+        "effective_assembly_dependency_rules",
+        "HTTP_EF_regressions_by_integrator"
+      ],
+      "deliverables": [
+        "source_destination_map",
+        "port_inventory",
+        "bounded_diff",
+        "tests",
+        "integration_change_request",
+        "external_SHA_bound_validation_report"
+      ],
+      "special_limits": [
+        "No_new_NLI_qualification",
+        "No_reranking_change",
+        "No_scope_profile_success_claim",
+        "No_HTTP_contract_change"
+      ]
+    }
+  },
+  "change_request_required_fields": [
+    "task_id",
+    "base_sha",
+    "current_sha",
+    "requested_paths",
+    "affected_contract",
+    "concrete_need",
+    "old_behavior",
+    "new_behavior",
+    "impacted_consumers",
+    "CLR_wire_data_compatibility",
+    "proposed_tests",
+    "integration_order",
+    "owner",
+    "approval_decision"
+  ],
+  "validation_evidence_required_fields": [
+    "tested_sha",
+    "tested_tree",
+    "worktree_clean",
+    "commands_and_options",
+    "sdk_os_workloads",
+    "test_service_identities",
+    "results_failures_skips",
+    "external_trx_paths",
+    "fixture_hashes",
+    "environment_limits",
+    "merged_sha_if_different"
+  ],
+  "validation_integrity_rules": [
+    "SHA seul insuffisant si arbre sale : commit candidat propre ou diff/hash explicitement conservés.",
+    "Ne pas renommer un TRX ancien pour le rattacher à un nouveau SHA.",
+    "Égalité d’arbres distincte de tests exécutés sur le SHA de fusion.",
+    "Validation combinée A2+A3 avant de déclarer la première vague achevée.",
+    "Aucun test synthétique ne vaut qualification d’un modèle réel."
+  ],
+  "integration_order": [
+    "G1_validated",
+    "A2_and_A3_parallel",
+    "serialized_integrator_cutovers",
+    "combined_candidate_validation",
+    "authorized_merge"
+  ],
+  "mutations_executed_by_this_documentation_task": false,
+  "baseline_original_audit": {
+    "repository": "alescis-wuin/KnowledgeHub",
+    "ref": "main",
+    "observed_commit": "e422eaca948884ca954b2b97d74852ed364151d5",
+    "accepted_integrated_milestones": "KH009.0–1.6",
+    "historical_local_qualification_tests": 463,
+    "reexecuted_here": false,
+    "prepared_base_sha": null,
+    "prepared_base_requirement": "Renseigner le SHA réel de G1 après préparation commune autorisée ; ne pas le remplacer par le SHA historique."
+  },
+  "baseline_after_pr18": {
+    "main_commit": "0f359979235d189cb3059c86224dba738d176e4c",
+    "git_tree": "833b6a0fda44b88cdcd60bb9c255b540e1aa3cec",
+    "source_audit_commit": "e422eaca948884ca954b2b97d74852ed364151d5",
+    "source_rules_unchanged": true
+  },
+  "observed_path_ownership_count_historical": 48,
+  "added_integrator_doc_path_rules_count": 1,
+  "external_scopes_not_git_paths": [
+    {
+      "scope": "KH0012-Lab",
+      "owner": "private_lab_owner",
+      "source": "separate/private Git repository or worktree",
+      "policy": "never copy private files/oracles/holdout to public KnowledgeHub; tests operate offline; no path guessed",
+      "status": "protected_external"
+    },
+    {
+      "scope": "Avalonia PoC",
+      "owner": "avalonia_owner",
+      "source": "separate offline worktree on Windows; path not confirmed here",
+      "policy": "no assumed path, no auto move, future connector integration by owner",
+      "status": "protected_external"
+    },
+    {
+      "scope": "MAUI Windows",
+      "owner": "maui_owner",
+      "source": "Windows worktree, not observed in local Linux report",
+      "policy": "cannot require MAUI Android/iOS builds in Linux gate; no repo-local write without owner",
+      "status": "protected_external"
+    }
+  ],
+  "public_repo_isolation": {
+    "no_private_lab": true,
+    "no_personal_database_oracles": true,
+    "no_emitting_security_tokens": true,
+    "future_ownership_change_requires_CR": true
+  },
+  "graphs_source": {
+    "status": "normative_approved_not_implemented_except_observed_baseline",
+    "baseline_sha": "e422eaca948884ca954b2b97d74852ed364151d5",
+    "baseline_observed": {
+      "KnowledgeHub.Api": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Infrastructure"
+      ],
+      "KnowledgeHub.Application": [
+        "KnowledgeHub.Domain"
+      ],
+      "KnowledgeHub.Client": [],
+      "KnowledgeHub.CorpusImporter": [
+        "KnowledgeHub.Application"
+      ],
+      "KnowledgeHub.Domain": [],
+      "KnowledgeHub.Evaluation": [],
+      "KnowledgeHub.Infrastructure": [
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Application"
+      ],
+      "KnowledgeHub.Observability.Verify": [
+        "KnowledgeHub.Tests.Integration"
+      ],
+      "KnowledgeHub.Tests.Integration": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Api",
+        "KnowledgeHub.CorpusImporter",
+        "KnowledgeHub.Infrastructure"
+      ],
+      "KnowledgeHub.Tests.Unit": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Api"
+      ]
+    },
+    "A1_G1_allowed": {
+      "KnowledgeHub.Api": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Infrastructure",
+        "KnowledgeHub.Contracts.Http",
+        "KnowledgeHub.Rag.Contracts",
+        "KnowledgeHub.Verification"
+      ],
+      "KnowledgeHub.Application": [
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Rag.Contracts",
+        "KnowledgeHub.Verification"
+      ],
+      "KnowledgeHub.Client": [],
+      "KnowledgeHub.CorpusImporter": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Client.Http",
+        "KnowledgeHub.Contracts.Http"
+      ],
+      "KnowledgeHub.Domain": [],
+      "KnowledgeHub.Evaluation": [],
+      "KnowledgeHub.Infrastructure": [
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Rag.Contracts",
+        "KnowledgeHub.Verification"
+      ],
+      "KnowledgeHub.Observability.Verify": [
+        "KnowledgeHub.Tests.Integration"
+      ],
+      "KnowledgeHub.Tests.Integration": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Api",
+        "KnowledgeHub.CorpusImporter",
+        "KnowledgeHub.Infrastructure"
+      ],
+      "KnowledgeHub.Tests.Unit": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Api"
+      ],
+      "KnowledgeHub.Contracts.Http": [],
+      "KnowledgeHub.Client.Http": [
+        "KnowledgeHub.Contracts.Http"
+      ],
+      "KnowledgeHub.Rag.Contracts": [],
+      "KnowledgeHub.Verification": [
+        "KnowledgeHub.Rag.Contracts"
+      ],
+      "KnowledgeHub.Client.Http.Tests": [
+        "KnowledgeHub.Client.Http",
+        "KnowledgeHub.Contracts.Http"
+      ],
+      "KnowledgeHub.Verification.Tests": [
+        "KnowledgeHub.Verification",
+        "KnowledgeHub.Rag.Contracts"
+      ]
+    },
+    "A2_A3_integrated_allowed": {
+      "KnowledgeHub.Api": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Infrastructure",
+        "KnowledgeHub.Contracts.Http",
+        "KnowledgeHub.Rag.Contracts",
+        "KnowledgeHub.Verification"
+      ],
+      "KnowledgeHub.Application": [
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Rag.Contracts",
+        "KnowledgeHub.Verification"
+      ],
+      "KnowledgeHub.Client": [],
+      "KnowledgeHub.CorpusImporter": [
+        "KnowledgeHub.Client.Http",
+        "KnowledgeHub.Contracts.Http"
+      ],
+      "KnowledgeHub.Domain": [],
+      "KnowledgeHub.Evaluation": [],
+      "KnowledgeHub.Infrastructure": [
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Rag.Contracts",
+        "KnowledgeHub.Verification"
+      ],
+      "KnowledgeHub.Observability.Verify": [
+        "KnowledgeHub.Tests.Integration"
+      ],
+      "KnowledgeHub.Tests.Integration": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Api",
+        "KnowledgeHub.CorpusImporter",
+        "KnowledgeHub.Infrastructure"
+      ],
+      "KnowledgeHub.Tests.Unit": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Api"
+      ],
+      "KnowledgeHub.Contracts.Http": [],
+      "KnowledgeHub.Client.Http": [
+        "KnowledgeHub.Contracts.Http"
+      ],
+      "KnowledgeHub.Rag.Contracts": [],
+      "KnowledgeHub.Verification": [
+        "KnowledgeHub.Rag.Contracts"
+      ],
+      "KnowledgeHub.Client.Http.Tests": [
+        "KnowledgeHub.Client.Http",
+        "KnowledgeHub.Contracts.Http"
+      ],
+      "KnowledgeHub.Verification.Tests": [
+        "KnowledgeHub.Verification",
+        "KnowledgeHub.Rag.Contracts"
+      ]
+    },
+    "edges_are": "direct_ProjectReference",
+    "all_listed_graphs_acyclic_by_static_check": true,
+    "future_targets_deferred": {
+      "KnowledgeHub.Retrieval": [
+        "KnowledgeHub.Rag.Contracts"
+      ],
+      "KnowledgeHub.Inference.Ollama": [
+        "KnowledgeHub.Rag.Contracts"
+      ],
+      "KnowledgeHub.Rag.Core": [
+        "KnowledgeHub.Rag.Contracts"
+      ]
+    }
+  },
+  "graph_check": {
+    "direct_edges_not_transitive": true,
+    "require_acyclic": true,
+    "allow_historical_tool_exception": "KnowledgeHub.Observability.Verify -> KnowledgeHub.Tests.Integration",
+    "require_no_new_prod_to_tests": true
+  },
+  "normative_revision": "1.1.0-rc.1",
+  "maintainer_approvals": {
+    "A02-D01": "A",
+    "A02-D02": "B",
+    "A02-D03": "A + uniform diagnostics",
+    "A02-D04": "B",
+    "A02-D05": "A",
+    "A02-D06": "A",
+    "A02-D07": "A",
+    "change_control": "A",
+    "SPEC-01": "approved",
+    "SPEC-02": "approved",
+    "SPEC-03": "approved",
+    "normative_revision": "1.0.0-rc.1",
+    "date_local": "2026-11-03"
+  },
+  "change_control": {
+    "required_after_final_approval": true,
+    "scope": "Every change to frozen contract or protected ownership; admin/data/security follow specialized authorization in addition",
+    "semver": {
+      "MAJOR": "Breaking CLR/wire/schema/enum/port/data changes; explicit consumer transition",
+      "MINOR": "Additive compatible functionality/types/codes",
+      "PATCH": "Documentation or defect correction without public behavior/shape change"
+    },
+    "no_implicit_server_mutation": true,
+    "no_unapproved_paths": true,
+    "local_evidence": "bind build/test/format/fixtures to candidate SHA and clean-tree or a declared diff hash; never reuse old TRX as new evidence",
+    "exceptions": "Hotfix may accelerate scheduling, never omit ownership authorization or mandatory safety gates"
+  },
+  "documentation_git_integration": {
+    "repository": "alescis-wuin/KnowledgeHub",
+    "pull_request": 19,
+    "review_branch": "feature/arch-a0-2-normative-docs",
+    "first_documentation_commit": "81c806779e25a92501e1aa040ad138ae5465f5a8",
+    "reviewed_head_sha": "4409b10a5bbb7b03a6a36c2d26df94b4be075e96",
+    "main_sha_at_pr_review": "0f359979235d189cb3059c86224dba738d176e4c",
+    "repository_documentation_state": "committed_and_published_to_review_branch",
+    "main_merge_state": "pending_review_and_explicit_merge",
+    "main_merge_commit_sha": null,
+    "prepared_base_sha": null,
+    "runtime_implemented": false,
+    "qualification_scope": "documentary_only",
+    "review_correction_id": "ARCH-A0.2-PR19-REV-003",
+    "notes": "Reviewed REV-002 was published at 4409b10 (tree 5c12fe6). REV-003 is a new unapproved candidate with unknown future Git SHA. PR19 not merged; API/SDK/RAG libraries, runtime tests and G1 not implemented.",
+    "reviewed_tree_sha": "5c12fe6028be01193e6ff42267e0c6e0f5b2b18e",
+    "reviewed_head_scope": "Last completed Codex review of published REV-002 (baseline for REV-003); not the proposed REV-003 candidate commit.",
+    "last_published_head_sha_at_authoring": "4409b10a5bbb7b03a6a36c2d26df94b4be075e96",
+    "candidate_revision": "1.1.0-rc.1",
+    "candidate_commit_sha": null,
+    "candidate_tree_sha": null,
+    "candidate_approval_status": "pending_explicit_maintainer_approval",
+    "candidate_git_binding_rule": "After a signed REV-003 commit and push, obtain the current artifact identity from git rev-parse HEAD and HEAD^{tree} and GitHub PR19 head.sha; match it to the reviewed commit at review/merge time. Never embed a purported current commit/tree SHA into its own tracked contents (circular commitment)."
+  },
+  "candidate_normative_revision": {
+    "revision": "1.1.0-rc.1",
+    "baseline_approved_revision": "1.0.0-rc.1",
+    "owner": "integrator",
+    "approval_status": "pending_explicit_maintainer_approval",
+    "related_change_request": "ARCH-A0.2-PR19-REV-003",
+    "requires_review_head_exact_match": true,
+    "self_referential_commit_hash_forbidden": true,
+    "runtime_and_G1_status": "not_implemented"
+  }
+}
