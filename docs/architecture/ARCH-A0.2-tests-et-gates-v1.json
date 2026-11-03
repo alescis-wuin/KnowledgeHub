@@ -106,7 +106,13 @@
     "RAG: fail-closed double revalidation across persistence and authorization scope",
     "API baseline characterization: custom InvalidModelStateResponseFactory returns camelCase ApiResponse errors before any RFC9457 normalization; check F-WIRE-009 against Program.cs.",
     "RAG: VerifiedEvidenceAnswer retains rejected diagnostic claims on internal ABSTAIN/CONFLICT paths; public VerifiedRagResponseDto must exclude those claims.",
-    "SDK: HttpClient.Timeout equal to or shorter than TotalRequestTimeout is rejected before requests; infinite or strictly greater host timeout accepted; classifier distinguishes caller, SDK and unsolicited cancellation."
+    "SDK: HttpClient.Timeout equal to or shorter than TotalRequestTimeout is rejected before requests; infinite or strictly greater host timeout accepted; classifier distinguishes caller, SDK and unsolicited cancellation.",
+    "A2 SDK: constructor rejects TotalRequestTimeout below 1ms or above 2147483647ms, even with infinite host HttpClient.Timeout; CancelAfter does not throw after passing validation.",
+    "A2 SDK: host-supplied HttpClient has no readable handler configuration; real integration composition must set AllowAutoRedirect=false and pass cross-origin 307/308 POST exfiltration negative tests. Do not claim a constructor can validate arbitrary handler settings.",
+    "A2 SDK: reject missing or invalid BaseAddress (HTTP(S) absolute, no credentials/query/fragment), disallow remote plaintext HTTP and preserve configured API path prefixes.",
+    "A2 API/SDK: distinct trusted application/problem+json document.not_found vs route.not_found vs untrusted proxy 404; only 2 nullable document reads return null, other cases safely throw.",
+    "A2 API/SDK: exact stable-code regex with escaped literal period; reject httpXnot_found and arbitrary/unallowlisted remote error codes.",
+    "A2 API: POST /api/sources target fixture preserves explicit url:null under default MVC serializer; no serializer drift."
   ],
   "quality_invariants": [
     "No runtime source files changed in ARCH-A0.2",
@@ -116,7 +122,9 @@
     "No A2/A3 before G1 prepared_base_sha",
     "No acceptance based on synthetic JSON fixtures alone",
     "No SDK connection until API normalization is proven",
-    "No public IVerifiedVerdictEvaluator in v1"
+    "No public IVerifiedVerdictEvaluator in v1",
+    "Importer redirect safety is a host integration gate, not falsely claimed as SDK introspection of HttpClientHandler.",
+    "No status-only 404-to-null mapping: require verified document.not_found ProblemDetails and trusted API origin."
   ],
   "provenance": {
     "audit_spec": "KnowledgeHub-Reprise-2026-11-03-v1.0.0/references/audit-v2-annexes/initial_contracts.*",
@@ -148,7 +156,7 @@
     "pull_request": 19,
     "review_branch": "feature/arch-a0-2-normative-docs",
     "first_documentation_commit": "81c806779e25a92501e1aa040ad138ae5465f5a8",
-    "reviewed_head_sha": "81c806779e25a92501e1aa040ad138ae5465f5a8",
+    "reviewed_head_sha": "570466b039c128f7c5e0f1fed7bcdc0d15fe8db8",
     "main_sha_at_pr_review": "0f359979235d189cb3059c86224dba738d176e4c",
     "repository_documentation_state": "committed_and_published_to_review_branch",
     "main_merge_state": "pending_review_and_explicit_merge",
@@ -156,7 +164,7 @@
     "prepared_base_sha": null,
     "runtime_implemented": false,
     "qualification_scope": "documentary_only",
-    "review_correction_id": "ARCH-A0.2-PR19-REV-001",
-    "notes": "The Git branch contains the six frozen documents, but main has not merged PR19; no API/SDK/RAG library or G1 is implemented."
+    "review_correction_id": "ARCH-A0.2-PR19-REV-002",
+    "notes": "PR19 documents are published on the review branch at 570466b; main remains unmerged. REV-002 is only a documentary correction candidate; API/SDK/RAG runtime and G1 remain unimplemented."
   }
 }

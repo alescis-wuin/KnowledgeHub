@@ -209,11 +209,12 @@
         "traceId": "synthetic-trace",
         "data": {
           "id": "11111111-1111-4111-8111-111111111111",
-          "name": "Exemple"
+          "name": "Exemple",
+          "url": null
         },
         "errors": []
       },
-      "assertion": "HTTP actual 201 equals envelope statusCode; no documented legacy 200 tolerance in new SDK"
+      "assertion": "HTTP 201 and statusCode 201; KnowledgeSourceDto.Url is nullable and MVC default serializes the property as explicit url:null (not omitted). Integration test required."
     },
     {
       "id": "F-TARGET-201-tags",
@@ -277,10 +278,39 @@
         "type": "about:blank",
         "title": "Not Found",
         "status": 404,
-        "code": "http.not_found",
+        "code": "document.not_found",
         "correlationId": "1234567890abcdef1234567890abcdef"
       },
-      "assertion": "Nullable SDK read methods only map 404 to null, others throw HttpRequestException with diagnostics"
+      "assertion": "Future typed resource-absence 404 at trusted origin only: nullable SDK method may return null after validating ProblemDetails 404, code=document.not_found and correlationId. Distinct from route/proxy 404; API not yet normalized."
+    },
+    {
+      "id": "F-TARGET-PROBLEM-404-ROUTE",
+      "route": "GET /api/unknown-route",
+      "role": "target_synthetic_requires_api_integration_test",
+      "http_status": 404,
+      "media_type": "application/problem+json",
+      "expect": {
+        "type": "about:blank",
+        "title": "Not Found",
+        "status": 404,
+        "code": "route.not_found",
+        "correlationId": "1234567890abcdef1234567890abcdef"
+      },
+      "assertion": "Future unmatched-route 404 MUST throw safe KnowledgeHubHttpRequestException; never map to null. API normalization still pending."
+    },
+    {
+      "id": "F-NEGATIVE-PROXY-404",
+      "route": "GET /api/documents/{id:guid}",
+      "role": "adversarial_synthetic_negative_fixture",
+      "http_status": 404,
+      "media_type": "text/html",
+      "source_response": "proxy-generated 404, not authenticated API ProblemDetails",
+      "expect": {
+        "client_result": "KnowledgeHubHttpRequestException",
+        "null_result": false,
+        "response_body_exposed": false
+      },
+      "assertion": "Synthetic proxy 404 must not be mistaken for a missing document or leak untrusted body into errors."
     }
   ],
   "limits": {
@@ -301,7 +331,7 @@
     "pull_request": 19,
     "review_branch": "feature/arch-a0-2-normative-docs",
     "first_documentation_commit": "81c806779e25a92501e1aa040ad138ae5465f5a8",
-    "reviewed_head_sha": "81c806779e25a92501e1aa040ad138ae5465f5a8",
+    "reviewed_head_sha": "570466b039c128f7c5e0f1fed7bcdc0d15fe8db8",
     "main_sha_at_pr_review": "0f359979235d189cb3059c86224dba738d176e4c",
     "repository_documentation_state": "committed_and_published_to_review_branch",
     "main_merge_state": "pending_review_and_explicit_merge",
@@ -309,7 +339,7 @@
     "prepared_base_sha": null,
     "runtime_implemented": false,
     "qualification_scope": "documentary_only",
-    "review_correction_id": "ARCH-A0.2-PR19-REV-001",
-    "notes": "The Git branch contains the six frozen documents, but main has not merged PR19; no API/SDK/RAG library or G1 is implemented."
+    "review_correction_id": "ARCH-A0.2-PR19-REV-002",
+    "notes": "PR19 documents are published on the review branch at 570466b; main remains unmerged. REV-002 is only a documentary correction candidate; API/SDK/RAG runtime and G1 remain unimplemented."
   }
 }

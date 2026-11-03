@@ -38,7 +38,7 @@
       "pull_request": 19,
       "review_branch": "feature/arch-a0-2-normative-docs",
       "first_documentation_commit": "81c806779e25a92501e1aa040ad138ae5465f5a8",
-      "reviewed_head_sha": "81c806779e25a92501e1aa040ad138ae5465f5a8",
+      "reviewed_head_sha": "570466b039c128f7c5e0f1fed7bcdc0d15fe8db8",
       "main_sha_at_pr_review": "0f359979235d189cb3059c86224dba738d176e4c",
       "repository_documentation_state": "committed_and_published_to_review_branch",
       "main_merge_state": "pending_review_and_explicit_merge",
@@ -46,8 +46,8 @@
       "prepared_base_sha": null,
       "runtime_implemented": false,
       "qualification_scope": "documentary_only",
-      "review_correction_id": "ARCH-A0.2-PR19-REV-001",
-      "notes": "The Git branch contains the six frozen documents, but main has not merged PR19; no API/SDK/RAG library or G1 is implemented."
+      "review_correction_id": "ARCH-A0.2-PR19-REV-002",
+      "notes": "PR19 documents are published on the review branch at 570466b; main remains unmerged. REV-002 is only a documentary correction candidate; API/SDK/RAG runtime and G1 remain unimplemented."
     }
   },
   "authoritative_scope": {
@@ -1191,14 +1191,16 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "404_document_not_found_vs_route_or_proxy_not_found"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+        "sdk_target_owner": "KnowledgeHubDocumentsClient",
+        "not_found_discriminator": "For SDK target, HTTP 404 -> null only if valid application/problem+json code=document.not_found from trusted API origin; never on route.not_found/generic/proxy 404."
       },
       {
         "route_id": "POST /api/documents",
@@ -1316,14 +1318,16 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "404_document_not_found_vs_route_or_proxy_not_found"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+        "sdk_target_owner": "KnowledgeHubDocumentsClient",
+        "not_found_discriminator": "For SDK target, HTTP 404 -> null only if valid application/problem+json code=document.not_found from trusted API origin; never on route.not_found/generic/proxy 404."
       },
       {
         "route_id": "GET /api/documents/search?q={q}",
@@ -1583,7 +1587,7 @@
       "non_2xx_media_type": "application/problem+json",
       "non_2xx_format": "RFC9457 ProblemDetails, standard fields type/title/status (detail/instance optional) and extensions code, correlationId; validation errors extension only for safe field names.",
       "required_extensions": {
-        "code": "documented stable code; [a-z][a-z0-9]*(.[a-z][a-z0-9_]*)+",
+        "code": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9_]*)+$",
         "correlationId": "32 lowercase hexadecimal characters, nonzero; validated server-generated W3C trace identifier or fresh opaque random ID"
       },
       "status_consistency": "actual HTTP status authoritative; ProblemDetails.status must match transmitted status; success envelope statusCode must match actual HTTP status",
@@ -1591,7 +1595,24 @@
       "all_http_failures": "including MVC controller errors, [ApiController] validation, auth failures, middleware exceptions, notfound and rate limits",
       "compatibility_policy": "No default legacy tolerance in new SDK; server normalization must be demonstrated in isolated integration fixtures before A2 importer or UI cutover.",
       "not_yet_implemented": true,
-      "approval_status": "normative_approved_not_implemented"
+      "approval_status": "normative_approved_not_implemented",
+      "code_validation_note": "Anchored regular expression with literal escaped dot, applied to the entire code string. Syntax alone is insufficient: SDK maps only an explicit local allowlist and never logs untrusted remote code.",
+      "typed_not_found_target": {
+        "resource_absent": "API document GET/{id:guid} and GET/{id:guid}/details must return HTTP 404 application/problem+json with code=document.not_found ONLY when that document ID truly does not exist within the authorized scope.",
+        "route_missing": "Unmatched API route must return HTTP 404 application/problem+json with code=route.not_found, not document.not_found; do not reveal whether an unauthorized document exists.",
+        "proxy_or_untrusted_404": "A 404 lacking authenticated expected API-origin ProblemDetails, correct content-type, matching status, validated correlation ID, or allowlisted document.not_found is not resource absence; never map it to null.",
+        "sdk_mapping": "Only GetDocumentAsync/GetDocumentDetailsAsync map verified HTTP 404 + typed document.not_found from the trusted origin to null; wrong route, proxy, generic http.not_found and mismatched payload throw KnowledgeHubHttpRequestException with safe metadata. Other SDK methods always throw on HTTP 404.",
+        "status_code_compatibility": "Changing the server error extension code is a future API wire-contract change under CR/SPEC-02; must be implemented and tested before nullable SDK behavior is enabled.",
+        "server_and_client_tests": [
+          "document truly absent -> 404 document.not_found -> null for two reads",
+          "unmatched route -> 404 route.not_found -> exception",
+          "proxy untrusted HTML 404 -> exception",
+          "404 with spoofed code on nontrusted origin -> exception",
+          "404 document.not_found on nonnullable method -> exception",
+          "404 with invalid correlationId -> exception",
+          "authorized-but-hidden document -> fail closed without revealing existence"
+        ]
+      }
     },
     "observed_model_state_source": "KnowledgeHub.Api/Program.cs (Configure<ApiBehaviorOptions>), KnowledgeHub.Application/DTOs/ApiResponses.cs"
   },
@@ -1651,7 +1672,8 @@
       "legacy empty Guid matched by title only against documents without ExternalId",
       "preserve 5 numeric ImportDocumentOutcome values",
       "Unchanged does not rewrite content or reindex",
-      "no retry or unintended idempotency changes"
+      "no retry or unintended idempotency changes",
+      "Host HttpClientHandler.AllowAutoRedirect=false is preserved on SDK importer cutover; test 307/308 cross-origin POST for zero payload forwarding"
     ],
     "former_proposal_not_adopted": {
       "type": "KnowledgeHub.Client.Http.KnowledgeHubHttpClient",
@@ -1665,12 +1687,12 @@
       "per_client_constructor": "(HttpClient httpClient, KnowledgeHubHttpClientOptions options); HttpClient supplied by host and NEVER disposed",
       "options_type": "public sealed record KnowledgeHubHttpClientOptions(TimeSpan TotalRequestTimeout)",
       "DI_optional": "Integrators may register named/typed clients; no mandatory Microsoft.Extensions.* dependency in SDK; no static singleton or auto service-provider creation",
-      "configuration": "Host owns BaseAddress, authentication and request identity; SDK must not blindly log HTTP URI, question or body",
+      "configuration": "Host owns absolute HTTP(S) BaseAddress, authentication, nonredirecting primary handler (AllowAutoRedirect=false) and request identity; HTTPS required for non-loopback, HTTP only loopback; SDK must not blindly log URI, question or body. SDK cannot inspect host redirect handler: integration gate required.",
       "retry": "none (including mutation or generation)",
-      "timeout": "SDK-owned finite TotalRequestTimeout controls SendAsync and body read; caller cancellation wins a tie; enforce host HttpClient.Timeout == Timeout.InfiniteTimeSpan or strictly greater than TotalRequestTimeout to rule out an earlier host cancellation.",
+      "timeout": "SDK-owned TotalRequestTimeout in inclusive 1..2147483647ms range; CancelAfter covers SendAsync and body; caller cancellation wins a tie; host HttpClient.Timeout must be infinite or strictly greater.",
       "resource_lifetimes": "HttpClient host-owned; request and response sdk-owned",
       "contract_status": "normative_approved_not_implemented",
-      "host_timeout_compatibility": "Reject construction (ArgumentException) unless HttpClient.Timeout == Timeout.InfiniteTimeSpan OR HttpClient.Timeout > options.TotalRequestTimeout. The SDK must not mutate the host-owned HttpClient.Timeout. Reject zero, negative and infinite SDK TotalRequestTimeout; validate also before first request if the host changed the timeout after construction."
+      "host_timeout_compatibility": "Reject construction unless TotalRequestTimeout is between 1 and int.MaxValue milliseconds inclusive and HttpClient.Timeout is InfiniteTimeSpan or strictly greater. Validate again before request if host changed its timeout. The SDK never mutates the host-owned HttpClient."
     },
     "clients": [
       {
@@ -1755,10 +1777,11 @@
       "no_new_category_implicit": "Additional families/codes require CR and tests; new stable codes can be additive (MINOR) if all consumers handle unknown codes.",
       "normalization_first": "SDK integration deferred until all server error paths use the approved ProblemDetails wire target",
       "not_runtime_implemented": true,
-      "approval_status": "normative_approved_not_implemented"
+      "approval_status": "normative_approved_not_implemented",
+      "resource_absence_error_mapping": "Server document.not_found and route.not_found are typed API wire codes; SDK may return null only for the first on two reads. Others map to safe HTTP error family http.not_found; never concatenate an arbitrary remote code."
     },
     "timeout_arbitration": {
-      "finite_sdk_budget": "TimeSpan > TimeSpan.Zero; TimeSpan.InfiniteTimeSpan and TimeSpan.MaxValue rejected; implementable with CancellationTokenSource.CancelAfter for total send+body read.",
+      "finite_sdk_budget": "Require TimeSpan.FromMilliseconds(1) <= TotalRequestTimeout <= TimeSpan.FromMilliseconds(int.MaxValue) (2147483647ms). Reject 0, negative, infinite, fractional sub-millisecond and larger budgets at constructor with ArgumentOutOfRangeException/ArgumentException. Within the bound, CancellationTokenSource.CancelAfter(TimeSpan) can be used for the SDK-owned request+stream deadline; no silent clamping.",
       "host_client_timeout_requirement": "HttpClient.Timeout == Timeout.InfiniteTimeSpan OR HttpClient.Timeout > TotalRequestTimeout; reject otherwise with ArgumentException naming the invalid configuration before requests.",
       "no_silent_host_mutation": true,
       "sdk_budget_starts_before_send_and_covers_stream": true,
@@ -1770,9 +1793,42 @@
         "HttpClient.Timeout InfiniteTimeSpan / TotalRequestTimeout 120s -> accepted",
         "HttpClient.Timeout 120s / TotalRequestTimeout 60s -> accepted",
         "Caller token canceled during stream -> cancellation category",
-        "SDK budget expires during body stream -> timeout category"
+        "SDK budget expires during body stream -> timeout category",
+        "TotalRequestTimeout 0.5ms / host infinite -> configuration rejected before SendAsync",
+        "TotalRequestTimeout 1ms / host infinite -> accepted",
+        "TotalRequestTimeout 2147483647ms / host infinite -> accepted (timer boundary checked)",
+        "TotalRequestTimeout 2147483648ms / host infinite -> configuration rejected before SendAsync",
+        "TotalRequestTimeout TimeSpan.MaxValue -> configuration rejected"
+      ],
+      "min_total_request_timeout_ms": 1,
+      "max_total_request_timeout_ms": 2147483647,
+      "validation_portability": "Portable conservative bound across .NET implementations. Do not claim to support UInt32.MaxValue-1 on all platforms. Constructor rejects invalid budget before any request."
+    },
+    "host_redirect_security_policy": {
+      "mandatory_for_every_sdk_consumer": true,
+      "host_configuration": "Construct host-owned HttpClient with HttpClientHandler/SocketsHttpHandler.AllowAutoRedirect = false; same requirement for named/typed clients and the CorpusImporter after SDK cutover. Never use the default auto-redirecting handler for KnowledgeHub API requests, including GET, POST and authenticated requests.",
+      "host_setup_source": "KnowledgeHub.CorpusImporter/Program.cs uses new HttpClientHandler { AllowAutoRedirect = false } at the verified baseline.",
+      "sdk_contract": "The SDK must reject all received 300..399 responses as non-success, never follow Location, never resend request body and never implement its own redirects. No transparent retry.",
+      "critical_limitation": "An HttpClient supplied to a constructor does NOT expose its primary handler/AllowAutoRedirect. The SDK cannot prove the host disabled redirects from HttpClient alone; a nonredirecting host handler and security test are mandatory pre-cutover gates. Do not falsely claim constructor enforcement. If automatic fail-closed construction is required, a separate approved factory/handler API CR is needed.",
+      "integration_gate": "Before any importer/UI/service cutover, test the real configured host HttpClient against 301/302/303/307/308, including cross-origin 307/308 with POST payload and attacker-controlled Location. Assert zero requests/bodies/credentials delivered to redirected origin; 3xx are reported as safe failures. The test must use the production handler configuration, not only a fake nonredirecting handler.",
+      "sensitive_data_scope": "Corpus documents, private RAG questions, credentials, authorization headers and metadata payloads; do not echo Location or response body in exceptions or logs."
+    },
+    "base_address_requirements": {
+      "constructor": "Require non-null absolute HttpClient.BaseAddress with scheme http or https, no UserInfo, Query or Fragment; reject at construction with ArgumentException rather than allow InvalidOperationException on first relative send. Recheck before first request if the host mutates its BaseAddress.",
+      "transport_confidentiality": "Only HTTPS is permitted for a non-loopback host; cleartext HTTP is restricted to loopback (same as existing CorpusImporter/Program.cs). Reuse the approved host address; do not replace or mutate it.",
+      "relative_route_resolution": "Treat the recorded /api/... routes as API route identities; construct relative request paths without an initial slash and resolve against a normalized trailing-slash BaseAddress, preserving an explicitly configured API path prefix. Do not silently discard a reverse-proxy prefix or authorize a new origin.",
+      "source_baseline": "KnowledgeHub.CorpusImporter/Program.cs checks configured URL; KnowledgeHub.CorpusImporter/Services/CorpusImporter.cs checks BaseAddress non-null.",
+      "tests": [
+        "null BaseAddress -> ArgumentException",
+        "relative or non-http(s) address -> ArgumentException",
+        "userinfo/query/fragment -> ArgumentException",
+        "remote cleartext HTTP -> ArgumentException",
+        "HTTPS absolute with path prefix -> correct final request URI",
+        "loopback HTTP absolute -> accepted",
+        "mutated BaseAddress before request -> detected"
       ]
-    }
+    },
+    "nullable_not_found_contract": "Only two listed document reads may return null after exact RFC9457 HTTP 404 ProblemDetails at the configured trusted origin, with status 404, code=document.not_found and valid correlationId. Generic 404, missing route/proxy 404, malformed body or unallowlisted code MUST throw; no status-only 404-to-null fallback in the new SDK. No API normalization, no SDK cutover."
   },
   "rag_contracts_v1": {
     "types": [

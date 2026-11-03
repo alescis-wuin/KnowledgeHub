@@ -60,3 +60,17 @@ Chaque CR fournit `task_id`, `base_sha`, `current_sha`, `requested_paths`, `affe
 - `integration_order` : valider le delta sur la branche existante, commit signé distinct, publier la PR mise à jour après autorisation, attendre les revues Codex, fusion uniquement après autorisation.
 - `owner` : intégrateur (dossier `docs/architecture/`) ; `approval_decision` : résolution des revues explicitement demandée par le mainteneur, **acceptation du delta à confirmer sur le rapport d’exécution**.
 - Le gel approuvé `1.0.0-rc.1` et ses 7 décisions ne sont pas annulés. Aucun `prepared_base_sha` ni commit de fusion dans `main` ne peut être inventé.
+
+## CR ARCH-A0.2-PR19-REV-002 — Renforcement après nouvelle revue Codex
+
+- `task_id` : `ARCH-A0.2-PR19-REV-002` ; `base_sha` et `current_sha` de la revue : `570466b039c128f7c5e0f1fed7bcdc0d15fe8db8` ; `requested_paths` : les six documents normatifs `docs/architecture/` de la PR #19.
+- `affected_contract` : transport et configuration `KnowledgeHub.Client.Http`, délai SDK, normalisation API WIRE-02/03, 404 des lectures documentaires, fixtures et règles de sécurité.
+- `concrete_need` : résoudre 1 remarque P1 (redirections) et 5 remarques P2 après la revue du second commit ; éviter toute fuite de documents et toute classification 404 ou timeout inexacte.
+- `old_behavior` : pas de borne maximale `CancelAfter`, redirections hôte non spécifiées, BaseAddress non validée, fixture source sans `url:null`, 404 nullable basé seulement sur le statut, regex `.` non échappée.
+- `new_behavior` : délai SDK borné [1, 2 147 483 647] ms ; handler hôte non redirigeant obligatoire avec preuve d'intégration ; adresse API absolue validée et HTTPS hors loopback ; fixture `url:null` ; 404 documentaire typé `document.not_found` vs `route.not_found`/proxy ; regex ancrée à point littéral.
+- `impacted_consumers` : intégrateur API normalisation SPEC-02, SDK A2, `KnowledgeHub.CorpusImporter`, interfaces futures et tests de contrat.
+- `CLR_wire_data_compatibility` : aucun CLR ni migration modifiés dans cette correction. Le futur code `document.not_found`/`route.not_found` élargit le vocabulaire filaire cible et requiert qualification/CR d'intégration ; les options et constructeurs SDK approuvés sont conservés. L'obligation de configuration hôte nécessite un vrai contrôle d'intégration, car `HttpClient` ne révèle pas son handler.
+- `proposed_tests` : JSON strict ; validation des quatre familles d'erreur, 23 types/22 opérations/16 RAG/49 réservations, bornes timeout et BaseAddress, réseau 307/308 POST vers origine non fiable, 404 document/route/proxy et code regex, sérialisation MVC de `url:null`.
+- `integration_order` : appliquer seulement le delta documentaire sur la branche existante, vérifier le retour v3, créer un commit signé distinct, publier après autorisation, examiner nouvelle revue Codex, fusionner uniquement après accord explicite. Prévoir les gates HTTP/API/SDK avant le cutover A2, et G1 indépendant.
+- `owner` : intégrateur du répertoire `docs/architecture/` ; `approval_decision` : correction candidate soumise à l'acceptation du mainteneur après retour de qualification ; aucune approbation ni fusion automatique.
+- Les sept décisions d'orientation et la gouvernance approuvées en `1.0.0-rc.1` restent inchangées ; `prepared_base_sha=null`.
