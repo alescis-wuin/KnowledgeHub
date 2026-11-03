@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "artifact": "ARCH-A0.2-contracts",
-  "status": "normative_approved_review_branch_committed_unmerged_not_implemented",
+  "status": "baseline_1_0_0_rc1_approved_candidate_1_1_0_rc1_pending_maintainer_approval_unmerged_not_implemented",
   "provenance": {
     "repository": "alescis-wuin/KnowledgeHub",
     "main_commit_observed": "0f359979235d189cb3059c86224dba738d176e4c",
@@ -38,7 +38,7 @@
       "pull_request": 19,
       "review_branch": "feature/arch-a0-2-normative-docs",
       "first_documentation_commit": "81c806779e25a92501e1aa040ad138ae5465f5a8",
-      "reviewed_head_sha": "570466b039c128f7c5e0f1fed7bcdc0d15fe8db8",
+      "reviewed_head_sha": "4409b10a5bbb7b03a6a36c2d26df94b4be075e96",
       "main_sha_at_pr_review": "0f359979235d189cb3059c86224dba738d176e4c",
       "repository_documentation_state": "committed_and_published_to_review_branch",
       "main_merge_state": "pending_review_and_explicit_merge",
@@ -46,8 +46,29 @@
       "prepared_base_sha": null,
       "runtime_implemented": false,
       "qualification_scope": "documentary_only",
-      "review_correction_id": "ARCH-A0.2-PR19-REV-002",
-      "notes": "PR19 documents are published on the review branch at 570466b; main remains unmerged. REV-002 is only a documentary correction candidate; API/SDK/RAG runtime and G1 remain unimplemented."
+      "review_correction_id": "ARCH-A0.2-PR19-REV-003",
+      "notes": "Reviewed REV-002 was published at 4409b10 (tree 5c12fe6). REV-003 is a new unapproved candidate with unknown future Git SHA. PR19 not merged; API/SDK/RAG libraries, runtime tests and G1 not implemented.",
+      "reviewed_tree_sha": "5c12fe6028be01193e6ff42267e0c6e0f5b2b18e",
+      "reviewed_head_scope": "Last completed Codex review of published REV-002 (baseline for REV-003); not the proposed REV-003 candidate commit.",
+      "last_published_head_sha_at_authoring": "4409b10a5bbb7b03a6a36c2d26df94b4be075e96",
+      "candidate_revision": "1.1.0-rc.1",
+      "candidate_commit_sha": null,
+      "candidate_tree_sha": null,
+      "candidate_approval_status": "pending_explicit_maintainer_approval",
+      "candidate_git_binding_rule": "After a signed REV-003 commit and push, obtain the current artifact identity from git rev-parse HEAD and HEAD^{tree} and GitHub PR19 head.sha; match it to the reviewed commit at review/merge time. Never embed a purported current commit/tree SHA into its own tracked contents (circular commitment)."
+    },
+    "candidate_normative_amendment": {
+      "revision": "1.1.0-rc.1",
+      "previous_approved_revision": "1.0.0-rc.1",
+      "change_request": "ARCH-A0.2-PR19-REV-003",
+      "classification": "MINOR_additive_codes_and_SDK_policy_requirements",
+      "basis": "4409b10a5bbb7b03a6a36c2d26df94b4be075e96",
+      "reviewed_tree": "5c12fe6028be01193e6ff42267e0c6e0f5b2b18e",
+      "approved": false,
+      "approval_decision": "pending_explicit_maintainer_approval_after_PR19_review",
+      "runtime_qualified": false,
+      "merge_commit": null,
+      "notes": "The 1.0.0-rc.1 baseline approvals D01..D07/GOV/SPEC remain effective; the added document.not_found and route.not_found wire codes, SDK timeout/configuration rules, TLS requirement and bounded responses form 1.1.0-rc.1, not yet approved or implemented."
     }
   },
   "authoritative_scope": {
@@ -58,7 +79,7 @@
     ],
     "normative_after_explicit_approval": true,
     "versioning": "SemVer: PATCH non-semantic fixture/doc, MINOR additive compatible, MAJOR incompatible CLR/wire/port ; change request obligatoire",
-    "target_status": "approved_normative_documents_on_PR19_branch_main_merge_pending"
+    "target_status": "candidate_1_1_0_rc1_pending_explicit_approval_on_PR19_unmerged"
   },
   "projects": [
     {
@@ -1016,14 +1037,20 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_collection_item_count_bounded",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubMetadataClient"
+        "sdk_target_owner": "KnowledgeHubMetadataClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 4194304,
+        "max_error_decoded_bytes": 65536,
+        "max_result_collection_items": 4096
       },
       {
         "route_id": "POST /api/categories",
@@ -1041,14 +1068,18 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 201,
         "target_response_body_statusCode": 201,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubMetadataClient"
+        "sdk_target_owner": "KnowledgeHubMetadataClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 4194304,
+        "max_error_decoded_bytes": 65536
       },
       {
         "route_id": "GET /api/sources",
@@ -1066,14 +1097,20 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_collection_item_count_bounded",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubMetadataClient"
+        "sdk_target_owner": "KnowledgeHubMetadataClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 4194304,
+        "max_error_decoded_bytes": 65536,
+        "max_result_collection_items": 4096
       },
       {
         "route_id": "POST /api/sources",
@@ -1091,14 +1128,18 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 201,
         "target_response_body_statusCode": 201,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubMetadataClient"
+        "sdk_target_owner": "KnowledgeHubMetadataClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 4194304,
+        "max_error_decoded_bytes": 65536
       },
       {
         "route_id": "GET /api/tags",
@@ -1116,14 +1157,20 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_collection_item_count_bounded",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubMetadataClient"
+        "sdk_target_owner": "KnowledgeHubMetadataClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 4194304,
+        "max_error_decoded_bytes": 65536,
+        "max_result_collection_items": 4096
       },
       {
         "route_id": "POST /api/tags",
@@ -1141,14 +1188,18 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 201,
         "target_response_body_statusCode": 201,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubMetadataClient"
+        "sdk_target_owner": "KnowledgeHubMetadataClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 4194304,
+        "max_error_decoded_bytes": 65536
       },
       {
         "route_id": "GET /api/documents",
@@ -1166,14 +1217,20 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_collection_item_count_bounded",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+        "sdk_target_owner": "KnowledgeHubDocumentsClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 33554432,
+        "max_error_decoded_bytes": 65536,
+        "max_result_collection_items": 4096
       },
       {
         "route_id": "GET /api/documents/{id:guid}",
@@ -1192,7 +1249,8 @@
           "wire_shape",
           "http_error_status",
           "no_private_payload_in_exception",
-          "404_document_not_found_vs_route_or_proxy_not_found"
+          "404_document_not_found_vs_route_or_proxy_not_found",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
@@ -1200,7 +1258,10 @@
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
         "sdk_target_owner": "KnowledgeHubDocumentsClient",
-        "not_found_discriminator": "For SDK target, HTTP 404 -> null only if valid application/problem+json code=document.not_found from trusted API origin; never on route.not_found/generic/proxy 404."
+        "not_found_discriminator": "For SDK target, HTTP 404 -> null only if valid application/problem+json code=document.not_found from trusted API origin; never on route.not_found/generic/proxy 404.",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 67108864,
+        "max_error_decoded_bytes": 65536
       },
       {
         "route_id": "POST /api/documents",
@@ -1218,14 +1279,18 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 201,
         "target_http_success_status": 201,
         "target_response_body_statusCode": 201,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+        "sdk_target_owner": "KnowledgeHubDocumentsClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 33554432,
+        "max_error_decoded_bytes": 65536
       },
       {
         "route_id": "POST /api/documents/import",
@@ -1243,14 +1308,18 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+        "sdk_target_owner": "KnowledgeHubDocumentsClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 33554432,
+        "max_error_decoded_bytes": 65536
       },
       {
         "route_id": "PUT /api/documents/{id:guid}",
@@ -1268,14 +1337,18 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+        "sdk_target_owner": "KnowledgeHubDocumentsClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 33554432,
+        "max_error_decoded_bytes": 65536
       },
       {
         "route_id": "DELETE /api/documents/{id:guid}",
@@ -1293,14 +1366,18 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+        "sdk_target_owner": "KnowledgeHubDocumentsClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 33554432,
+        "max_error_decoded_bytes": 65536
       },
       {
         "route_id": "GET /api/documents/{id:guid}/details",
@@ -1319,7 +1396,8 @@
           "wire_shape",
           "http_error_status",
           "no_private_payload_in_exception",
-          "404_document_not_found_vs_route_or_proxy_not_found"
+          "404_document_not_found_vs_route_or_proxy_not_found",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
@@ -1327,7 +1405,10 @@
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
         "sdk_target_owner": "KnowledgeHubDocumentsClient",
-        "not_found_discriminator": "For SDK target, HTTP 404 -> null only if valid application/problem+json code=document.not_found from trusted API origin; never on route.not_found/generic/proxy 404."
+        "not_found_discriminator": "For SDK target, HTTP 404 -> null only if valid application/problem+json code=document.not_found from trusted API origin; never on route.not_found/generic/proxy 404.",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 67108864,
+        "max_error_decoded_bytes": 65536
       },
       {
         "route_id": "GET /api/documents/search?q={q}",
@@ -1345,14 +1426,20 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_collection_item_count_bounded",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+        "sdk_target_owner": "KnowledgeHubDocumentsClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 33554432,
+        "max_error_decoded_bytes": 65536,
+        "max_result_collection_items": 4096
       },
       {
         "route_id": "GET /api/documents/category/{id:guid}",
@@ -1370,14 +1457,20 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_collection_item_count_bounded",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+        "sdk_target_owner": "KnowledgeHubDocumentsClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 33554432,
+        "max_error_decoded_bytes": 65536,
+        "max_result_collection_items": 4096
       },
       {
         "route_id": "GET /api/documents/tag/{id:guid}",
@@ -1395,14 +1488,20 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_collection_item_count_bounded",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+        "sdk_target_owner": "KnowledgeHubDocumentsClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 33554432,
+        "max_error_decoded_bytes": 65536,
+        "max_result_collection_items": 4096
       },
       {
         "route_id": "GET /api/documents/source/{id:guid}",
@@ -1420,14 +1519,20 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_collection_item_count_bounded",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+        "sdk_target_owner": "KnowledgeHubDocumentsClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 33554432,
+        "max_error_decoded_bytes": 65536,
+        "max_result_collection_items": 4096
       },
       {
         "route_id": "POST /api/documents/{id:guid}/ensure-index",
@@ -1445,14 +1550,18 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+        "sdk_target_owner": "KnowledgeHubDocumentsClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 33554432,
+        "max_error_decoded_bytes": 65536
       },
       {
         "route_id": "GET /api/statistics",
@@ -1470,14 +1579,18 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": 200,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubStatisticsClient"
+        "sdk_target_owner": "KnowledgeHubStatisticsClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 1048576,
+        "max_error_decoded_bytes": 65536
       },
       {
         "route_id": "POST /api/rag/ask",
@@ -1495,14 +1608,18 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": null,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubRagClient"
+        "sdk_target_owner": "KnowledgeHubRagClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 8388608,
+        "max_error_decoded_bytes": 65536
       },
       {
         "route_id": "POST /api/rag/ask/verified",
@@ -1520,14 +1637,18 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": null,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubRagClient"
+        "sdk_target_owner": "KnowledgeHubRagClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 8388608,
+        "max_error_decoded_bytes": 65536
       },
       {
         "route_id": "POST /api/vector/search",
@@ -1545,14 +1666,20 @@
         "tests_required": [
           "wire_shape",
           "http_error_status",
-          "no_private_payload_in_exception"
+          "no_private_payload_in_exception",
+          "response_collection_item_count_bounded",
+          "response_decoded_byte_limit_before_deserialization"
         ],
         "observed_http_success_status": 200,
         "target_http_success_status": 200,
         "target_response_body_statusCode": null,
         "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
         "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
-        "sdk_target_owner": "KnowledgeHubVectorSearchClient"
+        "sdk_target_owner": "KnowledgeHubVectorSearchClient",
+        "response_budget_profile": "bounded_response_v1_candidate",
+        "max_success_decoded_bytes": 8388608,
+        "max_error_decoded_bytes": 65536,
+        "max_result_collection_items": 1024
       }
     ],
     "intentionally_out_of_first_wave": [
@@ -1682,12 +1809,12 @@
     },
     "public_namespace": "KnowledgeHub.Client.Http",
     "shared_transport_design": {
-      "reuse": "one internal KnowledgeHubHttpTransport with shared cancellation, timeout, auth pass-through, serialization, error classification, correlation and resource disposal; cannot be public circular facade",
+      "reuse": "one internal KnowledgeHubHttpTransport with shared cancellation, timeout, auth pass-through, serialization, error classification, correlation and resource disposal; cannot be public circular facade It also implements bounded response byte-count and JSON collection/depth validation before DTO creation on all 22 operations and on error responses.",
       "ownership": "host owns HttpClient; SDK disposes requests and responses only",
       "per_client_constructor": "(HttpClient httpClient, KnowledgeHubHttpClientOptions options); HttpClient supplied by host and NEVER disposed",
       "options_type": "public sealed record KnowledgeHubHttpClientOptions(TimeSpan TotalRequestTimeout)",
       "DI_optional": "Integrators may register named/typed clients; no mandatory Microsoft.Extensions.* dependency in SDK; no static singleton or auto service-provider creation",
-      "configuration": "Host owns absolute HTTP(S) BaseAddress, authentication, nonredirecting primary handler (AllowAutoRedirect=false) and request identity; HTTPS required for non-loopback, HTTP only loopback; SDK must not blindly log URI, question or body. SDK cannot inspect host redirect handler: integration gate required.",
+      "configuration": "Host owns absolute HTTP(S) BaseAddress, authentication, nonredirecting primary handler (AllowAutoRedirect=false) and request identity; HTTPS required for non-loopback, HTTP only loopback; SDK must not blindly log URI, question or body. SDK cannot inspect host redirect handler: integration gate required. Certificate chain and hostname validation must remain enabled on the host-owned handler; TLS bypass is forbidden and requires a real handler integration gate.",
       "retry": "none (including mutation or generation)",
       "timeout": "SDK-owned TotalRequestTimeout in inclusive 1..2147483647ms range; CancelAfter covers SendAsync and body; caller cancellation wins a tie; host HttpClient.Timeout must be infinite or strictly greater.",
       "resource_lifetimes": "HttpClient host-owned; request and response sdk-owned",
@@ -1767,14 +1894,14 @@
       "codes": {
         "http": "http.bad_request, http.unauthorized, http.forbidden, http.not_found, http.conflict, http.rate_limited, http.server_error, http.unexpected_status",
         "transport": "transport.network_failure",
-        "protocol": "protocol.invalid_json, protocol.invalid_envelope, protocol.status_mismatch, protocol.unsupported_media_type",
+        "protocol": "protocol.invalid_json, protocol.invalid_envelope, protocol.status_mismatch, protocol.unsupported_media_type, protocol.response_limit_exceeded",
         "cancellation": "request.cancelled_by_caller, request.cancelled_unknown",
         "timeout": "request.deadline_exceeded"
       },
       "diagnostics": "On every SDK-owned exception, include locally produced correlationId from the request context (valid W3C Activity.TraceId or cryptographically random 128-bit fallback), nonzero 32-lowerhex; never trust remote correlation without validation; remote trace is optional context, not authority.",
-      "body_safety": "Do not incorporate arbitrary server error codes, headers, body, request URI, sensitive query or invalid remote IDs in exceptions, codes or loggable strings; map server codes from allowlist to stable local codes or fallback.",
+      "body_safety": "Do not incorporate arbitrary server error codes, headers, body, request URI, sensitive query or invalid remote IDs in exceptions, codes or loggable strings; map server codes from allowlist to stable local codes or fallback. Never buffer or deserialize an unbounded error body; exceeded response cap maps to protocol.response_limit_exceeded.",
       "timeouts": "Require compatible host HttpClient.Timeout in constructor and before first request; if caller token is canceled classify as caller cancellation (wins race); if SDK timeout token fired with caller active classify request.deadline_exceeded; all other cancellations are request.cancelled_unknown. Never silently override HttpClient.Timeout.",
-      "no_new_category_implicit": "Additional families/codes require CR and tests; new stable codes can be additive (MINOR) if all consumers handle unknown codes.",
+      "no_new_category_implicit": "Additional families/codes require CR and tests; new stable codes can be additive (MINOR) if all consumers handle unknown codes. REV-003 proposes protocol.response_limit_exceeded in the existing Protocol category; it is an additive code requiring maintainer approval under MINOR versioning.",
       "normalization_first": "SDK integration deferred until all server error paths use the approved ProblemDetails wire target",
       "not_runtime_implemented": true,
       "approval_status": "normative_approved_not_implemented",
@@ -1828,7 +1955,200 @@
         "mutated BaseAddress before request -> detected"
       ]
     },
-    "nullable_not_found_contract": "Only two listed document reads may return null after exact RFC9457 HTTP 404 ProblemDetails at the configured trusted origin, with status 404, code=document.not_found and valid correlationId. Generic 404, missing route/proxy 404, malformed body or unallowlisted code MUST throw; no status-only 404-to-null fallback in the new SDK. No API normalization, no SDK cutover."
+    "nullable_not_found_contract": "Only two listed document reads may return null after exact RFC9457 HTTP 404 ProblemDetails at the configured trusted origin, with status 404, code=document.not_found and valid correlationId. Generic 404, missing route/proxy 404, malformed body or unallowlisted code MUST throw; no status-only 404-to-null fallback in the new SDK. No API normalization, no SDK cutover.",
+    "host_tls_validation_policy": {
+      "required_for_all_sdk_consumers": true,
+      "transport_policy": "Use HTTPS for every non-loopback API origin. Keep platform TLS chain and DNS hostname validation active; permit a host private CA only if explicitly trusted by the host OS/organization. Reject invalid, expired, self-signed-untrusted, or wrong-host certificates.",
+      "forbidden_bypasses": [
+        "HttpClientHandler.DangerousAcceptAnyServerCertificateValidator",
+        "ServerCertificateCustomValidationCallback returning true without full chain and hostname validation",
+        "SslClientAuthenticationOptions.RemoteCertificateValidationCallback accepting SslPolicyErrors != None",
+        "nonproduction trust-all handlers or automatic unsafe fallback when TLS fails"
+      ],
+      "handler_observability_limit": "An SDK constructor receiving a host-supplied HttpClient cannot inspect TLS validation callbacks or trust settings. HTTPS URI checking is not a TLS security guarantee. No unsupported claim of constructor enforcement.",
+      "host_ownership": "The integrator owns HttpClient/SocketsHttpHandler or HttpClientHandler, DI registration, trusted roots and certificate policy. The SDK must not silently alter or replace the host handler.",
+      "cutover_gate": "Before importer, MAUI, Avalonia or service cutover, exercise the actual production-equivalent configured handler against trusted HTTPS (success), untrusted self-signed, wrong DNS host and expired certificates (all fail closed). Confirm that no request body, credentials or raw private diagnostics reach the untrusted endpoint; cross-check redirect gate separately.",
+      "scope": "documentation_target_only; SDK and integration tests remain unimplemented"
+    },
+    "response_resource_limits": {
+      "policy_id": "bounded_response_v1_candidate",
+      "scope": "new SDK v1 target, not existing server behavior; pending maintainer approval",
+      "response_limits_by_route": [
+        {
+          "route_id": "GET /api/categories",
+          "client": "KnowledgeHubMetadataClient",
+          "max_success_decoded_bytes": 4194304,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": 4096
+        },
+        {
+          "route_id": "POST /api/categories",
+          "client": "KnowledgeHubMetadataClient",
+          "max_success_decoded_bytes": 4194304,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": null
+        },
+        {
+          "route_id": "GET /api/sources",
+          "client": "KnowledgeHubMetadataClient",
+          "max_success_decoded_bytes": 4194304,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": 4096
+        },
+        {
+          "route_id": "POST /api/sources",
+          "client": "KnowledgeHubMetadataClient",
+          "max_success_decoded_bytes": 4194304,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": null
+        },
+        {
+          "route_id": "GET /api/tags",
+          "client": "KnowledgeHubMetadataClient",
+          "max_success_decoded_bytes": 4194304,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": 4096
+        },
+        {
+          "route_id": "POST /api/tags",
+          "client": "KnowledgeHubMetadataClient",
+          "max_success_decoded_bytes": 4194304,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": null
+        },
+        {
+          "route_id": "GET /api/documents",
+          "client": "KnowledgeHubDocumentsClient",
+          "max_success_decoded_bytes": 33554432,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": 4096
+        },
+        {
+          "route_id": "GET /api/documents/{id:guid}",
+          "client": "KnowledgeHubDocumentsClient",
+          "max_success_decoded_bytes": 67108864,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": null
+        },
+        {
+          "route_id": "POST /api/documents",
+          "client": "KnowledgeHubDocumentsClient",
+          "max_success_decoded_bytes": 33554432,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": null
+        },
+        {
+          "route_id": "POST /api/documents/import",
+          "client": "KnowledgeHubDocumentsClient",
+          "max_success_decoded_bytes": 33554432,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": null
+        },
+        {
+          "route_id": "PUT /api/documents/{id:guid}",
+          "client": "KnowledgeHubDocumentsClient",
+          "max_success_decoded_bytes": 33554432,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": null
+        },
+        {
+          "route_id": "DELETE /api/documents/{id:guid}",
+          "client": "KnowledgeHubDocumentsClient",
+          "max_success_decoded_bytes": 33554432,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": null
+        },
+        {
+          "route_id": "GET /api/documents/{id:guid}/details",
+          "client": "KnowledgeHubDocumentsClient",
+          "max_success_decoded_bytes": 67108864,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": null
+        },
+        {
+          "route_id": "GET /api/documents/search?q={q}",
+          "client": "KnowledgeHubDocumentsClient",
+          "max_success_decoded_bytes": 33554432,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": 4096
+        },
+        {
+          "route_id": "GET /api/documents/category/{id:guid}",
+          "client": "KnowledgeHubDocumentsClient",
+          "max_success_decoded_bytes": 33554432,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": 4096
+        },
+        {
+          "route_id": "GET /api/documents/tag/{id:guid}",
+          "client": "KnowledgeHubDocumentsClient",
+          "max_success_decoded_bytes": 33554432,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": 4096
+        },
+        {
+          "route_id": "GET /api/documents/source/{id:guid}",
+          "client": "KnowledgeHubDocumentsClient",
+          "max_success_decoded_bytes": 33554432,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": 4096
+        },
+        {
+          "route_id": "POST /api/documents/{id:guid}/ensure-index",
+          "client": "KnowledgeHubDocumentsClient",
+          "max_success_decoded_bytes": 33554432,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": null
+        },
+        {
+          "route_id": "GET /api/statistics",
+          "client": "KnowledgeHubStatisticsClient",
+          "max_success_decoded_bytes": 1048576,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": null
+        },
+        {
+          "route_id": "POST /api/rag/ask",
+          "client": "KnowledgeHubRagClient",
+          "max_success_decoded_bytes": 8388608,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": null
+        },
+        {
+          "route_id": "POST /api/rag/ask/verified",
+          "client": "KnowledgeHubRagClient",
+          "max_success_decoded_bytes": 8388608,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": null
+        },
+        {
+          "route_id": "POST /api/vector/search",
+          "client": "KnowledgeHubVectorSearchClient",
+          "max_success_decoded_bytes": 8388608,
+          "max_error_decoded_bytes": 65536,
+          "max_result_collection_items": 1024
+        }
+      ],
+      "error_max_decoded_bytes": 65536,
+      "json_max_depth": 64,
+      "decoded_bytes_meaning": "The byte counter is applied to the representation consumed by the JSON decoder, after any host automatic decompression; Content-Length is an optional early rejection only, not authoritative for chunked, compressed or lying responses.",
+      "enforcement": "Use ResponseHeadersRead and a length-limited stream for both success and failure bodies. Count bytes incrementally while reading, then validate JSON depth and top-level/nested result collection counts before materializing untrusted DTOs. Reject oversized/overdeep/too-many-items payloads via safe KnowledgeHubHttpProtocolException with protocol.response_limit_exceeded; dispose response and stream promptly. The SDK total timeout and caller cancellation cover all reads.",
+      "limits_are_fixed_v1": true,
+      "no_silent_fallback": "No truncated success responses, partial data, catch-and-return-empty, automatic pagination or hidden retry; if an existing list or document exceeds the explicit fixed cap, fail closed with a stable protocol error. A pagination/streaming API requires an independently approved versioned CR and server support; not added to the 22 existing routes here.",
+      "security": "No response body, private URI, raw item, Location, tokens or server-controlled text in exception/log. Bound error-body parsing identically and map only allowlisted server codes; an oversized ProblemDetails body is a safe protocol failure, not a trusted error.",
+      "acceptance_tests": [
+        "all 22 routes have explicit decoded-byte caps and error cap",
+        "bounded 200 / 201 body at exact cap succeeds when otherwise valid",
+        "cap+1 uncompressed body -> safe protocol.response_limit_exceeded",
+        "large chunked stream without Content-Length -> safe failure before overallocating",
+        "compressed small wire / large decoded body (decompression bomb) -> decoded cap enforced",
+        "oversized HTTP 400 application/problem+json -> safe failure without body in exception",
+        "JSON nested deeper than 64 -> bounded protocol failure",
+        "4097 list entries or 1025 vector entries -> safe protocol failure before DTO construction",
+        "legitimate document bigger than cap -> explicit failure, no silent truncation or invented pagination",
+        "caller cancellation and SDK total timeout continue to work during bounded reads"
+      ]
+    }
   },
   "rag_contracts_v1": {
     "types": [
@@ -2244,7 +2564,7 @@
     "error_metadata_contract_requires_final_approval": false,
     "external_project_changes_allowed_in_A0_2": false
   },
-  "normative_revision": "1.0.0-rc.1",
+  "normative_revision": "1.1.0-rc.1",
   "maintainer_decisions": {
     "A02-D01": "A",
     "A02-D04": "B",

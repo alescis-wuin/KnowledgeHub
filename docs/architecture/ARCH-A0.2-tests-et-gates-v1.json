@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "artifact": "ARCH-A0.2-tests-and-gates",
-  "status": "normative_approved_review_branch_committed_unmerged_not_implemented",
+  "status": "baseline_1_0_0_rc1_approved_candidate_1_1_0_rc1_pending_maintainer_approval_unmerged_not_implemented",
   "gates": [
     {
       "id": "ARCH-A0.2.01",
@@ -56,7 +56,7 @@
     {
       "id": "ARCH-A0.2.05",
       "required": true,
-      "criterion": "Version candidate 1.0.0-rc.1, change control, diagnostic uniforme quatre familles, régression KH008 documentée sans prétention runtime",
+      "criterion": "Version 1.0.0-rc.1 approuvée conservée; candidate 1.1.0-rc.1 non approuvée, contrôle de changements MINOR et protections de diagnostic documentés.",
       "checks": [
         "STATIC_VERSION_STATUS",
         "REVIEW_SECURITY_FAIl_CLOSED",
@@ -64,7 +64,7 @@
         "STATIC_CR_SEMVER"
       ],
       "result": "documentary_pass_on_review_branch",
-      "result_scope": "static_documentary_only; independent main merge pending; runtime not implemented"
+      "result_scope": "static_documentary_only; independent main merge pending; runtime not implemented; new REV-003 candidate requires its own explicit maintainer approval"
     },
     {
       "id": "ARCH-A0.2.06",
@@ -112,7 +112,11 @@
     "A2 SDK: reject missing or invalid BaseAddress (HTTP(S) absolute, no credentials/query/fragment), disallow remote plaintext HTTP and preserve configured API path prefixes.",
     "A2 API/SDK: distinct trusted application/problem+json document.not_found vs route.not_found vs untrusted proxy 404; only 2 nullable document reads return null, other cases safely throw.",
     "A2 API/SDK: exact stable-code regex with escaped literal period; reject httpXnot_found and arbitrary/unallowlisted remote error codes.",
-    "A2 API: POST /api/sources target fixture preserves explicit url:null under default MVC serializer; no serializer drift."
+    "A2 API: POST /api/sources target fixture preserves explicit url:null under default MVC serializer; no serializer drift.",
+    "A2 SDK: use platform certificate chain and hostname validation for real host-owned handlers; reject untrusted, expired and wrong-host certs; no permissive TLS callback or SDK false guarantee.",
+    "A2 SDK: bound decoded bytes for all 22 2xx and non-2xx responses, including chunked, compressed and malicious Content-Length; fail closed before DTO deserialization.",
+    "A2 SDK: enforce response JSON depth 64 and top-level/nested collection bounds (4,096 lists / 1,024 vector results), no silent truncation or invented pagination.",
+    "ARCH-A0.2: candidate 1.1.0-rc.1 remains unapproved until maintainer explicitly accepts MINOR additions after PR19 review; binding evidence must use actual Git PR head and tree."
   ],
   "quality_invariants": [
     "No runtime source files changed in ARCH-A0.2",
@@ -124,7 +128,10 @@
     "No SDK connection until API normalization is proven",
     "No public IVerifiedVerdictEvaluator in v1",
     "Importer redirect safety is a host integration gate, not falsely claimed as SDK introspection of HttpClientHandler.",
-    "No status-only 404-to-null mapping: require verified document.not_found ProblemDetails and trusted API origin."
+    "No status-only 404-to-null mapping: require verified document.not_found ProblemDetails and trusted API origin.",
+    "TLS scheme alone is not sufficient proof of secure host certificate verification; real production-equivalent handler gate is required.",
+    "Response length and item bounds must be enforced before deserializing success and ProblemDetails bodies, not just via timeout.",
+    "Approved 1.0.0-rc.1 decisions are historical; candidate 1.1.0-rc.1 is pending acceptance and has no self-embedded future commit SHA."
   ],
   "provenance": {
     "audit_spec": "KnowledgeHub-Reprise-2026-11-03-v1.0.0/references/audit-v2-annexes/initial_contracts.*",
@@ -148,15 +155,20 @@
       "Initial documentary commit signed and verified on GitHub: 81c8067; final merge SHA and runtime qualification remain unavailable.",
       "A2/A3 work remains blocked until G1, and client integration additionally requires the separate API normalization gate."
     ],
-    "approved_date_local": "2026-11-03"
+    "approved_date_local": "2026-11-03",
+    "candidate_revision": "1.1.0-rc.1",
+    "candidate_approved": false,
+    "candidate_approval_status": "pending_explicit_maintainer_approval",
+    "candidate_approval_scope": "new codes, TLS handler gate, body-size/resource limits and provenance, not D01..D07",
+    "candidate_git_sha": null
   },
-  "normative_revision": "1.0.0-rc.1",
+  "normative_revision": "1.1.0-rc.1",
   "repository_documentation_state": {
     "repository": "alescis-wuin/KnowledgeHub",
     "pull_request": 19,
     "review_branch": "feature/arch-a0-2-normative-docs",
     "first_documentation_commit": "81c806779e25a92501e1aa040ad138ae5465f5a8",
-    "reviewed_head_sha": "570466b039c128f7c5e0f1fed7bcdc0d15fe8db8",
+    "reviewed_head_sha": "4409b10a5bbb7b03a6a36c2d26df94b4be075e96",
     "main_sha_at_pr_review": "0f359979235d189cb3059c86224dba738d176e4c",
     "repository_documentation_state": "committed_and_published_to_review_branch",
     "main_merge_state": "pending_review_and_explicit_merge",
@@ -164,7 +176,15 @@
     "prepared_base_sha": null,
     "runtime_implemented": false,
     "qualification_scope": "documentary_only",
-    "review_correction_id": "ARCH-A0.2-PR19-REV-002",
-    "notes": "PR19 documents are published on the review branch at 570466b; main remains unmerged. REV-002 is only a documentary correction candidate; API/SDK/RAG runtime and G1 remain unimplemented."
+    "review_correction_id": "ARCH-A0.2-PR19-REV-003",
+    "notes": "Reviewed REV-002 was published at 4409b10 (tree 5c12fe6). REV-003 is a new unapproved candidate with unknown future Git SHA. PR19 not merged; API/SDK/RAG libraries, runtime tests and G1 not implemented.",
+    "reviewed_tree_sha": "5c12fe6028be01193e6ff42267e0c6e0f5b2b18e",
+    "reviewed_head_scope": "Last completed Codex review of published REV-002 (baseline for REV-003); not the proposed REV-003 candidate commit.",
+    "last_published_head_sha_at_authoring": "4409b10a5bbb7b03a6a36c2d26df94b4be075e96",
+    "candidate_revision": "1.1.0-rc.1",
+    "candidate_commit_sha": null,
+    "candidate_tree_sha": null,
+    "candidate_approval_status": "pending_explicit_maintainer_approval",
+    "candidate_git_binding_rule": "After a signed REV-003 commit and push, obtain the current artifact identity from git rev-parse HEAD and HEAD^{tree} and GitHub PR19 head.sha; match it to the reviewed commit at review/merge time. Never embed a purported current commit/tree SHA into its own tracked contents (circular commitment)."
   }
 }

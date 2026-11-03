@@ -1,4 +1,4 @@
-# ARCH-A0.2 — Registre des décisions et plan de conformité 1.0.0-rc.1
+# ARCH-A0.2 — Registre des décisions (gel approuvé 1.0.0-rc.1 ; amendement candidat 1.1.0-rc.1)
 
 **Référence :** `main@0f359979235d189cb3059c86224dba738d176e4c`. **Statut :** décisions du mainteneur 7/7, gouvernance et SPEC-01..03 explicitement approuvées le 2026-11-03 ; **premier commit signé `81c806779e25a92501e1aa040ad138ae5465f5a8` présent sur la branche de PR #19 ; fusion dans `main` non réalisée** ; `prepared_base_sha=null`. Le JSON de provenance extérieur au dépôt `REGISTRE-DECISIONS-MAINTENEUR.json` conserve le texte détaillé et les réserves de chaque lot.
 
@@ -74,3 +74,20 @@ Chaque CR fournit `task_id`, `base_sha`, `current_sha`, `requested_paths`, `affe
 - `integration_order` : appliquer seulement le delta documentaire sur la branche existante, vérifier le retour v3, créer un commit signé distinct, publier après autorisation, examiner nouvelle revue Codex, fusionner uniquement après accord explicite. Prévoir les gates HTTP/API/SDK avant le cutover A2, et G1 indépendant.
 - `owner` : intégrateur du répertoire `docs/architecture/` ; `approval_decision` : correction candidate soumise à l'acceptation du mainteneur après retour de qualification ; aucune approbation ni fusion automatique.
 - Les sept décisions d'orientation et la gouvernance approuvées en `1.0.0-rc.1` restent inchangées ; `prepared_base_sha=null`.
+
+## CR ARCH-A0.2-PR19-REV-003 — Revue Codex III
+
+- `task_id` : `ARCH-A0.2-PR19-REV-003`.
+- `base_sha` : `4409b10a5bbb7b03a6a36c2d26df94b4be075e96` (tree `5c12fe6028be01193e6ff42267e0c6e0f5b2b18e`).
+- `current_sha` : base Git vérifiée ci-dessus ; **SHA du futur commit de correction = inconnu** jusqu'au commit local et à son push ; résolution lors de la revue via `git rev-parse HEAD` et la tête PR #19, sans hash auto-référent.
+- `requested_paths` : les six fichiers suivis `docs/architecture/ARCH-A0.2-*` de la PR #19.
+- `affected_contract` : provenance de revue, version normative, TLS des clients HTTP, limites mémoire/réponses JSON et catégories diagnostiques existantes.
+- `concrete_need` : quatre suggestions P2 Codex sur `4409b10` (SHA de provenance, version, certificats, réponses volumineuses).
+- `old_behavior` : métadonnées rattachées à `570466b`, version `1.0.0-rc.1` indistincte des ajouts récents, TLS hôte non attesté, corps HTTP sans limite explicite.
+- `new_behavior` : base examinée `4409b10` et arbre exact ; candidat `1.1.0-rc.1` en attente d'acceptation ; vérification TLS chaîne/nom par le handler hôte, tests négatifs réels ; limites par route en octets décodés et en éléments avant désérialisation ; exception protocolaire sûre sur dépassement.
+- `impacted_consumers` : futur SDK A2, importeur, MAUI/Avalonia, API pour futures formes de réponse ; aucune intégration de consommateur effectuée.
+- `CLR_wire_data_compatibility` : aucun fichier C# ni schéma DB modifié ; les nouveaux codes HTTP `document.not_found`/`route.not_found` et le code SDK `protocol.response_limit_exceeded` sont des ajouts MINOR candidats et exigent approbation/qualification avant diffusion. Les plafonds peuvent refuser de grands résultats existants : transition explicite et décision sur pagination future, sans prétendre que celle-ci existe.
+- `proposed_tests` : JSON strict, graphes et comptages inchangés, identité Git base, TLS invalid/expired/wrong-host et callback dangereux, dépassement 2xx/4xx, chunked, decompression, JSON profondeur et listes, couverture exacte des 22 routes.
+- `integration_order` : appliquer correction documentaire REV-003 en local ; vérifier ; commit signé ; publier sans fusion ; demander revue Codex ; acceptation explicite de `1.1.0-rc.1` par le mainteneur ; fusion contrôlée ; implémentation API/SDK dans les phases autorisées seulement.
+- `owner` : intégrateur `docs/architecture/` ; aucune modification hors six documents.
+- `approval_decision` : **PENDING**, l'approbation historique du gel `1.0.0-rc.1` et des sept choix reste préservée, ne vaut pas approbation automatique du candidat `1.1.0-rc.1`.
