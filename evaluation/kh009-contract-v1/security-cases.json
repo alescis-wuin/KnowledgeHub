@@ -1,0 +1,332 @@
+{
+  "contractId": "KnowledgeHub.Workspaces.API.v1",
+  "sourceContract": "docs/KH009-0-api-contract.v1.json",
+  "state": "TEST_REQUIREMENTS_NOT_EXECUTED",
+  "notes": "These are future security acceptance requirements, not passing runtime tests. Current tests only validate fixture integrity.",
+  "cases": [
+    {
+      "id": "S001",
+      "category": "authentication",
+      "scenario": "untrusted-or-absent-token",
+      "expected": "401",
+      "targetStage": "KH-009.1",
+      "description": "No valid Bearer -> 401 plus WWW-Authenticate; no tenant data",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S002",
+      "category": "authentication",
+      "scenario": "invalid-signature",
+      "expected": "401",
+      "targetStage": "KH-009.1",
+      "description": "Reject JWT with invalid signature",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S003",
+      "category": "authentication",
+      "scenario": "wrong-issuer-audience",
+      "expected": "401",
+      "targetStage": "KH-009.1",
+      "description": "Reject iss/aud mismatch",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S004",
+      "category": "authentication",
+      "scenario": "expired-token",
+      "expected": "401",
+      "targetStage": "KH-009.1",
+      "description": "Reject expired JWT and do not refresh server-side",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S005",
+      "category": "authentication",
+      "scenario": "cross-issuer-subject-collision",
+      "expected": "ISOLATED",
+      "targetStage": "KH-009.1",
+      "description": "Same sub from distinct issuers never maps to same user",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S006",
+      "category": "authorization",
+      "scenario": "nonmember-reads-workspace",
+      "expected": "404",
+      "targetStage": "KH-009.2",
+      "description": "No visibility of unauthorized workspace",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S007",
+      "category": "authorization",
+      "scenario": "viewer-creates-document",
+      "expected": "403",
+      "targetStage": "KH-009.3",
+      "description": "Viewer cannot write documents",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S008",
+      "category": "authorization",
+      "scenario": "member-asks-rag",
+      "expected": "200",
+      "targetStage": "KH-009.4",
+      "description": "Active member may ask RAG of own tenant",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S009",
+      "category": "authorization",
+      "scenario": "admin-tries-owner-transfer",
+      "expected": "403",
+      "targetStage": "KH-009.2",
+      "description": "Only owner can transfer ownership",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S010",
+      "category": "authorization",
+      "scenario": "last-owner-removal",
+      "expected": "409",
+      "targetStage": "KH-009.2",
+      "description": "Reject removal or downgrade of last owner",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S011",
+      "category": "authorization",
+      "scenario": "revoked-membership",
+      "expected": "404",
+      "targetStage": "KH-009.2",
+      "description": "Membership revocation effective immediately",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S012",
+      "category": "authorization",
+      "scenario": "email-verified-false-invitation",
+      "expected": "403",
+      "targetStage": "KH-009.2",
+      "description": "Invitation acceptance requires verified email",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S013",
+      "category": "tenancy",
+      "scenario": "read-cross-workspace-document",
+      "expected": "404",
+      "targetStage": "KH-009.3",
+      "description": "Document B inaccessible from A",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S014",
+      "category": "tenancy",
+      "scenario": "mutate-cross-workspace-document",
+      "expected": "404",
+      "targetStage": "KH-009.3",
+      "description": "Cannot update document B using A route",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S015",
+      "category": "tenancy",
+      "scenario": "category-tag-source-cross-workspace-link",
+      "expected": "422",
+      "targetStage": "KH-009.3",
+      "description": "No cross-tenant metadata associations",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S016",
+      "category": "tenancy",
+      "scenario": "external-id-same-in-two-workspaces",
+      "expected": "ISOLATED",
+      "targetStage": "KH-009.3",
+      "description": "ExternalId identity uniqueness scoped by WorkspaceId",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S017",
+      "category": "tenancy",
+      "scenario": "legacy-routes-reveal-scoped-records",
+      "expected": "NO_LEAK",
+      "targetStage": "KH-009.3",
+      "description": "Legacy endpoints never bypass scoped tenant isolation",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S018",
+      "category": "tenancy",
+      "scenario": "client-injects-workspace-id-body",
+      "expected": "DENY",
+      "targetStage": "KH-009.3",
+      "description": "Server resolves tenant from authorized route/membership",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S019",
+      "category": "vector",
+      "scenario": "vector-cache-cross-workspace",
+      "expected": "NO_LEAK",
+      "targetStage": "KH-009.4",
+      "description": "Vector index must be tenant-partitioned",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S020",
+      "category": "vector",
+      "scenario": "topk-cross-tenant-contamination",
+      "expected": "NO_LEAK",
+      "targetStage": "KH-009.4",
+      "description": "Filter to authorized workspace before cosine ranking/topK",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S021",
+      "category": "vector",
+      "scenario": "cache-invalidation-cross-tenant",
+      "expected": "ISOLATED",
+      "targetStage": "KH-009.4",
+      "description": "Independent tenant invalidation and revision",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S022",
+      "category": "rag",
+      "scenario": "classic-rag-cross-workspace-source",
+      "expected": "NO_LEAK",
+      "targetStage": "KH-009.4",
+      "description": "Classic RAG never includes another workspace sources",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S023",
+      "category": "rag",
+      "scenario": "verified-rag-cross-workspace-evidence",
+      "expected": "ABSTAIN",
+      "targetStage": "KH-009.4",
+      "description": "Wrong-tenant evidence cannot be captured or published",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S024",
+      "category": "rag",
+      "scenario": "verified-rag-cross-workspace-revalidation",
+      "expected": "ABSTAIN",
+      "targetStage": "KH-009.4",
+      "description": "Revalidation must enforce tenant and document revision",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S025",
+      "category": "rag",
+      "scenario": "verified-rag-unqualified-assessor",
+      "expected": "ABSTAIN",
+      "targetStage": "KH-009.4",
+      "description": "Missing qualified assessor remains fail-closed",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S026",
+      "category": "assets",
+      "scenario": "asset-cross-workspace-request",
+      "expected": "404",
+      "targetStage": "KH-009.2",
+      "description": "No asset data or content cross-workspace",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S027",
+      "category": "assets",
+      "scenario": "asset-spoofed-mime",
+      "expected": "415",
+      "targetStage": "KH-009.2",
+      "description": "Reject unsupported image bytes irrespective of metadata",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S028",
+      "category": "assets",
+      "scenario": "private-asset-cache",
+      "expected": "NO_LEAK",
+      "targetStage": "KH-009.2",
+      "description": "Cache-Control private/no-store; no token in URL",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S029",
+      "category": "concurrency",
+      "scenario": "missing-if-match",
+      "expected": "428",
+      "targetStage": "KH-009.2",
+      "description": "Mandatory precondition on declared mutations",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S030",
+      "category": "concurrency",
+      "scenario": "stale-if-match",
+      "expected": "412",
+      "targetStage": "KH-009.2",
+      "description": "Prevent lost updates with strong ETags",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S031",
+      "category": "concurrency",
+      "scenario": "restore-archived-by-nonowner",
+      "expected": "403",
+      "targetStage": "KH-009.2",
+      "description": "No restore without current owner permission",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S032",
+      "category": "logging",
+      "scenario": "secrets-in-trace",
+      "expected": "NO_LEAK",
+      "targetStage": "KH-009.5",
+      "description": "No JWT, corpus text, invitation tokens or prompts in logs and spans",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S033",
+      "category": "persistence",
+      "scenario": "migration-legacy-unattributed",
+      "expected": "DENY",
+      "targetStage": "KH-009.3",
+      "description": "Do not silently adopt legacy data into user workspace",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S034",
+      "category": "persistence",
+      "scenario": "tenant-filter-bypass",
+      "expected": "NO_LEAK",
+      "targetStage": "KH-009.3",
+      "description": "Raw SQL/IgnoreQueryFilters still guarded by authorization",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S035",
+      "category": "persistence",
+      "scenario": "foreign-key-cross-workspace",
+      "expected": "DENY",
+      "targetStage": "KH-009.3",
+      "description": "Composite FK/unique constraints prevent cross-tenant joins",
+      "implementationStatus": "PENDING"
+    },
+    {
+      "id": "S036",
+      "category": "http",
+      "scenario": "trace-id-crlf-injection",
+      "expected": "DENY",
+      "targetStage": "KH-009.5",
+      "description": "Validate correlation headers and never log attacker-provided CRLF",
+      "implementationStatus": "PENDING"
+    }
+  ]
+}
