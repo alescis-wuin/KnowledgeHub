@@ -1,0 +1,296 @@
+{
+  "schema_version": "1.0.0",
+  "status": "mixed_observed_synthetic_and_target_normative_approved_not_runtime_verified",
+  "base_sha": "0f359979235d189cb3059c86224dba738d176e4c",
+  "fixtures": [
+    {
+      "id": "F-WIRE-001",
+      "route": "GET /api/documents",
+      "source_response": "MVC action result, default Web serializer",
+      "http_status": 200,
+      "expect": {
+        "success": true,
+        "statusCode": 200,
+        "traceId": "synthetic-trace",
+        "data": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "externalId": null,
+            "contentSha256": null,
+            "title": "Exemple",
+            "content": "Texte factice",
+            "createdAt": "2026-11-03T00:00:00Z",
+            "tags": []
+          }
+        ],
+        "errors": []
+      },
+      "assertion": "camelCase, nulls and non-null empty collections are distinct",
+      "role": "existing_synthetic_reference"
+    },
+    {
+      "id": "F-WIRE-002",
+      "route": "POST /api/documents/import",
+      "source_response": "MVC action result, default Web serializer",
+      "http_status": 200,
+      "expect": {
+        "success": true,
+        "statusCode": 200,
+        "traceId": "synthetic-trace",
+        "data": {
+          "document": {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "externalId": "22222222-2222-4222-8222-222222222222",
+            "contentSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "title": "Exemple",
+            "content": "Texte factice",
+            "createdAt": "2026-11-03T00:00:00Z",
+            "tags": []
+          },
+          "outcome": 4
+        },
+        "errors": []
+      },
+      "assertion": "ImportDocumentOutcome.Unchanged numeric 4; preserve externalId and contentSha256",
+      "role": "existing_synthetic_reference"
+    },
+    {
+      "id": "F-WIRE-003",
+      "route": "POST /api/categories",
+      "source_response": "MVC action result, default Web serializer",
+      "http_status": 200,
+      "expect": {
+        "success": true,
+        "statusCode": 201,
+        "traceId": "synthetic-trace",
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "name": "Exemple"
+        },
+        "errors": []
+      },
+      "assertion": "historic mismatch HTTP 200 versus envelope statusCode 201; needs server-specific regression fixture",
+      "role": "observed_synthetic_baseline_fixture_not_canonical_target"
+    },
+    {
+      "id": "F-WIRE-004",
+      "route": "GET /api/documents/{id:guid}",
+      "source_response": "MVC NotFound 404",
+      "http_status": 404,
+      "expect": {
+        "success": false,
+        "statusCode": 404,
+        "traceId": "synthetic-trace",
+        "data": null,
+        "errors": [
+          "Document introuvable"
+        ]
+      },
+      "assertion": "404 maps null only in explicit read method; no private text",
+      "role": "existing_synthetic_reference"
+    },
+    {
+      "id": "F-WIRE-005",
+      "route": "MIDDLEWARE / ArgumentException",
+      "source_response": "JsonSerializer.Serialize without Web options",
+      "http_status": 400,
+      "expect": {
+        "Success": false,
+        "StatusCode": 400,
+        "TraceId": "synthetic-trace",
+        "Data": null,
+        "Errors": [
+          "synthetic error"
+        ]
+      },
+      "assertion": "legacy middleware PascalCase; not canonical target; actual validation body may differ",
+      "role": "observed_synthetic_baseline_fixture_not_canonical_target"
+    },
+    {
+      "id": "F-WIRE-006",
+      "route": "POST /api/vector/search",
+      "source_response": "MVC direct result",
+      "http_status": 200,
+      "expect": [
+        {
+          "chunkId": "22222222-2222-4222-8222-222222222222",
+          "documentId": "11111111-1111-4111-8111-111111111111",
+          "title": "Exemple",
+          "content": "Texte factice",
+          "score": 0.12
+        }
+      ],
+      "assertion": "direct array; score not confidence",
+      "role": "existing_synthetic_reference"
+    },
+    {
+      "id": "F-WIRE-007",
+      "route": "POST /api/rag/ask/verified",
+      "source_response": "MVC direct verified result, safe abstention",
+      "http_status": 200,
+      "expect": {
+        "verdict": "ABSTAIN",
+        "answer": "Preuves insuffisantes ou validation non disponible : aucune réponse factuelle publiée.",
+        "claims": []
+      },
+      "assertion": "ABSTAIN is successful application verdict; no raw/rejected claims",
+      "role": "existing_synthetic_reference"
+    },
+    {
+      "id": "F-WIRE-008",
+      "route": "POST /api/rag/ask/verified",
+      "source_response": "MVC direct verified result, synthetic citation shape; not a qualified finding",
+      "http_status": 200,
+      "expect": {
+        "verdict": "ANSWER",
+        "answer": "- Exemple",
+        "claims": [
+          {
+            "id": "a1",
+            "statement": "Exemple",
+            "evidence": [
+              {
+                "documentId": "11111111-1111-4111-8111-111111111111",
+                "chunkId": "22222222-2222-4222-8222-222222222222",
+                "startUtf16": 0,
+                "lengthUtf16": 7,
+                "quote": "Exemple",
+                "chunkSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ]
+          }
+        ]
+      },
+      "assertion": "schema-only; do not infer model quality or validity of synthetic hash",
+      "role": "existing_synthetic_reference"
+    },
+    {
+      "id": "F-WIRE-009",
+      "route": "[ApiController] automatic invalid model",
+      "source_response": "ValidationProblemDetails",
+      "http_status": 400,
+      "expect_schema_only": {
+        "type": "string?",
+        "title": "string?",
+        "status": "int?",
+        "errors": "dictionary<string,string[]>?"
+      },
+      "assertion": "different error body: characterize actual ASP.NET with integration tests, not byte-for-byte fixture",
+      "role": "observed_synthetic_baseline_fixture_not_canonical_target"
+    },
+    {
+      "id": "F-TARGET-201-categories",
+      "route": "POST /api/categories",
+      "role": "target_synthetic_requires_api_integration_test",
+      "http_status": 201,
+      "expect": {
+        "success": true,
+        "statusCode": 201,
+        "traceId": "synthetic-trace",
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "name": "Exemple"
+        },
+        "errors": []
+      },
+      "assertion": "HTTP actual 201 equals envelope statusCode; no documented legacy 200 tolerance in new SDK"
+    },
+    {
+      "id": "F-TARGET-201-sources",
+      "route": "POST /api/sources",
+      "role": "target_synthetic_requires_api_integration_test",
+      "http_status": 201,
+      "expect": {
+        "success": true,
+        "statusCode": 201,
+        "traceId": "synthetic-trace",
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "name": "Exemple"
+        },
+        "errors": []
+      },
+      "assertion": "HTTP actual 201 equals envelope statusCode; no documented legacy 200 tolerance in new SDK"
+    },
+    {
+      "id": "F-TARGET-201-tags",
+      "route": "POST /api/tags",
+      "role": "target_synthetic_requires_api_integration_test",
+      "http_status": 201,
+      "expect": {
+        "success": true,
+        "statusCode": 201,
+        "traceId": "synthetic-trace",
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "name": "Exemple"
+        },
+        "errors": []
+      },
+      "assertion": "HTTP actual 201 equals envelope statusCode; no documented legacy 200 tolerance in new SDK"
+    },
+    {
+      "id": "F-TARGET-PROBLEM-400",
+      "route": "[ApiController] invalid model",
+      "role": "target_synthetic_requires_api_integration_test",
+      "http_status": 400,
+      "media_type": "application/problem+json",
+      "expect": {
+        "type": "about:blank",
+        "title": "Bad Request",
+        "status": 400,
+        "code": "http.bad_request",
+        "correlationId": "1234567890abcdef1234567890abcdef",
+        "errors": {
+          "title": [
+            "Required field"
+          ]
+        }
+      },
+      "assertion": "Same RFC9457 format as middleware; no exception class name, request content, stack or private data"
+    },
+    {
+      "id": "F-TARGET-PROBLEM-500",
+      "route": "middleware unhandled failure",
+      "role": "target_synthetic_requires_api_integration_test",
+      "http_status": 500,
+      "media_type": "application/problem+json",
+      "expect": {
+        "type": "about:blank",
+        "title": "Internal Server Error",
+        "status": 500,
+        "code": "http.server_error",
+        "correlationId": "1234567890abcdef1234567890abcdef"
+      },
+      "assertion": "Generic safe response; no exception details; status property matches actual HTTP 500"
+    },
+    {
+      "id": "F-TARGET-PROBLEM-404",
+      "route": "GET /api/documents/{id:guid}",
+      "role": "target_synthetic_requires_api_integration_test",
+      "http_status": 404,
+      "media_type": "application/problem+json",
+      "expect": {
+        "type": "about:blank",
+        "title": "Not Found",
+        "status": 404,
+        "code": "http.not_found",
+        "correlationId": "1234567890abcdef1234567890abcdef"
+      },
+      "assertion": "Nullable SDK read methods only map 404 to null, others throw HttpRequestException with diagnostics"
+    }
+  ],
+  "limits": {
+    "synthetic": true,
+    "same_runtime_serializer_not_executed_here": true,
+    "guide_for_future_tests_not_oracle": true,
+    "sample_hash_not_verified_against_sample_content": true,
+    "float_scores_are_example_not_calibrated": true,
+    "observed_http_200_vs_body_201_from_source": true,
+    "target_cases_are_not_runtime_evidence": true,
+    "legacy_cases_retained_for_audit_not_target": true,
+    "real_server_normalization_precedes_sdk_cutover": true,
+    "approved_normative_not_runtime_evidence": true
+  },
+  "normative_revision": "1.0.0-rc.1"
+}

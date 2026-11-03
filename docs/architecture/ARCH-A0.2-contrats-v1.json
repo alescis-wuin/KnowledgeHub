@@ -1,0 +1,2157 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "ARCH-A0.2-contracts",
+  "status": "normative_approved_pending_repository_integration_not_implemented",
+  "provenance": {
+    "repository": "alescis-wuin/KnowledgeHub",
+    "main_commit_observed": "0f359979235d189cb3059c86224dba738d176e4c",
+    "main_tree_observed": "833b6a0fda44b88cdcd60bb9c255b540e1aa3cec",
+    "original_source_audit_commit": "e422eaca948884ca954b2b97d74852ed364151d5",
+    "post_source_change": "PR18 whitespace-only, locally validated by git diff -w",
+    "runtime_code_changed": false,
+    "prepared_base_sha": null,
+    "candidate_cutover_sha": null,
+    "maintainer_final_normative_approval": {
+      "approved": true,
+      "date_local": "2026-11-03",
+      "revision": "1.0.0-rc.1",
+      "approver": "project_maintainer",
+      "evidence": "explicit_user_message_in_current_KnowledgeHub_conversation",
+      "includes": [
+        "A02-D01",
+        "A02-D02",
+        "A02-D03",
+        "A02-D04",
+        "A02-D05",
+        "A02-D06",
+        "A02-D07",
+        "GOV",
+        "SPEC-01",
+        "SPEC-02",
+        "SPEC-03"
+      ],
+      "repository_commit": null,
+      "runtime_qualification": false
+    }
+  },
+  "authoritative_scope": {
+    "producer": "integrator",
+    "consumer_areas": [
+      "A2_HTTP",
+      "A3_Verification"
+    ],
+    "normative_after_explicit_approval": true,
+    "versioning": "SemVer: PATCH non-semantic fixture/doc, MINOR additive compatible, MAJOR incompatible CLR/wire/port ; change request obligatoire",
+    "target_status": "approved_normative_pending_repository_integration"
+  },
+  "projects": [
+    {
+      "name": "KnowledgeHub.Contracts.Http",
+      "assembly_role": "wire-contract-only",
+      "allowed_references": [],
+      "forbid": [
+        "KnowledgeHub.Application",
+        "KnowledgeHub.Api",
+        "KnowledgeHub.Domain",
+        "KnowledgeHub.Infrastructure",
+        "KnowledgeHub.Rag.Contracts",
+        "EntityFramework",
+        "AspNetCore",
+        "UI",
+        "DI"
+      ],
+      "target_framework": "net10.0",
+      "owner": "A2",
+      "phase": "A2.1"
+    },
+    {
+      "name": "KnowledgeHub.Client.Http",
+      "assembly_role": "http-transport",
+      "allowed_references": [
+        "KnowledgeHub.Contracts.Http"
+      ],
+      "forbid": [
+        "Application",
+        "Domain",
+        "Infrastructure",
+        "Api",
+        "MAUI",
+        "Avalonia",
+        "EF",
+        "UI"
+      ],
+      "owner": "A2",
+      "phase": "A2.2"
+    },
+    {
+      "name": "KnowledgeHub.Rag.Contracts",
+      "assembly_role": "value-and-ports",
+      "allowed_references": [],
+      "forbid": [
+        "KnowledgeHub.Contracts.Http",
+        "Application",
+        "Domain",
+        "Infrastructure",
+        "Api",
+        "EF",
+        "ASP.NET",
+        "DI",
+        "HTTP",
+        "UI"
+      ],
+      "owner": "A3",
+      "phase": "A3.1"
+    },
+    {
+      "name": "KnowledgeHub.Verification",
+      "assembly_role": "pure-verification",
+      "allowed_references": [
+        "KnowledgeHub.Rag.Contracts"
+      ],
+      "forbid": [
+        "Application",
+        "Domain",
+        "Infrastructure",
+        "Api",
+        "EF",
+        "HTTP",
+        "DI",
+        "SQL",
+        "UI"
+      ],
+      "owner": "A3",
+      "phase": "A3.2"
+    }
+  ],
+  "http_wire_v1": {
+    "namespace_new": "KnowledgeHub.Contracts.Http",
+    "observed_server_serializer": "ASP.NET Core MVC Web defaults, camelCase on controller action results",
+    "observed_importer_serializer": "System.Net.Http.Json Web defaults, case-insensitive reads",
+    "observed_middleware_serializer": "System.Text.Json default Serialize without options: PascalCase error envelope",
+    "observed_model_state_error": "ASP.NET Core [ApiController] automatic 400 can return ValidationProblemDetails, not ApiResponse",
+    "observed_numeric_enum": "ImportDocumentOutcome serialized as JSON number 0..4 without configured JsonStringEnumConverter",
+    "timestamp": "System.Text.Json DateTime round-trip ISO8601; Kind/tz cannot be inferred from CLR alone, no timezone change",
+    "guid": "JSON string in Guid D format; do not change ids",
+    "contract_target": "camelCase for successful API envelopes and direct RAG; server-side error alignment is separate integrator decision",
+    "current_success_envelope_fields": [
+      "success",
+      "statusCode",
+      "traceId",
+      "data",
+      "errors"
+    ],
+    "error_envelopes_legacy": [
+      "controller_404_camelCase_ApiResponse",
+      "middleware_400_500_PascalCase_ApiResponse",
+      "automatic_400_ValidationProblemDetails"
+    ],
+    "types": [
+      {
+        "type": "ApiResponse<T>",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.ApiResponse<T>",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/ApiResponse.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Success",
+            "clr_type": "bool",
+            "json_name": "success",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "StatusCode",
+            "clr_type": "int",
+            "json_name": "statusCode",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "TraceId",
+            "clr_type": "string?",
+            "json_name": "traceId",
+            "nullability": "nullable"
+          },
+          {
+            "name": "Data",
+            "clr_type": "T?",
+            "json_name": "data",
+            "nullability": "nullable"
+          },
+          {
+            "name": "Errors",
+            "clr_type": "IReadOnlyCollection<string>",
+            "json_name": "errors",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "DocumentDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.DocumentDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/DocumentDTO.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Id",
+            "clr_type": "Guid",
+            "json_name": "id",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "ExternalId",
+            "clr_type": "Guid?",
+            "json_name": "externalId",
+            "nullability": "nullable"
+          },
+          {
+            "name": "ContentSha256",
+            "clr_type": "string?",
+            "json_name": "contentSha256",
+            "nullability": "nullable"
+          },
+          {
+            "name": "Title",
+            "clr_type": "string",
+            "json_name": "title",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Content",
+            "clr_type": "string",
+            "json_name": "content",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "CreatedAt",
+            "clr_type": "DateTime",
+            "json_name": "createdAt",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Tags",
+            "clr_type": "List<string>",
+            "json_name": "tags",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "DocumentDetailsDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.DocumentDetailsDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/DocumentDetailsDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "global",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Id",
+            "clr_type": "Guid",
+            "json_name": "id",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Title",
+            "clr_type": "string",
+            "json_name": "title",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Content",
+            "clr_type": "string",
+            "json_name": "content",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Category",
+            "clr_type": "string?",
+            "json_name": "category",
+            "nullability": "nullable"
+          },
+          {
+            "name": "Source",
+            "clr_type": "string?",
+            "json_name": "source",
+            "nullability": "nullable"
+          },
+          {
+            "name": "Tags",
+            "clr_type": "IReadOnlyCollection<string>",
+            "json_name": "tags",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Chunks",
+            "clr_type": "IReadOnlyCollection<ChunkDto>",
+            "json_name": "chunks",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "CreatedAt",
+            "clr_type": "DateTime",
+            "json_name": "createdAt",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "ChunkDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.ChunkDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/ChunkDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Id",
+            "clr_type": "Guid",
+            "json_name": "id",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "DocumentId",
+            "clr_type": "Guid",
+            "json_name": "documentId",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "ChunkIndex",
+            "clr_type": "int",
+            "json_name": "chunkIndex",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "TokenCount",
+            "clr_type": "int",
+            "json_name": "tokenCount",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Content",
+            "clr_type": "string",
+            "json_name": "content",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "CreatedAt",
+            "clr_type": "DateTime",
+            "json_name": "createdAt",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "CreateDocumentDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.CreateDocumentDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/CreateDocumentDTO.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "global",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Title",
+            "clr_type": "string",
+            "json_name": "title",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Content",
+            "clr_type": "string",
+            "json_name": "content",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "ExternalId",
+            "clr_type": "Guid?",
+            "json_name": "externalId",
+            "nullability": "nullable"
+          },
+          {
+            "name": "CategoryId",
+            "clr_type": "Guid?",
+            "json_name": "categoryId",
+            "nullability": "nullable"
+          },
+          {
+            "name": "SourceId",
+            "clr_type": "Guid?",
+            "json_name": "sourceId",
+            "nullability": "nullable"
+          },
+          {
+            "name": "TagIds",
+            "clr_type": "List<Guid>",
+            "json_name": "tagIds",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Summary",
+            "clr_type": "string?",
+            "json_name": "summary",
+            "nullability": "nullable"
+          },
+          {
+            "name": "SearchKeywords",
+            "clr_type": "string?",
+            "json_name": "searchKeywords",
+            "nullability": "nullable"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "UpdateDocumentDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.UpdateDocumentDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/UpdateDocumentDTO.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Title",
+            "clr_type": "string",
+            "json_name": "title",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Content",
+            "clr_type": "string",
+            "json_name": "content",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "CategoryDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.CategoryDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/CategoryDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Id",
+            "clr_type": "Guid",
+            "json_name": "id",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Name",
+            "clr_type": "string",
+            "json_name": "name",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "CreateCategoryDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.CreateCategoryDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/CreateCategoryDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Name",
+            "clr_type": "string",
+            "json_name": "name",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "KnowledgeSourceDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.KnowledgeSourceDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/KnowledgeSourceDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Id",
+            "clr_type": "Guid",
+            "json_name": "id",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Name",
+            "clr_type": "string",
+            "json_name": "name",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Url",
+            "clr_type": "string?",
+            "json_name": "url",
+            "nullability": "nullable"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "CreateKnowledgeSourceDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.CreateKnowledgeSourceDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/CreateKnowledgeSourceDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Name",
+            "clr_type": "string",
+            "json_name": "name",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Url",
+            "clr_type": "string?",
+            "json_name": "url",
+            "nullability": "nullable"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "TagDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.TagDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/TagDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Id",
+            "clr_type": "Guid",
+            "json_name": "id",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Name",
+            "clr_type": "string",
+            "json_name": "name",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "CreateTagDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.CreateTagDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/CreateTagDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Name",
+            "clr_type": "string",
+            "json_name": "name",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "KnowledgeStatisticsDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.KnowledgeStatisticsDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/KnowledgeStatisticsDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "DocumentsCount",
+            "clr_type": "int",
+            "json_name": "documentsCount",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "CategoriesCount",
+            "clr_type": "int",
+            "json_name": "categoriesCount",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "SourcesCount",
+            "clr_type": "int",
+            "json_name": "sourcesCount",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "TagsCount",
+            "clr_type": "int",
+            "json_name": "tagsCount",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "ChunksCount",
+            "clr_type": "int",
+            "json_name": "chunksCount",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "ImportDocumentResultDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.ImportDocumentResultDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/ImportDocumentResultDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Document",
+            "clr_type": "DocumentDto",
+            "json_name": "document",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Outcome",
+            "clr_type": "ImportDocumentOutcome",
+            "json_name": "outcome",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "ImportDocumentOutcome",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.ImportDocumentOutcome",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/ImportDocumentResultDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "enum_values": {
+          "Created": 0,
+          "UpdatedContent": 1,
+          "UpdatedMetadata": 2,
+          "RepairedIndex": 3,
+          "Unchanged": 4
+        },
+        "wire_representation_at_baseline": "number",
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "AskQuestionRequestDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.AskQuestionRequestDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/AskQuestionRequestDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Question",
+            "clr_type": "string",
+            "json_name": "question",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "AskQuestionResponseDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.AskQuestionResponseDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/AskQuestionResponseDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Question",
+            "clr_type": "string",
+            "json_name": "question",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Answer",
+            "clr_type": "string",
+            "json_name": "answer",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Sources",
+            "clr_type": "IReadOnlyCollection<SourceReferenceDto>",
+            "json_name": "sources",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "SourceReferenceDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.SourceReferenceDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/SourceReferenceDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Title",
+            "clr_type": "string",
+            "json_name": "title",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Score",
+            "clr_type": "double",
+            "json_name": "score",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Excerpt",
+            "clr_type": "string",
+            "json_name": "excerpt",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "RelevancePercent",
+            "clr_type": "int",
+            "json_name": "relevancePercent",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "VectorSearchRequestDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.VectorSearchRequestDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/VectorSearchRequestDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Question",
+            "clr_type": "string",
+            "json_name": "question",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "TopK",
+            "clr_type": "int",
+            "json_name": "topK",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "VectorSearchResultDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.VectorSearchResultDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/VectorSearchResultDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "ChunkId",
+            "clr_type": "Guid",
+            "json_name": "chunkId",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "DocumentId",
+            "clr_type": "Guid",
+            "json_name": "documentId",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Title",
+            "clr_type": "string",
+            "json_name": "title",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Content",
+            "clr_type": "string",
+            "json_name": "content",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Score",
+            "clr_type": "double",
+            "json_name": "score",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "VerifiedRagResponseDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.VerifiedRagResponseDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/VerifiedRagResponseDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Verdict",
+            "clr_type": "string",
+            "json_name": "verdict",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Answer",
+            "clr_type": "string",
+            "json_name": "answer",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Claims",
+            "clr_type": "IReadOnlyList<VerifiedRagClaimDto>",
+            "json_name": "claims",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "VerifiedRagClaimDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.VerifiedRagClaimDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/VerifiedRagResponseDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "Id",
+            "clr_type": "string",
+            "json_name": "id",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Statement",
+            "clr_type": "string",
+            "json_name": "statement",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Evidence",
+            "clr_type": "IReadOnlyList<VerifiedRagCitationDto>",
+            "json_name": "evidence",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      },
+      {
+        "type": "VerifiedRagCitationDto",
+        "proposed_new_full_name": "KnowledgeHub.Contracts.Http.VerifiedRagCitationDto",
+        "source_declaring_file": "KnowledgeHub.Application/DTOs/VerifiedRagResponseDto.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.DTOs",
+        "destination_assembly": "KnowledgeHub.Contracts.Http",
+        "destination_phase": "A2.1",
+        "source_stays_until_integrator_cutover": true,
+        "cutover_commit_sha": null,
+        "field_shape": [
+          {
+            "name": "DocumentId",
+            "clr_type": "Guid",
+            "json_name": "documentId",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "ChunkId",
+            "clr_type": "Guid",
+            "json_name": "chunkId",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "StartUtf16",
+            "clr_type": "int",
+            "json_name": "startUtf16",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "LengthUtf16",
+            "clr_type": "int",
+            "json_name": "lengthUtf16",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "Quote",
+            "clr_type": "string",
+            "json_name": "quote",
+            "nullability": "nonnullable_source_declaration"
+          },
+          {
+            "name": "ChunkSha256",
+            "clr_type": "string",
+            "json_name": "chunkSha256",
+            "nullability": "nonnullable_source_declaration"
+          }
+        ],
+        "property_set_exact_as_source": true,
+        "runtime_fixture_needed": true
+      }
+    ],
+    "routes": [
+      {
+        "route_id": "GET /api/categories",
+        "method": "GET",
+        "path": "/api/categories",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<IReadOnlyList<CategoryDto>>",
+        "observed_action_payload_clr": "List<CategoryDto>",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<IReadOnlyList<CategoryDto>> GetCategoriesAsync(CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": null,
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubMetadataClient"
+      },
+      {
+        "route_id": "POST /api/categories",
+        "method": "POST",
+        "path": "/api/categories",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<CategoryDto>",
+        "observed_action_payload_clr": "CategoryDto",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto request, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": "body_statusCode_201",
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 201,
+        "target_response_body_statusCode": 201,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubMetadataClient"
+      },
+      {
+        "route_id": "GET /api/sources",
+        "method": "GET",
+        "path": "/api/sources",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<IReadOnlyList<KnowledgeSourceDto>>",
+        "observed_action_payload_clr": "List<KnowledgeSourceDto>",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<IReadOnlyList<KnowledgeSourceDto>> GetSourcesAsync(CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": null,
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubMetadataClient"
+      },
+      {
+        "route_id": "POST /api/sources",
+        "method": "POST",
+        "path": "/api/sources",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<KnowledgeSourceDto>",
+        "observed_action_payload_clr": "KnowledgeSourceDto",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<KnowledgeSourceDto> CreateSourceAsync(CreateKnowledgeSourceDto request, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": "body_statusCode_201",
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 201,
+        "target_response_body_statusCode": 201,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubMetadataClient"
+      },
+      {
+        "route_id": "GET /api/tags",
+        "method": "GET",
+        "path": "/api/tags",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<IReadOnlyList<TagDto>>",
+        "observed_action_payload_clr": "List<TagDto>",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<IReadOnlyList<TagDto>> GetTagsAsync(CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": null,
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubMetadataClient"
+      },
+      {
+        "route_id": "POST /api/tags",
+        "method": "POST",
+        "path": "/api/tags",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<TagDto>",
+        "observed_action_payload_clr": "TagDto",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<TagDto> CreateTagAsync(CreateTagDto request, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": "body_statusCode_201",
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 201,
+        "target_response_body_statusCode": 201,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubMetadataClient"
+      },
+      {
+        "route_id": "GET /api/documents",
+        "method": "GET",
+        "path": "/api/documents",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<IReadOnlyList<DocumentDto>>",
+        "observed_action_payload_clr": "List<DocumentDto>",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<IReadOnlyList<DocumentDto>> GetDocumentsAsync(CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": null,
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+      },
+      {
+        "route_id": "GET /api/documents/{id:guid}",
+        "method": "GET",
+        "path": "/api/documents/{id:guid}",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<DocumentDto>",
+        "observed_action_payload_clr": "DocumentDto",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<DocumentDto?> GetDocumentAsync(Guid id, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": "404_maps_null_only_here",
+        "not_found": "return_null",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+      },
+      {
+        "route_id": "POST /api/documents",
+        "method": "POST",
+        "path": "/api/documents",
+        "http_success_status": 201,
+        "response_body_wire_model": "ApiResponse<DocumentDto>",
+        "observed_action_payload_clr": "DocumentDto",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<DocumentDto> CreateDocumentAsync(CreateDocumentDto request, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": null,
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 201,
+        "target_http_success_status": 201,
+        "target_response_body_statusCode": 201,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+      },
+      {
+        "route_id": "POST /api/documents/import",
+        "method": "POST",
+        "path": "/api/documents/import",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<ImportDocumentResultDto>",
+        "observed_action_payload_clr": "ImportDocumentResultDto",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<ImportDocumentResultDto> ImportDocumentAsync(CreateDocumentDto request, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": null,
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+      },
+      {
+        "route_id": "PUT /api/documents/{id:guid}",
+        "method": "PUT",
+        "path": "/api/documents/{id:guid}",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<DocumentDto>",
+        "observed_action_payload_clr": "DocumentDto",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<DocumentDto> UpdateDocumentAsync(Guid id, UpdateDocumentDto request, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": null,
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+      },
+      {
+        "route_id": "DELETE /api/documents/{id:guid}",
+        "method": "DELETE",
+        "path": "/api/documents/{id:guid}",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<string>",
+        "observed_action_payload_clr": "string",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<string> DeleteDocumentAsync(Guid id, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": null,
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+      },
+      {
+        "route_id": "GET /api/documents/{id:guid}/details",
+        "method": "GET",
+        "path": "/api/documents/{id:guid}/details",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<DocumentDetailsDto>",
+        "observed_action_payload_clr": "DocumentDetailsDto",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<DocumentDetailsDto?> GetDocumentDetailsAsync(Guid id, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": "404_maps_null_only_here",
+        "not_found": "return_null",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+      },
+      {
+        "route_id": "GET /api/documents/search?q={q}",
+        "method": "GET",
+        "path": "/api/documents/search?q={q}",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<IReadOnlyList<DocumentDto>>",
+        "observed_action_payload_clr": "List<DocumentDto>",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<IReadOnlyList<DocumentDto>> SearchDocumentsAsync(string query, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": null,
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+      },
+      {
+        "route_id": "GET /api/documents/category/{id:guid}",
+        "method": "GET",
+        "path": "/api/documents/category/{id:guid}",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<IReadOnlyList<DocumentDto>>",
+        "observed_action_payload_clr": "List<DocumentDto>",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<IReadOnlyList<DocumentDto>> GetDocumentsByCategoryAsync(Guid id, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": null,
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+      },
+      {
+        "route_id": "GET /api/documents/tag/{id:guid}",
+        "method": "GET",
+        "path": "/api/documents/tag/{id:guid}",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<IReadOnlyList<DocumentDto>>",
+        "observed_action_payload_clr": "List<DocumentDto>",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<IReadOnlyList<DocumentDto>> GetDocumentsByTagAsync(Guid id, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": null,
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+      },
+      {
+        "route_id": "GET /api/documents/source/{id:guid}",
+        "method": "GET",
+        "path": "/api/documents/source/{id:guid}",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<IReadOnlyList<DocumentDto>>",
+        "observed_action_payload_clr": "List<DocumentDto>",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<IReadOnlyList<DocumentDto>> GetDocumentsBySourceAsync(Guid id, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": null,
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+      },
+      {
+        "route_id": "POST /api/documents/{id:guid}/ensure-index",
+        "method": "POST",
+        "path": "/api/documents/{id:guid}/ensure-index",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<bool>",
+        "observed_action_payload_clr": "bool",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<bool> EnsureDocumentIndexAsync(Guid id, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": null,
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubDocumentsClient"
+      },
+      {
+        "route_id": "GET /api/statistics",
+        "method": "GET",
+        "path": "/api/statistics",
+        "http_success_status": 200,
+        "response_body_wire_model": "ApiResponse<KnowledgeStatisticsDto>",
+        "observed_action_payload_clr": "KnowledgeStatisticsDto",
+        "envelope": "ApiResponse",
+        "sdk_proposed_method": "public Task<KnowledgeStatisticsDto> GetStatisticsAsync(CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": null,
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": 200,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubStatisticsClient"
+      },
+      {
+        "route_id": "POST /api/rag/ask",
+        "method": "POST",
+        "path": "/api/rag/ask",
+        "http_success_status": 200,
+        "response_body_wire_model": "AskQuestionResponseDto",
+        "observed_action_payload_clr": "AskQuestionResponseDto",
+        "envelope": "direct",
+        "sdk_proposed_method": "public Task<AskQuestionResponseDto> AskQuestionAsync(AskQuestionRequestDto request, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": "direct_not_enveloped",
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": null,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubRagClient"
+      },
+      {
+        "route_id": "POST /api/rag/ask/verified",
+        "method": "POST",
+        "path": "/api/rag/ask/verified",
+        "http_success_status": 200,
+        "response_body_wire_model": "VerifiedRagResponseDto",
+        "observed_action_payload_clr": "VerifiedRagResponseDto",
+        "envelope": "direct",
+        "sdk_proposed_method": "public Task<VerifiedRagResponseDto> AskVerifiedQuestionAsync(AskQuestionRequestDto request, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": "direct_not_enveloped_abstain_valid",
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": null,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubRagClient"
+      },
+      {
+        "route_id": "POST /api/vector/search",
+        "method": "POST",
+        "path": "/api/vector/search",
+        "http_success_status": 200,
+        "response_body_wire_model": "IReadOnlyCollection<VectorSearchResultDto>",
+        "observed_action_payload_clr": "IReadOnlyCollection<VectorSearchResultDto>",
+        "envelope": "direct",
+        "sdk_proposed_method": "public Task<IReadOnlyList<VectorSearchResultDto>> SearchVectorAsync(VectorSearchRequestDto request, CancellationToken cancellationToken = default)",
+        "sdk_proposed": true,
+        "observed_exception": "direct_not_enveloped",
+        "not_found": "throw_non_success",
+        "error_contract": "HTTP non-2xx -> HttpRequestException.StatusCode ; corps ignoré, jamais divulgué",
+        "tests_required": [
+          "wire_shape",
+          "http_error_status",
+          "no_private_payload_in_exception"
+        ],
+        "observed_http_success_status": 200,
+        "target_http_success_status": 200,
+        "target_response_body_statusCode": null,
+        "sdk_error_contract_target": "Non-2xx => KnowledgeHubHttpRequestException carrying Error {code, category=http, correlationId, httpStatusCode}; server response ProblemDetails, never disclose body or request URI.",
+        "sdk_proposed_method_status": "accepted_signature_unchanged_owner_specialized_client_approved_not_implemented",
+        "sdk_target_owner": "KnowledgeHubVectorSearchClient"
+      }
+    ],
+    "intentionally_out_of_first_wave": [
+      "/api/context (RetrievedContextDto not among 23 initial types)",
+      "/api/embeddings (EmbeddingRequestDto/ResponseDto not among 23)",
+      "/api/diagnostics/database (DatabaseStatusDto not among 23)",
+      "KH009 Workspaces: separate future contract"
+    ],
+    "verified_response": {
+      "verdicts": [
+        "ABSTAIN",
+        "ANSWER",
+        "PARTIAL",
+        "CONFLICT"
+      ],
+      "safe_abstention_text": "Preuves insuffisantes ou validation non disponible : aucune réponse factuelle publiée.",
+      "conflict_answer_text": "Conflit documentaire non résolu. Aucune conclusion factuelle publiée.",
+      "abstain_and_conflict_publish_no_claims": true,
+      "no_raw_model_claims_public": true,
+      "source_side_mapping_owner": "integrator_Application_API"
+    },
+    "score_warning": "Score et RelevancePercent hérités ; aucune interprétation probabilité/certitude.",
+    "target_wire_policy": {
+      "success": "Preserve route-specific envelopes (ApiResponse<T> or direct RAG/vector result), System.Text.Json Web camelCase, exact enum numeric shape; unchanged success routes.",
+      "metadata_creations": [
+        "POST /api/categories",
+        "POST /api/sources",
+        "POST /api/tags"
+      ],
+      "metadata_http_status": 201,
+      "metadata_envelope_statusCode": 201,
+      "non_2xx_media_type": "application/problem+json",
+      "non_2xx_format": "RFC9457 ProblemDetails, standard fields type/title/status (detail/instance optional) and extensions code, correlationId; validation errors extension only for safe field names.",
+      "required_extensions": {
+        "code": "documented stable code; [a-z][a-z0-9]*(.[a-z][a-z0-9_]*)+",
+        "correlationId": "32 lowercase hexadecimal characters, nonzero; validated server-generated W3C trace identifier or fresh opaque random ID"
+      },
+      "status_consistency": "actual HTTP status authoritative; ProblemDetails.status must match transmitted status; success envelope statusCode must match actual HTTP status",
+      "error_security": "Do not return stack traces, tokens, document contents, question text, database/query details or private instance URI.",
+      "all_http_failures": "including MVC controller errors, [ApiController] validation, auth failures, middleware exceptions, notfound and rate limits",
+      "compatibility_policy": "No default legacy tolerance in new SDK; server normalization must be demonstrated in isolated integration fixtures before A2 importer or UI cutover.",
+      "not_yet_implemented": true,
+      "approval_status": "normative_approved_not_implemented"
+    }
+  },
+  "client_http_v1": {
+    "resource_ownership": {
+      "HttpClient": "host, jamais Dispose par SDK",
+      "HttpRequestMessage": "sdk, dispose",
+      "HttpResponseMessage": "sdk, dispose"
+    },
+    "error_types_proposed": [
+      {
+        "type": "KnowledgeHubHttpRequestException : HttpRequestException, IKnowledgeHubClientFailure",
+        "category": "http",
+        "condition": "HTTP non-2xx or transport failure; StatusCode is actual code for non-2xx, null for network errors"
+      },
+      {
+        "type": "KnowledgeHubHttpProtocolException : Exception, IKnowledgeHubClientFailure",
+        "category": "protocol",
+        "condition": "HTTP 2xx but malformed JSON, missing required body, wrong envelope or statusCode mismatch"
+      },
+      {
+        "type": "KnowledgeHubRequestCanceledException : OperationCanceledException, IKnowledgeHubClientFailure",
+        "category": "cancellation",
+        "condition": "caller cancelled token (caller cancellation wins race)"
+      },
+      {
+        "type": "KnowledgeHubRequestTimeoutException : TimeoutException, IKnowledgeHubClientFailure",
+        "category": "timeout",
+        "condition": "SDK-owned total budget elapsed with no caller cancellation"
+      }
+    ],
+    "legacy_known_status_mismatches": [
+      {
+        "routes": [
+          "POST /api/categories",
+          "POST /api/sources",
+          "POST /api/tags"
+        ],
+        "http_status": 200,
+        "body_statusCode": 201,
+        "decision": "Observed legacy exception only. D04-B rejects as canonical target: fix API first, no SDK legacy tolerance by default."
+      }
+    ],
+    "no_automatic_retry": true,
+    "caller_configures_http_headers_auth_base_address": true,
+    "effective_timeout_includes_body_read": true,
+    "url_encoding": "Uri.EscapeDataString on free-text search q; never put q in error messages",
+    "not_found_null_only": [
+      "GetDocumentAsync",
+      "GetDocumentDetailsAsync"
+    ],
+    "abstain_http_200_is_valid_result": true,
+    "untrusted_2xx_no_fallback": "never fabricate empty collections, default DTO, empty RAG response or success status",
+    "consumer_first": "KnowledgeHub.CorpusImporter; orchestration remains owned by importer, no server project reference after A2 cutover",
+    "import_guarantees": [
+      "Guid ExternalId is primary corpus identity",
+      "legacy empty Guid matched by title only against documents without ExternalId",
+      "preserve 5 numeric ImportDocumentOutcome values",
+      "Unchanged does not rewrite content or reindex",
+      "no retry or unintended idempotency changes"
+    ],
+    "former_proposal_not_adopted": {
+      "type": "KnowledgeHub.Client.Http.KnowledgeHubHttpClient",
+      "constructor": "public KnowledgeHubHttpClient(HttpClient httpClient, TimeSpan totalRequestTimeout)",
+      "reason": "Maintainer A02-D02=B: specialized clients instead of one 22-method facade"
+    },
+    "public_namespace": "KnowledgeHub.Client.Http",
+    "shared_transport_design": {
+      "reuse": "one internal KnowledgeHubHttpTransport with shared cancellation, timeout, auth pass-through, serialization, error classification, correlation and resource disposal; cannot be public circular facade",
+      "ownership": "host owns HttpClient; SDK disposes requests and responses only",
+      "per_client_constructor": "(HttpClient httpClient, KnowledgeHubHttpClientOptions options); HttpClient supplied by host and NEVER disposed",
+      "options_type": "public sealed record KnowledgeHubHttpClientOptions(TimeSpan TotalRequestTimeout)",
+      "DI_optional": "Integrators may register named/typed clients; no mandatory Microsoft.Extensions.* dependency in SDK; no static singleton or auto service-provider creation",
+      "configuration": "Host owns BaseAddress, authentication and request identity; SDK must not blindly log HTTP URI, question or body",
+      "retry": "none (including mutation or generation)",
+      "timeout": "one effective budget including send and body read; cancellation requested by caller has priority when simultaneous",
+      "resource_lifetimes": "HttpClient host-owned; request and response sdk-owned",
+      "contract_status": "normative_approved_not_implemented"
+    },
+    "clients": [
+      {
+        "type": "KnowledgeHubMetadataClient",
+        "fully_qualified_name": "KnowledgeHub.Client.Http.KnowledgeHubMetadataClient",
+        "method_names": [
+          "GetCategoriesAsync",
+          "CreateCategoryAsync",
+          "GetSourcesAsync",
+          "CreateSourceAsync",
+          "GetTagsAsync",
+          "CreateTagAsync"
+        ],
+        "operation_count": 6,
+        "constructor": "public KnowledgeHubMetadataClient(HttpClient httpClient, KnowledgeHubHttpClientOptions options)"
+      },
+      {
+        "type": "KnowledgeHubDocumentsClient",
+        "fully_qualified_name": "KnowledgeHub.Client.Http.KnowledgeHubDocumentsClient",
+        "method_names": [
+          "GetDocumentsAsync",
+          "GetDocumentAsync",
+          "CreateDocumentAsync",
+          "ImportDocumentAsync",
+          "UpdateDocumentAsync",
+          "DeleteDocumentAsync",
+          "GetDocumentDetailsAsync",
+          "SearchDocumentsAsync",
+          "GetDocumentsByCategoryAsync",
+          "GetDocumentsByTagAsync",
+          "GetDocumentsBySourceAsync",
+          "EnsureDocumentIndexAsync"
+        ],
+        "operation_count": 12,
+        "constructor": "public KnowledgeHubDocumentsClient(HttpClient httpClient, KnowledgeHubHttpClientOptions options)"
+      },
+      {
+        "type": "KnowledgeHubStatisticsClient",
+        "fully_qualified_name": "KnowledgeHub.Client.Http.KnowledgeHubStatisticsClient",
+        "method_names": [
+          "GetStatisticsAsync"
+        ],
+        "operation_count": 1,
+        "constructor": "public KnowledgeHubStatisticsClient(HttpClient httpClient, KnowledgeHubHttpClientOptions options)"
+      },
+      {
+        "type": "KnowledgeHubRagClient",
+        "fully_qualified_name": "KnowledgeHub.Client.Http.KnowledgeHubRagClient",
+        "method_names": [
+          "AskQuestionAsync",
+          "AskVerifiedQuestionAsync"
+        ],
+        "operation_count": 2,
+        "constructor": "public KnowledgeHubRagClient(HttpClient httpClient, KnowledgeHubHttpClientOptions options)"
+      },
+      {
+        "type": "KnowledgeHubVectorSearchClient",
+        "fully_qualified_name": "KnowledgeHub.Client.Http.KnowledgeHubVectorSearchClient",
+        "method_names": [
+          "SearchVectorAsync"
+        ],
+        "operation_count": 1,
+        "constructor": "public KnowledgeHubVectorSearchClient(HttpClient httpClient, KnowledgeHubHttpClientOptions options)"
+      }
+    ],
+    "operations_total": 22,
+    "error_contract_target": {
+      "interface": "public interface IKnowledgeHubClientFailure { KnowledgeHubErrorInfo Error { get; } }",
+      "info_record": "public sealed record KnowledgeHubErrorInfo(string Code, KnowledgeHubErrorCategory Category, string CorrelationId, HttpStatusCode? HttpStatusCode)",
+      "category_enum": "public enum KnowledgeHubErrorCategory { Http = 0, Protocol = 1, Cancellation = 2, Timeout = 3 }",
+      "subclasses": "Each of four SDK-owned exception subclasses implements IKnowledgeHubClientFailure and exposes an immutable Error; .NET base catch semantics preserved; no common Exception superclass is possible across HttpRequestException, OperationCanceledException and TimeoutException.",
+      "codes": {
+        "http": "http.bad_request, http.unauthorized, http.forbidden, http.not_found, http.conflict, http.rate_limited, http.server_error, http.unexpected_status",
+        "transport": "transport.network_failure",
+        "protocol": "protocol.invalid_json, protocol.invalid_envelope, protocol.status_mismatch, protocol.unsupported_media_type",
+        "cancellation": "request.cancelled_by_caller, request.cancelled_unknown",
+        "timeout": "request.deadline_exceeded"
+      },
+      "diagnostics": "On every SDK-owned exception, include locally produced correlationId from the request context (valid W3C Activity.TraceId or cryptographically random 128-bit fallback), nonzero 32-lowerhex; never trust remote correlation without validation; remote trace is optional context, not authority.",
+      "body_safety": "Do not incorporate arbitrary server error codes, headers, body, request URI, sensitive query or invalid remote IDs in exceptions, codes or loggable strings; map server codes from allowlist to stable local codes or fallback.",
+      "timeouts": "When linked tokens race, inspect caller token before timeout token; unknown unsolicited cancellation must not be misclassified as SDK timeout.",
+      "no_new_category_implicit": "Additional families/codes require CR and tests; new stable codes can be additive (MINOR) if all consumers handle unknown codes.",
+      "normalization_first": "SDK integration deferred until all server error paths use the approved ProblemDetails wire target",
+      "not_runtime_implemented": true,
+      "approval_status": "normative_approved_not_implemented"
+    }
+  },
+  "rag_contracts_v1": {
+    "types": [
+      {
+        "type": "ClaimProposal",
+        "source_file": "KnowledgeHub.Application/Verification/ClaimProposal.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "record(string Id, string Statement, IReadOnlyList<EvidencePointer> Evidence)",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "EvidencePointer",
+        "source_file": "KnowledgeHub.Application/Verification/ClaimProposal.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "record(Guid DocumentId, Guid ChunkId, int StartUtf16, int LengthUtf16, string Quote, string ChunkSha256)",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "ClaimProposalBatch",
+        "source_file": "KnowledgeHub.Application/Verification/ClaimProposal.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "record(int SchemaVersion, IReadOnlyList<ClaimProposal> Claims)",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "EvidenceSnapshot",
+        "source_file": "KnowledgeHub.Application/Verification/EvidenceSnapshot.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "sealed class EvidenceSnapshot(Guid documentId, Guid chunkId, string content); Guid DocumentId; Guid ChunkId; string Content; string ChunkSha256",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "EvidenceRetrievalSnapshot",
+        "source_file": "KnowledgeHub.Application/Verification/EvidenceRetrievalSnapshot.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "sealed class EvidenceRetrievalSnapshot(IReadOnlyCollection<EvidenceSnapshot> chunks, IReadOnlyDictionary<Guid,string> documentContentSha256); IReadOnlyDictionary<Guid,EvidenceSnapshot> AllowedChunks; IReadOnlyDictionary<Guid,string> DocumentContentSha256",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "EvidenceCaptureStatus",
+        "source_file": "KnowledgeHub.Application/Verification/EvidenceRetrievalSnapshot.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "enum Captured=0, EmptyRetrieval=1, InvalidRetrieval=2, StaleRetrieval=3, InconsistentSource=4",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "EvidenceCaptureResult",
+        "source_file": "KnowledgeHub.Application/Verification/EvidenceRetrievalSnapshot.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "record(EvidenceCaptureStatus Status, EvidenceRetrievalSnapshot? Snapshot)",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "EvidenceRevalidationStatus",
+        "source_file": "KnowledgeHub.Application/Verification/EvidenceRetrievalSnapshot.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "enum Fresh=0, Stale=1, InvalidSnapshot=2",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "SemanticEvidenceRelation",
+        "source_file": "KnowledgeHub.Application/Verification/QualifiedEvidenceAssessment.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "enum Unknown=0, Entails=1, Contradicts=2, Conflicts=3",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "EvidenceCoverageStatus",
+        "source_file": "KnowledgeHub.Application/Verification/QualifiedEvidenceAssessment.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "enum Unknown=0, Complete=1, Partial=2",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "SemanticEvidenceFinding",
+        "source_file": "KnowledgeHub.Application/Verification/QualifiedEvidenceAssessment.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "record(string ClaimId, EvidencePointer Evidence, SemanticEvidenceRelation Relation)",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "QualifiedEvidenceAssessment",
+        "source_file": "KnowledgeHub.Application/Verification/QualifiedEvidenceAssessment.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "record(string PolicyId, bool Qualified, EvidenceCoverageStatus Coverage, IReadOnlyList<SemanticEvidenceFinding> Findings); static Unavailable",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "VerifiedClaimStatus",
+        "source_file": "KnowledgeHub.Application/Verification/QualifiedEvidenceAssessment.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "enum Supported=0, InsufficientEvidence=1, InvalidEvidence=2, Contradicted=3, ConflictingEvidence=4",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "VerifiedAnswerStatus",
+        "source_file": "KnowledgeHub.Application/Verification/QualifiedEvidenceAssessment.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "enum Abstain=0, Answer=1, Partial=2, Conflict=3",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "VerifiedClaimResult",
+        "source_file": "KnowledgeHub.Application/Verification/QualifiedEvidenceAssessment.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "record(string Id, VerifiedClaimStatus Status, string Statement, IReadOnlyList<EvidencePointer> Evidence)",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      },
+      {
+        "type": "VerifiedEvidenceAnswer",
+        "source_file": "KnowledgeHub.Application/Verification/QualifiedEvidenceAssessment.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "source_namespace": "KnowledgeHub.Application.Verification",
+        "destination_assembly": "KnowledgeHub.Rag.Contracts",
+        "destination_namespace": "KnowledgeHub.Rag.Contracts",
+        "destination_phase": "A3.1",
+        "shape_signature": "record(VerifiedAnswerStatus Status, IReadOnlyList<VerifiedClaimResult> Claims, string Text)",
+        "cutover_commit_sha": null,
+        "one_definition_per_fully_qualified_type": true,
+        "namespace_change_requires_consumer_rebuild": true
+      }
+    ],
+    "ports": [
+      {
+        "name": "IClaimProposalGenerator",
+        "source_file": "KnowledgeHub.Application/Interfaces/IClaimProposalGenerator.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "target_assembly": "KnowledgeHub.Rag.Contracts",
+        "phase": "A3.1",
+        "status": "approved_direction_cutover_deferred",
+        "method": "Task<string?> GenerateAsync(string question, EvidenceRetrievalSnapshot snapshot, CancellationToken cancellationToken = default)",
+        "returns_raw_untrusted": true,
+        "cutover_commit_sha": null
+      },
+      {
+        "name": "IQualifiedEvidenceAssessor",
+        "source_file": "KnowledgeHub.Application/Interfaces/IQualifiedEvidenceAssessor.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "target_assembly": "KnowledgeHub.Rag.Contracts",
+        "phase": "A3.1",
+        "status": "approved_direction_cutover_deferred",
+        "method": "Task<QualifiedEvidenceAssessment> AssessAsync(string question, ClaimProposalBatch proposals, EvidenceRetrievalSnapshot snapshot, CancellationToken cancellationToken = default)",
+        "no_qualified_assessor_installed": true,
+        "cutover_commit_sha": null
+      },
+      {
+        "name": "IEvidenceRevalidator",
+        "source_file": null,
+        "source_assembly": null,
+        "target_assembly": "KnowledgeHub.Rag.Contracts",
+        "phase": "A3.1",
+        "status": "approved_direction_new_v1_port_implementation_deferred",
+        "method": "Task<EvidenceRevalidationStatus> RevalidateAsync(EvidenceRetrievalSnapshot snapshot, CancellationToken cancellationToken = default)",
+        "cutover_commit_sha": null
+      },
+      {
+        "name": "IEvidenceSnapshotProvider",
+        "source_file": "KnowledgeHub.Application/Interfaces/IEvidenceSnapshotProvider.cs",
+        "source_assembly": "KnowledgeHub.Application",
+        "target_assembly": "KnowledgeHub.Application",
+        "phase": "A3_integration",
+        "status": "approved_direction_cutover_deferred",
+        "method": "Task<EvidenceCaptureResult> CaptureAsync(IReadOnlyCollection<VectorSearchResultDto> retrievedChunks, CancellationToken cancellationToken = default)",
+        "also_inherits": "IEvidenceRevalidator",
+        "same_scoped_provider_for_both_ports": true,
+        "cutover_commit_sha": null
+      },
+      {
+        "name": "IVerifiedVerdictEvaluator",
+        "source_file": null,
+        "source_assembly": null,
+        "target_assembly": null,
+        "phase": "A3.2_separate_approval",
+        "status": "reserved_only_A3_2_explicit_decision_required_not_in_v1",
+        "method": "Task<VerifiedEvidenceAnswer> EvaluateAsync(string question, ClaimProposalBatch? proposals, EvidenceRetrievalSnapshot? snapshot, CancellationToken cancellationToken = default)",
+        "must_not_be_introduced_by_A0.2": true,
+        "cutover_commit_sha": null
+      }
+    ],
+    "snapshot": {
+      "min_chunks": 1,
+      "max_chunks": 32,
+      "nonempty_unique_chunk_guids": true,
+      "document_sha256": "64 lowercase hex of canonical document content (not chunk)",
+      "chunk_sha256": "SHA256 UTF8 exact chunk content lowercase hex",
+      "constructor_allows_empty_content": true,
+      "null_content_rejected": true,
+      "copy_dictionary_defensively": true,
+      "snapshot_is_not_authorization_or_freshness_proof": true
+    },
+    "statuses": {
+      "capture": [
+        "Captured",
+        "EmptyRetrieval",
+        "InvalidRetrieval",
+        "StaleRetrieval",
+        "InconsistentSource"
+      ],
+      "revalidation": [
+        "Fresh",
+        "Stale",
+        "InvalidSnapshot"
+      ],
+      "semantic": [
+        "Unknown",
+        "Entails",
+        "Contradicts",
+        "Conflicts"
+      ],
+      "verified_answer": [
+        "Abstain",
+        "Answer",
+        "Partial",
+        "Conflict"
+      ]
+    },
+    "proposal_records_can_represent_invalid_untrusted_input": true,
+    "no_http_dto_in_contracts": true,
+    "no_semantic_policy_in_contracts": true,
+    "public_ports_v1": [
+      "IClaimProposalGenerator",
+      "IQualifiedEvidenceAssessor",
+      "IEvidenceRevalidator"
+    ],
+    "application_bridge_not_part_of_rag_contracts_public_ports": [
+      "IEvidenceSnapshotProvider"
+    ],
+    "reserved_port_not_in_v1": [
+      "IVerifiedVerdictEvaluator"
+    ]
+  },
+  "verification_v1": {
+    "transfer_source_files": [
+      "KnowledgeHub.Application/Verification/ClaimProposalJsonParser.cs",
+      "KnowledgeHub.Application/Verification/EvidenceAnchorVerifier.cs",
+      "KnowledgeHub.Application/Verification/VerifiedVerdictPolicy.cs",
+      "KnowledgeHub.Application/Verification/VerifiedVerdictService.cs"
+    ],
+    "move_local_types": [
+      "ClaimProposalParseStatus",
+      "EvidenceAnchorStatus"
+    ],
+    "public_surface_signatures": [
+      "ClaimProposalParseStatus ClaimProposalJsonParser.TryParse(ReadOnlySpan<byte> utf8Json, out ClaimProposalBatch? batch)",
+      "EvidenceAnchorStatus EvidenceAnchorVerifier.Verify(EvidencePointer? pointer, IReadOnlyDictionary<Guid, EvidenceSnapshot> allowedSnapshots)",
+      "VerifiedEvidenceAnswer VerifiedVerdictPolicy.Decide(ClaimProposalBatch? proposals, EvidenceRetrievalSnapshot? snapshot, EvidenceRevalidationStatus freshness, QualifiedEvidenceAssessment? assessment, string trustedPolicyId)",
+      "VerifiedVerdictService(IEvidenceRevalidator snapshotRevalidator, IQualifiedEvidenceAssessor? assessor, string trustedPolicyId)",
+      "Task<VerifiedEvidenceAnswer> VerifiedVerdictService.EvaluateAsync(string question, ClaimProposalBatch? proposals, EvidenceRetrievalSnapshot? snapshot, CancellationToken cancellationToken = default)"
+    ],
+    "parser_limits": {
+      "schema_version": 1,
+      "max_json_bytes": 65536,
+      "max_depth": 16,
+      "max_claims": 12,
+      "max_evidence_per_claim": 3,
+      "max_quote_utf16": 600,
+      "max_statement_utf16": 2000,
+      "max_claim_id_utf16": 32
+    },
+    "parser_rules": [
+      "Exact property sets schemaVersion/claims, id/statement/evidence, documentId/chunkId/startUtf16/lengthUtf16/quote/chunkSha256",
+      "Duplicate keys rejected",
+      "Trailing commas and JSON comments rejected",
+      "Guid nonempty D, digest lowerhex64, exact offsets UTF16",
+      "No Unicode/CRLF normalisation"
+    ],
+    "anchor_rules": [
+      "Exact DocumentId, ChunkId, ChunkSha256 match",
+      "Reject overflow and split-surrogate offsets",
+      "Exact UTF16 slices prove provenance, not entailment"
+    ],
+    "policy_rules": [
+      "All citations must individually Entails",
+      "Qualifying assessment independent, trusted policy ID and full exact findings",
+      "Coverage Unknown -> Abstain",
+      "Snapshot must revalidate Fresh",
+      "Any invalid citation rejects entire batch",
+      "Only Supported claims publish, Conflict/Abstain claim-free"
+    ],
+    "existing_orchestrator_owned_by": "integrator: KnowledgeHub.Application/Services/VerifiedRagService.cs",
+    "existing_orchestration_invariants": {
+      "max_question_utf16": 4096,
+      "retrieval_top_k": 5,
+      "no_assessor_abstain_before_retrieval": true,
+      "revalidate_after_assessment": true,
+      "revalidate_again_before_public_projection": true,
+      "cancellation_propagates": true,
+      "database_http_publication_not_atomic": true
+    },
+    "semantic_qualification_status": "no independently qualified assessor installed, safe ABSTAIN",
+    "not_in_scope": [
+      "change existing KH008 parser limits",
+      "add combined-evidence policy",
+      "new model/RAG scoring",
+      "change EF",
+      "DI composition",
+      "KH009 workspace authorization"
+    ]
+  },
+  "cutovers": {
+    "http_contract_dual_type_first": true,
+    "application_server_DTOs_unchanged_until_integrator": true,
+    "rag_single_definition_atomic_move": true,
+    "all_compiled_consumers_rebuilt": true,
+    "bridge_IEvidenceSnapshotProvider_in_Application": true,
+    "DI_and_Persistence_owner": "integrator",
+    "cutover_sha_all_null_until_actual": true,
+    "A2_A3_usable_only_after_G1": true,
+    "prepared_base_sha": null,
+    "api_normalization_required_before_sdk_integration": true,
+    "sdk_split_accepted": true,
+    "sdk_methods_unchanged": 22,
+    "error_metadata_contract_requires_final_approval": false,
+    "external_project_changes_allowed_in_A0_2": false
+  },
+  "normative_revision": "1.0.0-rc.1",
+  "maintainer_decisions": {
+    "A02-D01": "A",
+    "A02-D04": "B",
+    "A02-D02": "B",
+    "A02-D03": "A",
+    "A02-D05": "A",
+    "A02-D06": "A",
+    "A02-D07": "A"
+  }
+}
