@@ -80,62 +80,62 @@ public class DocumentService
     {
         return await KnowledgeHubActivities.TraceAsync("document.index", async () =>
         {
-        var document =
-            new KnowledgeDocument(
-                dto.Title,
-                dto.Content);
+            var document =
+                new KnowledgeDocument(
+                    dto.Title,
+                    dto.Content);
 
-        if (dto.ExternalId.HasValue)
-        {
-            document.AssignExternalId(dto.ExternalId.Value);
-        }
-
-        document.SetSummary(dto.Summary);
-        document.SetSearchKeywords(dto.SearchKeywords);
-
-        document.AssignCategory(
-            dto.CategoryId);
-
-        document.AssignSource(
-            dto.SourceId);
-
-        foreach (var tagId in dto.TagIds)
-        {
-            var tag =
-                await _tagRepository.GetByIdAsync(
-                    tagId,
-                    cancellationToken);
-
-            if (tag is not null)
+            if (dto.ExternalId.HasValue)
             {
-                document.AddTag(tag);
+                document.AssignExternalId(dto.ExternalId.Value);
             }
-        }
 
-        var chunks = BuildChunks(
-            document.Id,
-            document.Content);
+            document.SetSummary(dto.Summary);
+            document.SetSearchKeywords(dto.SearchKeywords);
 
-        var embeddings = await _embeddingGenerator.GenerateAsync(
-            chunks,
-            cancellationToken);
+            document.AssignCategory(
+                dto.CategoryId);
 
-        cancellationToken.ThrowIfCancellationRequested();
+            document.AssignSource(
+                dto.SourceId);
 
-        document.ReplaceChunks(chunks);
+            foreach (var tagId in dto.TagIds)
+            {
+                var tag =
+                    await _tagRepository.GetByIdAsync(
+                        tagId,
+                        cancellationToken);
 
-        await _repository.AddIndexedAsync(
-            document,
-            embeddings,
-            cancellationToken);
+                if (tag is not null)
+                {
+                    document.AddTag(tag);
+                }
+            }
 
-        await _cacheInvalidator.InvalidateAsync();
-        System.Diagnostics.Activity.Current?.SetTag("kh.document.chunk_count", chunks.Count);
-        _logger.LogInformation(CreatedEvent,
-            "Document {DocumentId} indexed with {ChunkCount} chunks",
-            document.Id, chunks.Count);
+            var chunks = BuildChunks(
+                document.Id,
+                document.Content);
 
-        return Map(document);
+            var embeddings = await _embeddingGenerator.GenerateAsync(
+                chunks,
+                cancellationToken);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            document.ReplaceChunks(chunks);
+
+            await _repository.AddIndexedAsync(
+                document,
+                embeddings,
+                cancellationToken);
+
+            await _cacheInvalidator.InvalidateAsync();
+            System.Diagnostics.Activity.Current?.SetTag("kh.document.chunk_count", chunks.Count);
+            _logger.LogInformation(CreatedEvent,
+                "Document {DocumentId} indexed with {ChunkCount} chunks",
+                document.Id, chunks.Count);
+
+            return Map(document);
         }, cancellationToken);
     }
 
@@ -149,129 +149,129 @@ public class DocumentService
     {
         return await KnowledgeHubActivities.TraceAsync("document.import", async () =>
         {
-        ArgumentNullException.ThrowIfNull(dto);
+            ArgumentNullException.ThrowIfNull(dto);
 
-        if (dto.ExternalId is not Guid externalId || externalId == Guid.Empty)
-        {
-            throw new ArgumentException("A non-empty ExternalId is required.");
-        }
-
-        if (string.IsNullOrWhiteSpace(dto.Title) || dto.Title.Trim().Length > 300 ||
-            string.IsNullOrWhiteSpace(dto.Content))
-        {
-            throw new ArgumentException("A valid title and non-empty content are required.");
-        }
-
-        var document = await _repository.GetByExternalIdAsync(
-            externalId, cancellationToken);
-        if (document is null)
-        {
-            var created = await CreateAsync(dto, cancellationToken);
-            return new ImportDocumentResultDto(created, ImportDocumentOutcome.Created);
-        }
-
-        var desiredContent = dto.Content.Trim();
-        var desiredHash = KnowledgeDocument.ComputeContentSha256(desiredContent);
-        var existingHash = document.ContentSha256 ??
-            KnowledgeDocument.ComputeContentSha256(document.Content);
-
-        var contentChanged =
-            !string.Equals(existingHash, desiredHash, StringComparison.Ordinal) ||
-            !string.Equals(document.Content, desiredContent, StringComparison.Ordinal);
-
-        var desiredTags = (dto.TagIds ?? []).ToHashSet();
-        var existingTags = document.DocumentTags.Select(x => x.TagId).ToHashSet();
-
-        var metadataChanged =
-            !string.Equals(document.Title, dto.Title.Trim(), StringComparison.Ordinal) ||
-            document.CategoryId != dto.CategoryId ||
-            document.SourceId != dto.SourceId ||
-            !string.Equals(document.Summary ?? string.Empty,
-                dto.Summary ?? string.Empty, StringComparison.Ordinal) ||
-            !string.Equals(document.SearchKeywords ?? string.Empty,
-                dto.SearchKeywords ?? string.Empty, StringComparison.Ordinal) ||
-            !existingTags.SetEquals(desiredTags);
-
-        var indexComplete = await _repository.HasCompleteIndexAsync(
-            document.Id, cancellationToken);
-
-        if (!contentChanged && !metadataChanged && indexComplete)
-        {
-            System.Diagnostics.Activity.Current?.SetTag("kh.import.outcome", "Unchanged");
-            _logger.LogDebug(ImportedEvent,
-                "Document {DocumentId} import outcome {ImportOutcome}",
-                document.Id, ImportDocumentOutcome.Unchanged);
-            return new ImportDocumentResultDto(Map(document), ImportDocumentOutcome.Unchanged);
-        }
-
-        // Validate all requested tags before any tracked entity is modified.
-        var newTags = new List<Tag>();
-        foreach (var tagId in desiredTags.Except(existingTags))
-        {
-            var tag = await _tagRepository.GetByIdAsync(tagId, cancellationToken);
-            if (tag is null)
+            if (dto.ExternalId is not Guid externalId || externalId == Guid.Empty)
             {
-                throw new ArgumentException($"Unknown tag ID: {tagId}.");
+                throw new ArgumentException("A non-empty ExternalId is required.");
             }
 
-            newTags.Add(tag);
-        }
+            if (string.IsNullOrWhiteSpace(dto.Title) || dto.Title.Trim().Length > 300 ||
+                string.IsNullOrWhiteSpace(dto.Content))
+            {
+                throw new ArgumentException("A valid title and non-empty content are required.");
+            }
 
-        IReadOnlyList<DocumentChunk>? replacementChunks = null;
-        IReadOnlyList<ChunkEmbedding>? replacementEmbeddings = null;
-        if (contentChanged || !indexComplete)
-        {
-            // Ollama calls finish before touching the tracked document.
-            replacementChunks = BuildChunks(document.Id, desiredContent);
-            replacementEmbeddings = await _embeddingGenerator.GenerateAsync(
-                replacementChunks, cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
-        }
+            var document = await _repository.GetByExternalIdAsync(
+                externalId, cancellationToken);
+            if (document is null)
+            {
+                var created = await CreateAsync(dto, cancellationToken);
+                return new ImportDocumentResultDto(created, ImportDocumentOutcome.Created);
+            }
 
-        if (replacementChunks is not null)
-        {
-            document.Update(dto.Title, desiredContent);
-        }
+            var desiredContent = dto.Content.Trim();
+            var desiredHash = KnowledgeDocument.ComputeContentSha256(desiredContent);
+            var existingHash = document.ContentSha256 ??
+                KnowledgeDocument.ComputeContentSha256(document.Content);
 
-        document.UpdateMetadata(
-            dto.Title, dto.CategoryId, dto.SourceId,
-            dto.Summary, dto.SearchKeywords);
+            var contentChanged =
+                !string.Equals(existingHash, desiredHash, StringComparison.Ordinal) ||
+                !string.Equals(document.Content, desiredContent, StringComparison.Ordinal);
 
-        foreach (var removed in document.DocumentTags
-                     .Where(x => !desiredTags.Contains(x.TagId)).ToArray())
-        {
-            document.DocumentTags.Remove(removed);
-        }
+            var desiredTags = (dto.TagIds ?? []).ToHashSet();
+            var existingTags = document.DocumentTags.Select(x => x.TagId).ToHashSet();
 
-        foreach (var tag in newTags)
-        {
-            document.AddTag(tag);
-        }
+            var metadataChanged =
+                !string.Equals(document.Title, dto.Title.Trim(), StringComparison.Ordinal) ||
+                document.CategoryId != dto.CategoryId ||
+                document.SourceId != dto.SourceId ||
+                !string.Equals(document.Summary ?? string.Empty,
+                    dto.Summary ?? string.Empty, StringComparison.Ordinal) ||
+                !string.Equals(document.SearchKeywords ?? string.Empty,
+                    dto.SearchKeywords ?? string.Empty, StringComparison.Ordinal) ||
+                !existingTags.SetEquals(desiredTags);
 
-        if (replacementChunks is not null && replacementEmbeddings is not null)
-        {
-            document.ReplaceChunks(replacementChunks);
-            await _repository.UpdateIndexedAsync(
-                document, replacementEmbeddings, cancellationToken);
-        }
-        else
-        {
-            await _repository.UpdateAsync(document, cancellationToken);
-        }
+            var indexComplete = await _repository.HasCompleteIndexAsync(
+                document.Id, cancellationToken);
 
-        await _cacheInvalidator.InvalidateAsync();
+            if (!contentChanged && !metadataChanged && indexComplete)
+            {
+                System.Diagnostics.Activity.Current?.SetTag("kh.import.outcome", "Unchanged");
+                _logger.LogDebug(ImportedEvent,
+                    "Document {DocumentId} import outcome {ImportOutcome}",
+                    document.Id, ImportDocumentOutcome.Unchanged);
+                return new ImportDocumentResultDto(Map(document), ImportDocumentOutcome.Unchanged);
+            }
 
-        System.Diagnostics.Activity.Current?.SetTag(
-            "kh.document.reindexed", replacementChunks is not null);
-        var outcome = contentChanged ? ImportDocumentOutcome.UpdatedContent :
-            !indexComplete ? ImportDocumentOutcome.RepairedIndex :
-            ImportDocumentOutcome.UpdatedMetadata;
+            // Validate all requested tags before any tracked entity is modified.
+            var newTags = new List<Tag>();
+            foreach (var tagId in desiredTags.Except(existingTags))
+            {
+                var tag = await _tagRepository.GetByIdAsync(tagId, cancellationToken);
+                if (tag is null)
+                {
+                    throw new ArgumentException($"Unknown tag ID: {tagId}.");
+                }
 
-        System.Diagnostics.Activity.Current?.SetTag("kh.import.outcome", outcome.ToString());
-        _logger.LogInformation(ImportedEvent,
-            "Document {DocumentId} import outcome {ImportOutcome}; Reindexed={Reindexed}",
-            document.Id, outcome, replacementChunks is not null);
-        return new ImportDocumentResultDto(Map(document), outcome);
+                newTags.Add(tag);
+            }
+
+            IReadOnlyList<DocumentChunk>? replacementChunks = null;
+            IReadOnlyList<ChunkEmbedding>? replacementEmbeddings = null;
+            if (contentChanged || !indexComplete)
+            {
+                // Ollama calls finish before touching the tracked document.
+                replacementChunks = BuildChunks(document.Id, desiredContent);
+                replacementEmbeddings = await _embeddingGenerator.GenerateAsync(
+                    replacementChunks, cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
+            if (replacementChunks is not null)
+            {
+                document.Update(dto.Title, desiredContent);
+            }
+
+            document.UpdateMetadata(
+                dto.Title, dto.CategoryId, dto.SourceId,
+                dto.Summary, dto.SearchKeywords);
+
+            foreach (var removed in document.DocumentTags
+                         .Where(x => !desiredTags.Contains(x.TagId)).ToArray())
+            {
+                document.DocumentTags.Remove(removed);
+            }
+
+            foreach (var tag in newTags)
+            {
+                document.AddTag(tag);
+            }
+
+            if (replacementChunks is not null && replacementEmbeddings is not null)
+            {
+                document.ReplaceChunks(replacementChunks);
+                await _repository.UpdateIndexedAsync(
+                    document, replacementEmbeddings, cancellationToken);
+            }
+            else
+            {
+                await _repository.UpdateAsync(document, cancellationToken);
+            }
+
+            await _cacheInvalidator.InvalidateAsync();
+
+            System.Diagnostics.Activity.Current?.SetTag(
+                "kh.document.reindexed", replacementChunks is not null);
+            var outcome = contentChanged ? ImportDocumentOutcome.UpdatedContent :
+                !indexComplete ? ImportDocumentOutcome.RepairedIndex :
+                ImportDocumentOutcome.UpdatedMetadata;
+
+            System.Diagnostics.Activity.Current?.SetTag("kh.import.outcome", outcome.ToString());
+            _logger.LogInformation(ImportedEvent,
+                "Document {DocumentId} import outcome {ImportOutcome}; Reindexed={Reindexed}",
+                document.Id, outcome, replacementChunks is not null);
+            return new ImportDocumentResultDto(Map(document), outcome);
         }, cancellationToken);
     }
 
@@ -282,78 +282,78 @@ public class DocumentService
     {
         return await KnowledgeHubActivities.TraceAsync<KnowledgeHub.Application.DTOs.DocumentDto?>("document.update", async () =>
         {
-        ArgumentNullException.ThrowIfNull(dto);
+            ArgumentNullException.ThrowIfNull(dto);
 
-        var document = await _repository.GetByIdAsync(
-            id,
-            cancellationToken);
+            var document = await _repository.GetByIdAsync(
+                id,
+                cancellationToken);
 
-        if (document is null)
-        {
-            return null;
-        }
+            if (document is null)
+            {
+                return null;
+            }
 
-        var title = dto.Title?.Trim() ?? string.Empty;
-        var newContent = dto.Content?.Trim() ?? string.Empty;
+            var title = dto.Title?.Trim() ?? string.Empty;
+            var newContent = dto.Content?.Trim() ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(title))
-        {
-            throw new ArgumentException("Title is required.");
-        }
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                throw new ArgumentException("Title is required.");
+            }
 
-        if (string.IsNullOrWhiteSpace(newContent))
-        {
-            throw new ArgumentException("Content is required.");
-        }
+            if (string.IsNullOrWhiteSpace(newContent))
+            {
+                throw new ArgumentException("Content is required.");
+            }
 
-        var contentChanged = !string.Equals(
-            document.Content,
-            newContent,
-            StringComparison.Ordinal);
+            var contentChanged = !string.Equals(
+                document.Content,
+                newContent,
+                StringComparison.Ordinal);
 
-        if (!contentChanged)
-        {
+            if (!contentChanged)
+            {
+                document.Update(title, newContent);
+
+                await _repository.UpdateAsync(
+                    document,
+                    cancellationToken);
+
+                await _cacheInvalidator.InvalidateAsync();
+                _logger.LogInformation(UpdatedEvent,
+                    "Document {DocumentId} updated; Reindexed={Reindexed}",
+                    document.Id, false);
+
+                return Map(document);
+            }
+
+            // Prepare the complete replacement before changing
+            // the tracked document or its existing chunks.
+            var chunks = BuildChunks(
+                document.Id,
+                newContent);
+
+            var embeddings = await _embeddingGenerator.GenerateAsync(
+                chunks,
+                cancellationToken);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // No external embedding calls remain after this point.
             document.Update(title, newContent);
+            document.ReplaceChunks(chunks);
 
-            await _repository.UpdateAsync(
+            await _repository.UpdateIndexedAsync(
                 document,
+                embeddings,
                 cancellationToken);
 
             await _cacheInvalidator.InvalidateAsync();
             _logger.LogInformation(UpdatedEvent,
                 "Document {DocumentId} updated; Reindexed={Reindexed}",
-                document.Id, false);
+                document.Id, true);
 
             return Map(document);
-        }
-
-        // Prepare the complete replacement before changing
-        // the tracked document or its existing chunks.
-        var chunks = BuildChunks(
-            document.Id,
-            newContent);
-
-        var embeddings = await _embeddingGenerator.GenerateAsync(
-            chunks,
-            cancellationToken);
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        // No external embedding calls remain after this point.
-        document.Update(title, newContent);
-        document.ReplaceChunks(chunks);
-
-        await _repository.UpdateIndexedAsync(
-            document,
-            embeddings,
-            cancellationToken);
-
-        await _cacheInvalidator.InvalidateAsync();
-        _logger.LogInformation(UpdatedEvent,
-            "Document {DocumentId} updated; Reindexed={Reindexed}",
-            document.Id, true);
-
-        return Map(document);
         }, cancellationToken);
     }
 

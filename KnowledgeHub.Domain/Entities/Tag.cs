@@ -8,10 +8,10 @@ public class Tag
         string.Empty;
 
     public ICollection<KnowledgeDocumentTag> DocumentTags
-        {
-            get;
-            private set;
-        }
+    {
+        get;
+        private set;
+    }
         = new List<KnowledgeDocumentTag>();
 
     private Tag()

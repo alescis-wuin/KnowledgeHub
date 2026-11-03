@@ -25,8 +25,8 @@ public class DocumentServiceTests
     private readonly Mock<ITextChunker>
         _chunkerMock;
 
-	private readonly Mock<IChunkEmbeddingGenerator>
-	    _embeddingGeneratorMock;
+    private readonly Mock<IChunkEmbeddingGenerator>
+        _embeddingGeneratorMock;
 
     private readonly Mock<IVectorIndexCacheInvalidator>
         _cacheInvalidatorMock;
@@ -59,20 +59,20 @@ public class DocumentServiceTests
                     "chunk-1"
                 });
 
-		_embeddingGeneratorMock = new Mock<IChunkEmbeddingGenerator>();
+        _embeddingGeneratorMock = new Mock<IChunkEmbeddingGenerator>();
 
-		_embeddingGeneratorMock
-		    .Setup(x => x.GenerateAsync(
-		        It.IsAny<IReadOnlyCollection<DocumentChunk>>(),
-		        It.IsAny<CancellationToken>()))
-		    .Returns((
-		        IReadOnlyCollection<DocumentChunk> chunks,
-		        CancellationToken _) =>
-		        Task.FromResult<IReadOnlyList<ChunkEmbedding>>(
-		            chunks.Select(chunk => new ChunkEmbedding(
-		                chunk.Id,
-		                new float[] { 1f, 0f }))
-		            .ToArray()));
+        _embeddingGeneratorMock
+            .Setup(x => x.GenerateAsync(
+                It.IsAny<IReadOnlyCollection<DocumentChunk>>(),
+                It.IsAny<CancellationToken>()))
+            .Returns((
+                IReadOnlyCollection<DocumentChunk> chunks,
+                CancellationToken _) =>
+                Task.FromResult<IReadOnlyList<ChunkEmbedding>>(
+                    chunks.Select(chunk => new ChunkEmbedding(
+                        chunk.Id,
+                        new float[] { 1f, 0f }))
+                    .ToArray()));
 
         _cacheInvalidatorMock =
             new Mock<IVectorIndexCacheInvalidator>();
@@ -111,12 +111,12 @@ public class DocumentServiceTests
 
         result.Content.Should().Be("Contenu");
 
-		_repositoryMock.Verify(
-		    x => x.AddIndexedAsync(
-		        It.IsAny<KnowledgeDocument>(),
-		        It.IsAny<IReadOnlyCollection<ChunkEmbedding>>(),
-		        It.IsAny<CancellationToken>()),
-		    Times.Once);
+        _repositoryMock.Verify(
+            x => x.AddIndexedAsync(
+                It.IsAny<KnowledgeDocument>(),
+                It.IsAny<IReadOnlyCollection<ChunkEmbedding>>(),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
         _cacheInvalidatorMock.Verify(
             x => x.InvalidateAsync(),
             Times.Once);
@@ -253,12 +253,12 @@ public class DocumentServiceTests
         result!.Title.Should()
             .Be("Nouveau titre");
 
-		_repositoryMock.Verify(
-		    x => x.UpdateIndexedAsync(
-		        It.IsAny<KnowledgeDocument>(),
-		        It.IsAny<IReadOnlyCollection<ChunkEmbedding>>(),
-		        It.IsAny<CancellationToken>()),
-		    Times.Once);
+        _repositoryMock.Verify(
+            x => x.UpdateIndexedAsync(
+                It.IsAny<KnowledgeDocument>(),
+                It.IsAny<IReadOnlyCollection<ChunkEmbedding>>(),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
         _cacheInvalidatorMock.Verify(
             x => x.InvalidateAsync(),
             Times.Once);
