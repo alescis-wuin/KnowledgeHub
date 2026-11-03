@@ -306,6 +306,299 @@ namespace KnowledgeHub.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceAsset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .UseCollation("C");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("Length")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("PixelHeight")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PixelWidth")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Purpose")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Sha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .UseCollation("C");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .UseCollation("C");
+
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("WorkspaceId", "Id")
+                        .HasName("AK_WorkspaceAssets_WorkspaceId_Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("WorkspaceId", "StorageKey")
+                        .IsUnique()
+                        .HasDatabaseName("UX_WorkspaceAssets_WorkspaceStorageKey");
+
+                    b.ToTable("WorkspaceAssets", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_WorkspaceAssets_ContentType", "\"ContentType\" IN ('image/png','image/jpeg','image/webp')");
+
+                            t.HasCheckConstraint("CK_WorkspaceAssets_Dimensions", "\"PixelWidth\" BETWEEN 1 AND 8192 AND \"PixelHeight\" BETWEEN 1 AND 8192 AND \"PixelWidth\"::bigint * \"PixelHeight\"::bigint <= 16777216");
+
+                            t.HasCheckConstraint("CK_WorkspaceAssets_Length", "\"Length\" >= 1 AND ((\"Purpose\" = 0 AND \"Length\" <= 5242880) OR (\"Purpose\" = 1 AND \"Length\" <= 10485760))");
+
+                            t.HasCheckConstraint("CK_WorkspaceAssets_Purpose", "\"Purpose\" BETWEEN 0 AND 1");
+
+                            t.HasCheckConstraint("CK_WorkspaceAssets_Sha256", "\"Sha256\" ~ '^[0-9a-f]{64}$'");
+
+                            t.HasCheckConstraint("CK_WorkspaceAssets_StorageKey", "\"StorageKey\" ~ '^[0-9a-f]{64}$'");
+                        });
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceAuditEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ActorUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Outcome")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TargetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("TargetType")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorUserId");
+
+                    b.HasIndex("WorkspaceId", "OccurredAtUtc", "Id")
+                        .HasDatabaseName("IX_WorkspaceAuditEvents_WorkspaceOccurredId");
+
+                    b.ToTable("WorkspaceAuditEvents", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_WorkspaceAuditEvents_EventType", "\"EventType\" BETWEEN 0 AND 15");
+
+                            t.HasCheckConstraint("CK_WorkspaceAuditEvents_Outcome", "\"Outcome\" BETWEEN 0 AND 2");
+
+                            t.HasCheckConstraint("CK_WorkspaceAuditEvents_TargetIdNotEmpty", "\"TargetId\" <> '00000000-0000-0000-0000-000000000000'::uuid");
+
+                            t.HasCheckConstraint("CK_WorkspaceAuditEvents_TargetMatchesEvent", "((\"EventType\" IN (0,1,2,3,15) AND \"TargetType\" = 0) OR (\"EventType\" IN (4,5,6,7) AND \"TargetType\" = 1) OR (\"EventType\" IN (8,9,10) AND \"TargetType\" = 2) OR (\"EventType\" = 11 AND \"TargetType\" = 3) OR (\"EventType\" = 12 AND \"TargetType\" = 4) OR (\"EventType\" IN (13,14) AND \"TargetType\" = 5)) AND (\"TargetType\" NOT IN (0,3,4) OR \"TargetId\" = \"WorkspaceId\")");
+
+                            t.HasCheckConstraint("CK_WorkspaceAuditEvents_TargetType", "\"TargetType\" BETWEEN 0 AND 5");
+                        });
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceBranding", b =>
+                {
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AccentColor")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .UseCollation("C");
+
+                    b.Property<string>("BackgroundColor")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .UseCollation("C");
+
+                    b.Property<Guid?>("BannerAssetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<Guid?>("LogoAssetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PrimaryColor")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .UseCollation("C");
+
+                    b.Property<string>("SecondaryColor")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .UseCollation("C");
+
+                    b.Property<string>("SurfaceColor")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .UseCollation("C");
+
+                    b.Property<string>("TextColor")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .UseCollation("C");
+
+                    b.Property<string>("TextOnPrimaryColor")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .UseCollation("C");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.HasKey("WorkspaceId");
+
+                    b.HasIndex("WorkspaceId", "BannerAssetId");
+
+                    b.HasIndex("WorkspaceId", "LogoAssetId");
+
+                    b.ToTable("WorkspaceBrandings", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_WorkspaceBrandings_AccentColor", "\"AccentColor\" ~ '^#[0-9A-F]{6}$'");
+
+                            t.HasCheckConstraint("CK_WorkspaceBrandings_BackgroundColor", "\"BackgroundColor\" ~ '^#[0-9A-F]{6}$'");
+
+                            t.HasCheckConstraint("CK_WorkspaceBrandings_DisplayNameNotBlank", "length(btrim(\"DisplayName\")) > 0");
+
+                            t.HasCheckConstraint("CK_WorkspaceBrandings_DistinctAssets", "\"LogoAssetId\" IS NULL OR \"BannerAssetId\" IS NULL OR \"LogoAssetId\" <> \"BannerAssetId\"");
+
+                            t.HasCheckConstraint("CK_WorkspaceBrandings_PrimaryColor", "\"PrimaryColor\" ~ '^#[0-9A-F]{6}$'");
+
+                            t.HasCheckConstraint("CK_WorkspaceBrandings_SecondaryColor", "\"SecondaryColor\" ~ '^#[0-9A-F]{6}$'");
+
+                            t.HasCheckConstraint("CK_WorkspaceBrandings_SurfaceColor", "\"SurfaceColor\" ~ '^#[0-9A-F]{6}$'");
+
+                            t.HasCheckConstraint("CK_WorkspaceBrandings_TextColor", "\"TextColor\" ~ '^#[0-9A-F]{6}$'");
+
+                            t.HasCheckConstraint("CK_WorkspaceBrandings_TextOnPrimaryColor", "\"TextOnPrimaryColor\" ~ '^#[0-9A-F]{6}$'");
+
+                            t.HasCheckConstraint("CK_WorkspaceBrandings_VersionPositive", "\"Version\" >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceHomeSection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("Links")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("LinksJson");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkspaceId", "SortOrder")
+                        .IsUnique()
+                        .HasDatabaseName("UX_WorkspaceHomeSections_WorkspaceOrder");
+
+                    b.ToTable("WorkspaceHomeSections", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_WorkspaceHomeSections_ContentByType", "CASE WHEN jsonb_typeof(\"LinksJson\") <> 'array' THEN false ELSE (\"Type\" = 0 AND \"Body\" IS NOT NULL AND length(btrim(\"Body\")) > 0 AND jsonb_array_length(\"LinksJson\") = 0) OR (\"Type\" = 1 AND \"Body\" IS NULL AND jsonb_array_length(\"LinksJson\") BETWEEN 1 AND 10) OR (\"Type\" = 2 AND \"Body\" IS NULL AND jsonb_array_length(\"LinksJson\") = 0) END");
+
+                            t.HasCheckConstraint("CK_WorkspaceHomeSections_LinksShape", "jsonb_typeof(\"LinksJson\") = 'array'");
+
+                            t.HasCheckConstraint("CK_WorkspaceHomeSections_TitleNotBlank", "length(btrim(\"Title\")) > 0");
+
+                            t.HasCheckConstraint("CK_WorkspaceHomeSections_ValidOrder", "\"SortOrder\" BETWEEN 0 AND 19");
+
+                            t.HasCheckConstraint("CK_WorkspaceHomeSections_ValidType", "\"Type\" BETWEEN 0 AND 2");
+                        });
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceHomepage", b =>
+                {
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("HeaderTitle")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("Subtitle")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("WelcomeMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.HasKey("WorkspaceId");
+
+                    b.ToTable("WorkspaceHomepages", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_WorkspaceHomepages_HeaderTitleNotBlank", "length(btrim(\"HeaderTitle\")) > 0");
+
+                            t.HasCheckConstraint("CK_WorkspaceHomepages_VersionPositive", "\"Version\" >= 1");
+                        });
+                });
+
             modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceInvitation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -486,6 +779,74 @@ namespace KnowledgeHub.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceAsset", b =>
+                {
+                    b.HasOne("KnowledgeHub.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("KnowledgeHub.Domain.Entities.Workspace", null)
+                        .WithMany()
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceAuditEvent", b =>
+                {
+                    b.HasOne("KnowledgeHub.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("ActorUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("KnowledgeHub.Domain.Entities.Workspace", null)
+                        .WithMany()
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceBranding", b =>
+                {
+                    b.HasOne("KnowledgeHub.Domain.Entities.Workspace", null)
+                        .WithOne()
+                        .HasForeignKey("KnowledgeHub.Domain.Entities.WorkspaceBranding", "WorkspaceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("KnowledgeHub.Domain.Entities.WorkspaceAsset", null)
+                        .WithMany()
+                        .HasForeignKey("WorkspaceId", "BannerAssetId")
+                        .HasPrincipalKey("WorkspaceId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("KnowledgeHub.Domain.Entities.WorkspaceAsset", null)
+                        .WithMany()
+                        .HasForeignKey("WorkspaceId", "LogoAssetId")
+                        .HasPrincipalKey("WorkspaceId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceHomeSection", b =>
+                {
+                    b.HasOne("KnowledgeHub.Domain.Entities.WorkspaceHomepage", null)
+                        .WithMany("Sections")
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceHomepage", b =>
+                {
+                    b.HasOne("KnowledgeHub.Domain.Entities.Workspace", null)
+                        .WithOne()
+                        .HasForeignKey("KnowledgeHub.Domain.Entities.WorkspaceHomepage", "WorkspaceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceInvitation", b =>
                 {
                     b.HasOne("KnowledgeHub.Domain.Entities.AppUser", null)
@@ -531,6 +892,11 @@ namespace KnowledgeHub.Infrastructure.Migrations
             modelBuilder.Entity("KnowledgeHub.Domain.Entities.Tag", b =>
                 {
                     b.Navigation("DocumentTags");
+                });
+
+            modelBuilder.Entity("KnowledgeHub.Domain.Entities.WorkspaceHomepage", b =>
+                {
+                    b.Navigation("Sections");
                 });
 #pragma warning restore 612, 618
         }
