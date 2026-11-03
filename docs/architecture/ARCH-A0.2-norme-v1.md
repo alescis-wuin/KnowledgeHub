@@ -1,6 +1,6 @@
 # ARCH-A0.2 — Contrat normatif consolidé 1.0.0-rc.1
 
-**État : gel normatif `1.0.0-rc.1` explicitement approuvé par le mainteneur le 2026-11-03, non intégré à Git et non implémenté.** Les décisions D01..D07, la gouvernance et les résolutions SPEC-01..SPEC-03 sont approuvées. Cette approbation ne vaut ni tests runtime ni autorisation de modifier l'API, les migrations, les clients ou G1.
+**État : gel normatif `1.0.0-rc.1` explicitement approuvé par le mainteneur le 2026-11-03, commité et publié sur la branche de revue de la PR #19, non fusionné dans `main` et non implémenté.** Les décisions D01..D07, la gouvernance et les résolutions SPEC-01..SPEC-03 sont approuvées. Cette approbation ne vaut ni tests runtime ni autorisation de modifier l'API, les migrations, les clients ou G1.
 
 **Référence vérifiée :** `alescis-wuin/KnowledgeHub main@0f359979235d189cb3059c86224dba738d176e4c` (Git tree `833b6a0fda44b88cdcd60bb9c255b540e1aa3cec`), PR #18 fusionnée. `prepared_base_sha = null`. Les résultats 379 unitaires + 84 intégration antérieurs appartiennent au candidat de formatage et ne qualifient pas ce futur code.
 
@@ -29,7 +29,7 @@ Il faut séparer **observation historique** et **contrat cible** :
 |---|---|---|
 | WIRE-01 | POST categories/sources/tags : HTTP 200 mais enveloppe `statusCode: 201` | HTTP 201 réel et enveloppe `statusCode: 201` pour les trois |
 | WIRE-02 | Middleware d'exception avec enveloppe PascalCase | Tout HTTP non-2xx : `application/problem+json`, `ProblemDetails` RFC 9457 |
-| WIRE-03 | Auto-validation `[ApiController]` pouvant émettre `ValidationProblemDetails` | Même `ProblemDetails` RFC 9457 que les autres erreurs, extension `errors` limitée aux noms de champs sûrs |
+| WIRE-03 | Auto-validation `[ApiController]` configurée dans `Program.cs` pour retourner `ApiResponses.Failure<object>` (HTTP 400, enveloppe camelCase par MVC) | Même `ProblemDetails` RFC 9457 que les autres erreurs, extension `errors` limitée aux noms de champs sûrs |
 
 Le corps cible non-2xx utilise `type`, `title`, `status` et les extensions **`code` et `correlationId`** ; `detail` et `instance` sont omis par défaut pour éviter les fuites. Le `type` générique `about:blank` est retenu pour le premier contrat, sans inventer une URL publique de documentation non provisionnée. Le statut HTTP transmis est l'autorité et doit correspondre à `status`; la casse est uniforme. `code` est un identifiant stable documenté et ne contient jamais un texte libre d'exception. `correlationId` : exactement 32 chiffres hexadécimaux minuscules, non zéro, produit côté serveur à partir d'une trace valide ou d'un identifiant aléatoire sûr. Ces champs ne servent ni d'authentification ni d'autorisation.
 
@@ -49,7 +49,7 @@ Une façade monolithique `KnowledgeHubHttpClient` avec 22 méthodes est **rejet�
 | `KnowledgeHubRagClient` | 2 | question standard et vérifiée |
 | `KnowledgeHubVectorSearchClient` | 1 | recherche vectorielle |
 
-Constructeur contractuel retenu pour chaque classe : `(HttpClient httpClient, KnowledgeHubHttpClientOptions options)`. Options retenues : `public sealed record KnowledgeHubHttpClientOptions(TimeSpan TotalRequestTimeout)`. L'hôte possède le `HttpClient` (base, authentification, durée de vie) et le SDK ne le détruit pas. L'infrastructure interne unique `KnowledgeHubHttpTransport` gère HTTP, sérialisation, annulation, budget global y compris lecture du corps, mappage d'erreurs, corrélation et disposition des requêtes/réponses. Les clients n'importent ni MAUI/Avalonia, ni API/Application/EF/Ollama, et n'ont aucun retry automatique. Un verdict `ABSTAIN` HTTP 200 est une réponse métier valide, non une exception. Une réponse 2xx malformée n'est pas transformée en succès par défaut.
+Constructeur contractuel retenu pour chaque classe : `(HttpClient httpClient, KnowledgeHubHttpClientOptions options)`. Options retenues : `public sealed record KnowledgeHubHttpClientOptions(TimeSpan TotalRequestTimeout)`. L'hôte possède le `HttpClient` (base, authentification, durée de vie) et le SDK ne le détruit pas. L'infrastructure interne unique `KnowledgeHubHttpTransport` gère HTTP, sérialisation, annulation, budget global y compris lecture du corps, mappage d'erreurs, corrélation et disposition des requêtes/réponses. La construction de chaque client doit refuser un `HttpClient.Timeout` hôte égal ou inférieur à `TotalRequestTimeout` (sauf `Timeout.InfiniteTimeSpan`), ainsi que les budgets SDK nuls, négatifs ou infinis ; le SDK ne change jamais la configuration de `HttpClient`. Cette exigence empêche un délai hôte plus court de produire une annulation que le SDK attribuerait à tort à son propre budget. Les tests A2 couvriront 100s/120s (refus), 10s/10s (refus), infini/120s (accepté), 120s/60s (accepté), l'annulation simultanée et la lecture streaming. Les clients n'importent ni MAUI/Avalonia, ni API/Application/EF/Ollama, et n'ont aucun retry automatique. Un verdict `ABSTAIN` HTTP 200 est une réponse métier valide, non une exception. Une réponse 2xx malformée n'est pas transformée en succès par défaut.
 
 Les 22 routes avec leur propriétaire figurent explicitement dans `ARCH-A0.2-contrats-v1.json`. Les Workspaces KH009, l'administration d'embeddings, les diagnostics et migrations restent hors SDK v1. **Pas de raccordement client tant que la normalisation WIRE-01..03 n'a pas été qualifiée.**
 
@@ -77,7 +77,7 @@ Les types publics du SDK retenus sont `KnowledgeHubHttpRequestException : HttpRe
 
 `IVerifiedVerdictEvaluator` n'est **pas un type public v1** et ne doit être créé par aucun jalon A0/A1/A2/A3.1. Il reste une **réservation documentaire** pour A3.2, avec nouvelle justification, preuve des consommateurs et approbation.
 
-KH008 est inchangé : schemaVersion=1, 65 536 octets maximum, profondeur 16, 12 claims, 3 citations/claim, 600 UTF-16/citation, 2 000 UTF-16/statement, ID de claim ≤32 ; GUID exacts, empreintes SHA-256 lowerhex et citations textuellement exactes avec offsets UTF-16 (sans troncature des surrogates). Les citations attestent la provenance, pas l'implication sémantique ; assessor qualifié indépendant requis. Sans assessor qualifié, **ABSTAIN avant retrieval et génération**. Après assessment, revalidation, puis revalidation finale avant publication, sans exposer de claims rejetés. Le snapshot ne prouve ni fraîcheur ni permission à lui seul.
+KH008 est inchangé : schemaVersion=1, 65 536 octets maximum, profondeur 16, 12 claims, 3 citations/claim, 600 UTF-16/citation, 2 000 UTF-16/statement, ID de claim ≤32 ; GUID exacts, empreintes SHA-256 lowerhex et citations textuellement exactes avec offsets UTF-16 (sans troncature des surrogates). Les citations attestent la provenance, pas l'implication sémantique ; assessor qualifié indépendant requis. Sans assessor qualifié, **ABSTAIN avant retrieval et génération**. Après assessment, revalidation, puis revalidation finale avant publication. `VerifiedEvidenceAnswer.Claims` conserve, en interne, certains claims rejetés (ABSTAIN/CONFLICT) et leurs statuts pour diagnostic, conformément aux tests KH008 ; seule la projection publique `VerifiedRagResponseDto.FromVerifiedDecision` exclut systématiquement ces claims des réponses HTTP. Le snapshot ne prouve ni fraîcheur ni permission à lui seul.
 
 ## 7. Propriété et change-control — D07=A, GOV=A
 
@@ -93,10 +93,14 @@ Après gel approuvé, chaque évolution passe une CR avec : `task_id`, `base_sha
 4. Après I0 (compilation, références, sécurité, tests, SHA réellement validés) : renseigner `prepared_base_sha` au vrai commit de base G1 ; seulement alors A2/A3 peuvent développer en parallèle.
 5. L'intégrateur conduit séparément la normalisation API D04-B, avant l'intégration du SDK ; COR-001/COR-002 restent ouvertes et ne sont pas corrigées ici.
 
-**Verdict actuel :** gel **normatif** ARCH-A0.2 `1.0.0-rc.1` approuvé (7/7 + gouvernance + SPEC-01..03), **intégration documentaire Git non réalisée**, `prepared_base_sha=null` et G1 non obtenu ; aucun commit/push/PR/API/DB/CLI exécuté par le dossier. Les validations statiques des fichiers JSON/graphes/ownership ne sont pas des tests .NET des nouvelles bibliothèques.
+**Verdict actuel :** gel **normatif** ARCH-A0.2 `1.0.0-rc.1` approuvé (7/7 + gouvernance + SPEC-01..03), **six fichiers documentaires committés sur la branche Git de la PR #19** (premier commit signé `81c806779e25a92501e1aa040ad138ae5465f5a8`), mais **aucune fusion dans `main`**, `prepared_base_sha=null` et G1 non obtenu ; aucun changement applicatif/API/DB par ce dossier. Les validations statiques des fichiers JSON/graphes/ownership ne sont pas des tests .NET des nouvelles bibliothèques.
 
 ## Références externes distinguées des faits du dépôt
 
 - [RFC 9457, Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457.html) : modèle `application/problem+json`, `status` cohérent avec HTTP, extensions et confidentialité.
 - [Microsoft Learn, ASP.NET Core 10 — API error handling](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling-api?view=aspnetcore-10.0) : `AddProblemDetails`, personnalisation et middleware.
 - [Microsoft Learn, .NET 10 — HttpRequestException.StatusCode](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httprequestexception.statuscode?view=net-10.0) : propriété nullable sur erreur de transport sans statut.
+
+## Amendement PR #19 — Codex Review (ARCH-A0.2-PR19-REV-001)
+
+Quatre corrections documentaires sont proposées après revue du premier commit signé : (1) statut Git distinct entre branche PR publiée et `main` non fusionné ; (2) baseline HTTP 400 selon `InvalidModelStateResponseFactory` configuré ; (3) claims diagnostiques internes conservés et projection HTTP filtrée ; (4) contrat explicite du délai hôte `HttpClient.Timeout`. Aucune signature publique, valeur d’enum, route, règle de sécurité KH008, propriétaire ou dépendance de projet n’est modifiée. Elles ne supposent ni fusion de la PR, ni implémentation du SDK/API, ni G1. La qualification de ce delta documentaire n’équivaut pas à la qualification runtime.

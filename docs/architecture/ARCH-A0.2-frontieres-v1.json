@@ -1,6 +1,6 @@
 {
   "document_kind": "ARCH-A0.2-normative-approved",
-  "status": "normative_approved_pending_repository_integration_not_implemented",
+  "status": "normative_approved_review_branch_committed_unmerged_not_implemented",
   "baseline": {
     "repository": "alescis-wuin/KnowledgeHub",
     "ref": "main",
@@ -8,7 +8,8 @@
     "git_tree": "833b6a0fda44b88cdcd60bb9c255b540e1aa3cec",
     "source_audit_commit": "e422eaca948884ca954b2b97d74852ed364151d5",
     "prepared_base_sha": null,
-    "qualification_reexecuted_for_documents": false
+    "qualification_reexecuted_for_documents": false,
+    "documentation_branch_first_commit": "81c806779e25a92501e1aa040ad138ae5465f5a8"
   },
   "accepted_decisions": {
     "backend_topology": "modular_monolith",
@@ -1201,5 +1202,21 @@
     "no_unapproved_paths": true,
     "local_evidence": "bind build/test/format/fixtures to candidate SHA and clean-tree or a declared diff hash; never reuse old TRX as new evidence",
     "exceptions": "Hotfix may accelerate scheduling, never omit ownership authorization or mandatory safety gates"
+  },
+  "documentation_git_integration": {
+    "repository": "alescis-wuin/KnowledgeHub",
+    "pull_request": 19,
+    "review_branch": "feature/arch-a0-2-normative-docs",
+    "first_documentation_commit": "81c806779e25a92501e1aa040ad138ae5465f5a8",
+    "reviewed_head_sha": "81c806779e25a92501e1aa040ad138ae5465f5a8",
+    "main_sha_at_pr_review": "0f359979235d189cb3059c86224dba738d176e4c",
+    "repository_documentation_state": "committed_and_published_to_review_branch",
+    "main_merge_state": "pending_review_and_explicit_merge",
+    "main_merge_commit_sha": null,
+    "prepared_base_sha": null,
+    "runtime_implemented": false,
+    "qualification_scope": "documentary_only",
+    "review_correction_id": "ARCH-A0.2-PR19-REV-001",
+    "notes": "The Git branch contains the six frozen documents, but main has not merged PR19; no API/SDK/RAG library or G1 is implemented."
   }
 }

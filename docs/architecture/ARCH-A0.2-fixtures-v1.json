@@ -167,16 +167,19 @@
     {
       "id": "F-WIRE-009",
       "route": "[ApiController] automatic invalid model",
-      "source_response": "ValidationProblemDetails",
+      "source_response": "BadRequestObjectResult(ApiResponses.Failure<object>(400, HttpContext.TraceIdentifier, errors)) serialized with MVC Web camelCase",
       "http_status": 400,
-      "expect_schema_only": {
-        "type": "string?",
-        "title": "string?",
-        "status": "int?",
-        "errors": "dictionary<string,string[]>?"
-      },
-      "assertion": "different error body: characterize actual ASP.NET with integration tests, not byte-for-byte fixture",
-      "role": "observed_synthetic_baseline_fixture_not_canonical_target"
+      "assertion": "Synthetic shape based on explicit InvalidModelStateResponseFactory override in KnowledgeHub.Api/Program.cs; errors and traceId are illustrative and must be characterized in runtime tests. Do not confuse with target RFC9457 ProblemDetails.",
+      "role": "observed_synthetic_baseline_fixture_not_canonical_target",
+      "expect": {
+        "success": false,
+        "statusCode": 400,
+        "traceId": "synthetic-trace",
+        "data": null,
+        "errors": [
+          "Synthetic validation error"
+        ]
+      }
     },
     {
       "id": "F-TARGET-201-categories",
@@ -292,5 +295,21 @@
     "real_server_normalization_precedes_sdk_cutover": true,
     "approved_normative_not_runtime_evidence": true
   },
-  "normative_revision": "1.0.0-rc.1"
+  "normative_revision": "1.0.0-rc.1",
+  "repository_documentation_state": {
+    "repository": "alescis-wuin/KnowledgeHub",
+    "pull_request": 19,
+    "review_branch": "feature/arch-a0-2-normative-docs",
+    "first_documentation_commit": "81c806779e25a92501e1aa040ad138ae5465f5a8",
+    "reviewed_head_sha": "81c806779e25a92501e1aa040ad138ae5465f5a8",
+    "main_sha_at_pr_review": "0f359979235d189cb3059c86224dba738d176e4c",
+    "repository_documentation_state": "committed_and_published_to_review_branch",
+    "main_merge_state": "pending_review_and_explicit_merge",
+    "main_merge_commit_sha": null,
+    "prepared_base_sha": null,
+    "runtime_implemented": false,
+    "qualification_scope": "documentary_only",
+    "review_correction_id": "ARCH-A0.2-PR19-REV-001",
+    "notes": "The Git branch contains the six frozen documents, but main has not merged PR19; no API/SDK/RAG library or G1 is implemented."
+  }
 }

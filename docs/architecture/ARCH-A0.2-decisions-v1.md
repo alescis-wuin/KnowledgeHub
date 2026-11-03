@@ -1,6 +1,6 @@
 # ARCH-A0.2 — Registre des décisions et plan de conformité 1.0.0-rc.1
 
-**Référence :** `main@0f359979235d189cb3059c86224dba738d176e4c`. **Statut :** décisions du mainteneur 7/7, gouvernance et SPEC-01..03 explicitement approuvées le 2026-11-03 ; **intégration Git non réalisée** ; `prepared_base_sha=null`. Le JSON de provenance extérieur au dépôt `REGISTRE-DECISIONS-MAINTENEUR.json` conserve le texte détaillé et les réserves de chaque lot.
+**Référence :** `main@0f359979235d189cb3059c86224dba738d176e4c`. **Statut :** décisions du mainteneur 7/7, gouvernance et SPEC-01..03 explicitement approuvées le 2026-11-03 ; **premier commit signé `81c806779e25a92501e1aa040ad138ae5465f5a8` présent sur la branche de PR #19 ; fusion dans `main` non réalisée** ; `prepared_base_sha=null`. Le JSON de provenance extérieur au dépôt `REGISTRE-DECISIONS-MAINTENEUR.json` conserve le texte détaillé et les réserves de chaque lot.
 
 | ID | Choix approuvé | Effets normatifs et limites |
 |---|---|---|
@@ -29,7 +29,7 @@ Aucune normalisation API ni DLL SDK n'a été exécutée dans ARCH-A0.2. Ces sol
 |---|---|---|
 | WIRE-01 | POST catégories/sources/tags : HTTP 200 vs corps 201 | Intégrateur API : corriger et qualifier avant SDK. |
 | WIRE-02 | Middleware d'exception émet PascalCase | Intégrateur API : normaliser en SPEC-02. |
-| WIRE-03 | Validation automatique peut émettre ValidationProblemDetails | Intégrateur API : unifier les erreurs non-2xx. |
+| WIRE-03 | `InvalidModelStateResponseFactory` configuré dans `KnowledgeHub.Api/Program.cs` : HTTP 400 via `ApiResponses.Failure<object>`, sérialisé en camelCase par MVC | Intégrateur API : unifier les erreurs non-2xx. |
 | WIRE-04 | DTO historiques en namespace global | Intégrateur : mapper/extraction sans renommage massif. |
 | ARCH-01 | Observability.Verify référence Tests.Integration | Dette outillage distincte, pas modèle production. |
 | ARCH-02 | Tests.Integration → CorpusImporter en double | Dette existante, sans changement ici. |
@@ -44,5 +44,19 @@ Chaque CR fournit `task_id`, `base_sha`, `current_sha`, `requested_paths`, `affe
 
 - Les choix D01–D07 et GOV sont déjà approuvés ; ne pas les redemander.
 - L'approbation explicite du gel documentaire `1.0.0-rc.1` inclut SPEC-01, SPEC-02 et SPEC-03, le 2026-11-03.
-- Approbateur : **mainteneur du projet** (message explicite KnowledgeHub du 2026-11-03) ; SHA d'intégration : **non créé** ; `prepared_base_sha` : **null**.
-- Gel normatif approuvé, **non fusionné et non implémenté** ; ne déduit aucun résultat .NET des validations documentaires.
+- Approbateur : **mainteneur du projet** (message explicite KnowledgeHub du 2026-11-03) ; SHA du premier commit documentaire : **`81c806779e25a92501e1aa040ad138ae5465f5a8`**, SHA de fusion dans `main` : **non créé** ; `prepared_base_sha` : **null**.
+- Gel normatif approuvé et commité sur branche PR, **non fusionné dans `main` et non implémenté** ; ne déduit aucun résultat .NET des validations documentaires.
+
+## CR ARCH-A0.2-PR19-REV-001 — Correction post-gel proposée
+
+- `task_id` : `ARCH-A0.2-PR19-REV-001` ; `base_sha` et `current_sha` : `81c806779e25a92501e1aa040ad138ae5465f5a8` (commit exact au moment des quatre remarques) ; `requested_paths` : les six fichiers sous `docs/architecture/` de la PR #19.
+- `affected_contract` : statut documentaire et gates A0.2, baseline WIRE-03, visibilité des claims KH008, budget SDK HTTP.
+- `concrete_need` : résoudre 1 remarque P1 et 3 remarques P2 publiées par Codex sur la PR #19.
+- `old_behavior` : documentation indiquant intégration Git absente, `ValidationProblemDetails` historique, claims sans distinction public/interne et budget SDK non coordonné au timeout hôte.
+- `new_behavior` : statut branche PR publié mais `main` non fusionné, baseline HTTP 400 camelCase `ApiResponse`, claims internes conservés et filtrés seulement à la projection publique, garde `HttpClient.Timeout == Timeout.InfiniteTimeSpan || HttpClient.Timeout > TotalRequestTimeout` et budget SDK fini strictement positif.
+- `impacted_consumers` : intégrateur ARCH-A1.2, équipes A2/API, A2/Client.Http, A3/Verification, validation documentaire et fixtures.
+- `CLR_wire_data_compatibility` : aucune classe ni DTO modifiés dans ce lot documentaire ; correction de la spécification et des fixtures, sans migration de données ; le garde timeout est un complément contractuel à tester lors de l’implémentation.
+- `proposed_tests` : lint JSON et Markdown, vérification des invariants 23/22/16, 49 ownership, graphes DAG, fixtures baseline/target, tests A2 de timeout et tests KH008 de projection interne/publique.
+- `integration_order` : valider le delta sur la branche existante, commit signé distinct, publier la PR mise à jour après autorisation, attendre les revues Codex, fusion uniquement après autorisation.
+- `owner` : intégrateur (dossier `docs/architecture/`) ; `approval_decision` : résolution des revues explicitement demandée par le mainteneur, **acceptation du delta à confirmer sur le rapport d’exécution**.
+- Le gel approuvé `1.0.0-rc.1` et ses 7 décisions ne sont pas annulés. Aucun `prepared_base_sha` ni commit de fusion dans `main` ne peut être inventé.

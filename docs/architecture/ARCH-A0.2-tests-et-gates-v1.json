@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "artifact": "ARCH-A0.2-tests-and-gates",
-  "status": "normative_approved_pending_repository_integration_not_implemented",
+  "status": "normative_approved_review_branch_committed_unmerged_not_implemented",
   "gates": [
     {
       "id": "ARCH-A0.2.01",
@@ -11,7 +11,8 @@
         "STATIC_GRAPH_DAG",
         "STATIC_ALLOWED_REFERENCES"
       ],
-      "result": "normative_approved_pending_repository_integration"
+      "result": "documentary_pass_on_review_branch",
+      "result_scope": "static_documentary_only; independent main merge pending; runtime not implemented"
     },
     {
       "id": "ARCH-A0.2.02",
@@ -25,7 +26,8 @@
         "STATIC_WIRE_OBSERVED_TARGET_SEPARATION",
         "STATIC_ERROR_WIRE_POLICY"
       ],
-      "result": "normative_approved_pending_repository_integration"
+      "result": "documentary_pass_on_review_branch",
+      "result_scope": "static_documentary_only; independent main merge pending; runtime not implemented"
     },
     {
       "id": "ARCH-A0.2.03",
@@ -36,7 +38,8 @@
         "STATIC_PORT_SIGNATURES",
         "STATIC_DEFERRED_PORT_NOT_PUBLIC"
       ],
-      "result": "normative_approved_pending_repository_integration"
+      "result": "documentary_pass_on_review_branch",
+      "result_scope": "static_documentary_only; independent main merge pending; runtime not implemented"
     },
     {
       "id": "ARCH-A0.2.04",
@@ -47,7 +50,8 @@
         "STATIC_RESERVED_PATHS",
         "STATIC_CHANGE_CONTROL_FIELDS_14"
       ],
-      "result": "normative_approved_pending_repository_integration"
+      "result": "documentary_pass_on_review_branch",
+      "result_scope": "static_documentary_only; independent main merge pending; runtime not implemented"
     },
     {
       "id": "ARCH-A0.2.05",
@@ -59,7 +63,8 @@
         "STATIC_ERROR_FAMILY_FOUR",
         "STATIC_CR_SEMVER"
       ],
-      "result": "normative_approved_pending_repository_integration"
+      "result": "documentary_pass_on_review_branch",
+      "result_scope": "static_documentary_only; independent main merge pending; runtime not implemented"
     },
     {
       "id": "ARCH-A0.2.06",
@@ -69,7 +74,8 @@
         "BASE_VERIFICATION",
         "OWNER_APPROVAL"
       ],
-      "result": "normative_approved_pending_repository_integration"
+      "result": "documentary_pass_on_review_branch",
+      "result_scope": "static_documentary_only; independent main merge pending; runtime not implemented"
     }
   ],
   "non_runtime_controls": [
@@ -97,7 +103,10 @@
     "SDK: no leaks in error bodies, codes, correlation headers, logs or exception messages",
     "SDK: test request timeout includes body streaming; zero implicit retries",
     "RAG: exactly three public ports and no premature IVerifiedVerdictEvaluator v1",
-    "RAG: fail-closed double revalidation across persistence and authorization scope"
+    "RAG: fail-closed double revalidation across persistence and authorization scope",
+    "API baseline characterization: custom InvalidModelStateResponseFactory returns camelCase ApiResponse errors before any RFC9457 normalization; check F-WIRE-009 against Program.cs.",
+    "RAG: VerifiedEvidenceAnswer retains rejected diagnostic claims on internal ABSTAIN/CONFLICT paths; public VerifiedRagResponseDto must exclude those claims.",
+    "SDK: HttpClient.Timeout equal to or shorter than TotalRequestTimeout is rejected before requests; infinite or strictly greater host timeout accepted; classifier distinguishes caller, SDK and unsolicited cancellation."
   ],
   "quality_invariants": [
     "No runtime source files changed in ARCH-A0.2",
@@ -122,16 +131,32 @@
     "governance_accepted": true,
     "final_normative_approval": "approved_1.0.0-rc.1_in_conversation",
     "approver": "project_maintainer",
-    "approved_commit": null,
+    "approved_commit": "81c806779e25a92501e1aa040ad138ae5465f5a8",
     "approved_at_utc": null,
     "prepared_base_sha": null,
     "comments": [
       "D01..D07 and governance approved by maintainer; SPEC-01..03 explicitly approved in conversation on 2026-11-03.",
-      "Approval is normative only; no repository commit, runtime test or G1 milestone is implied.",
-      "Signature of approved commit and exact UTC timestamp unavailable; fields intentionally null.",
+      "Approval is normative only; a signed documentary commit exists on PR19; no merged main commit, runtime test or G1 milestone is implied.",
+      "Initial documentary commit signed and verified on GitHub: 81c8067; final merge SHA and runtime qualification remain unavailable.",
       "A2/A3 work remains blocked until G1, and client integration additionally requires the separate API normalization gate."
     ],
     "approved_date_local": "2026-11-03"
   },
-  "normative_revision": "1.0.0-rc.1"
+  "normative_revision": "1.0.0-rc.1",
+  "repository_documentation_state": {
+    "repository": "alescis-wuin/KnowledgeHub",
+    "pull_request": 19,
+    "review_branch": "feature/arch-a0-2-normative-docs",
+    "first_documentation_commit": "81c806779e25a92501e1aa040ad138ae5465f5a8",
+    "reviewed_head_sha": "81c806779e25a92501e1aa040ad138ae5465f5a8",
+    "main_sha_at_pr_review": "0f359979235d189cb3059c86224dba738d176e4c",
+    "repository_documentation_state": "committed_and_published_to_review_branch",
+    "main_merge_state": "pending_review_and_explicit_merge",
+    "main_merge_commit_sha": null,
+    "prepared_base_sha": null,
+    "runtime_implemented": false,
+    "qualification_scope": "documentary_only",
+    "review_correction_id": "ARCH-A0.2-PR19-REV-001",
+    "notes": "The Git branch contains the six frozen documents, but main has not merged PR19; no API/SDK/RAG library or G1 is implemented."
+  }
 }
