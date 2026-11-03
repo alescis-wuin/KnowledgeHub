@@ -30,41 +30,41 @@ public sealed class VectorSearchService : IVectorSearchService
             KnowledgeHubActivities.TraceAsync<IReadOnlyCollection<VectorSearchResultDto>>(
             "vector_search.search", async () =>
         {
-        System.Diagnostics.Activity.Current?.SetTag("kh.retrieval.top_k", topK);
-        if (string.IsNullOrWhiteSpace(question) || topK <= 0)
-        {
-            return [];
-        }
-
-        var entries = await _indexCache.GetAsync(
-            _context,
-            cancellationToken);
-
-        if (entries.Count == 0)
-        {
-            return [];
-        }
-
-        var questionEmbedding = await _embeddingService
-            .GenerateEmbeddingAsync(question, cancellationToken);
-
-        var ranked = KnowledgeHubActivities.Trace("vector_search.rank", () =>
-            entries
-            .Select(entry => new VectorSearchResultDto
+            System.Diagnostics.Activity.Current?.SetTag("kh.retrieval.top_k", topK);
+            if (string.IsNullOrWhiteSpace(question) || topK <= 0)
             {
-                ChunkId = entry.ChunkId,
-                DocumentId = entry.DocumentId,
-                Title = entry.Title,
-                Content = entry.Content,
-                Score = CosineSimilarity(questionEmbedding, entry.Embedding)
-            })
-            .OrderByDescending(result => result.Score)
-            .GroupBy(result => result.DocumentId)
-            .Select(group => group.First())
-            .Take(topK)
-            .ToList());
-        System.Diagnostics.Activity.Current?.SetTag("kh.retrieval.result_count", ranked.Count);
-        return ranked;
+                return [];
+            }
+
+            var entries = await _indexCache.GetAsync(
+                _context,
+                cancellationToken);
+
+            if (entries.Count == 0)
+            {
+                return [];
+            }
+
+            var questionEmbedding = await _embeddingService
+                .GenerateEmbeddingAsync(question, cancellationToken);
+
+            var ranked = KnowledgeHubActivities.Trace("vector_search.rank", () =>
+                entries
+                .Select(entry => new VectorSearchResultDto
+                {
+                    ChunkId = entry.ChunkId,
+                    DocumentId = entry.DocumentId,
+                    Title = entry.Title,
+                    Content = entry.Content,
+                    Score = CosineSimilarity(questionEmbedding, entry.Embedding)
+                })
+                .OrderByDescending(result => result.Score)
+                .GroupBy(result => result.DocumentId)
+                .Select(group => group.First())
+                .Take(topK)
+                .ToList());
+            System.Diagnostics.Activity.Current?.SetTag("kh.retrieval.result_count", ranked.Count);
+            return ranked;
         }, cancellationToken), cancellationToken);
     }
 

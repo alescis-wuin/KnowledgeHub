@@ -41,49 +41,49 @@ public sealed class DocumentIndexRepairService
     {
         return await KnowledgeHubActivities.TraceAsync<bool?>("document.index.repair", async () =>
         {
-        var document = await _documents.GetByIdAsync(id, cancellationToken);
-        if (document is null)
-        {
-            return null;
-        }
+            var document = await _documents.GetByIdAsync(id, cancellationToken);
+            if (document is null)
+            {
+                return null;
+            }
 
-        if (await _documents.HasCompleteIndexAsync(id, cancellationToken))
-        {
-            return false;
-        }
+            if (await _documents.HasCompleteIndexAsync(id, cancellationToken))
+            {
+                return false;
+            }
 
-        var texts = _chunker.Chunk(document.Content)
-            .Select(value => value?.Trim())
-            .Where(value => !string.IsNullOrWhiteSpace(value))
-            .Select(value => value!)
-            .ToArray();
+            var texts = _chunker.Chunk(document.Content)
+                .Select(value => value?.Trim())
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Select(value => value!)
+                .ToArray();
 
-        if (texts.Length == 0)
-        {
-            throw new InvalidOperationException("Chunking produced no usable chunks.");
-        }
+            if (texts.Length == 0)
+            {
+                throw new InvalidOperationException("Chunking produced no usable chunks.");
+            }
 
-        var replacements = texts
-            .Select((text, index) => new DocumentChunk(
-                document.Id, index, text.Length, text))
-            .ToArray();
+            var replacements = texts
+                .Select((text, index) => new DocumentChunk(
+                    document.Id, index, text.Length, text))
+                .ToArray();
 
-        var embeddings = await _embeddings.GenerateAsync(
-            replacements, cancellationToken);
-        cancellationToken.ThrowIfCancellationRequested();
+            var embeddings = await _embeddings.GenerateAsync(
+                replacements, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
 
-        // Bump the concurrency token while preserving existing user metadata.
-        document.Update(document.Title, document.Content);
-        document.ReplaceChunks(replacements);
+            // Bump the concurrency token while preserving existing user metadata.
+            document.Update(document.Title, document.Content);
+            document.ReplaceChunks(replacements);
 
-        await _documents.UpdateIndexedAsync(
-            document, embeddings, cancellationToken);
-        await _cache.InvalidateAsync();
-        System.Diagnostics.Activity.Current?.SetTag("kh.document.chunk_count", replacements.Length);
-        _logger.LogInformation(RepairedEvent,
-            "Document {DocumentId} index repaired with {ChunkCount} chunks",
-            document.Id, replacements.Length);
-        return true;
+            await _documents.UpdateIndexedAsync(
+                document, embeddings, cancellationToken);
+            await _cache.InvalidateAsync();
+            System.Diagnostics.Activity.Current?.SetTag("kh.document.chunk_count", replacements.Length);
+            _logger.LogInformation(RepairedEvent,
+                "Document {DocumentId} index repaired with {ChunkCount} chunks",
+                document.Id, replacements.Length);
+            return true;
         }, cancellationToken);
     }
 }

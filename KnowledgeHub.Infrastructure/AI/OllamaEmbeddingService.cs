@@ -25,31 +25,31 @@ public class OllamaEmbeddingService
         return await KnowledgeHubMetrics.MeasureOllamaAsync("embedding", () =>
             KnowledgeHubActivities.TraceAsync("ollama.embed", async () =>
         {
-        using var response =
-            await _httpClient.PostAsJsonAsync(
-                "/api/embeddings",
-                new
-                {
-                    model = "nomic-embed-text",
-                    prompt = text
-                },
-                cancellationToken);
+            using var response =
+                await _httpClient.PostAsJsonAsync(
+                    "/api/embeddings",
+                    new
+                    {
+                        model = "nomic-embed-text",
+                        prompt = text
+                    },
+                    cancellationToken);
 
-        response.EnsureSuccessStatusCode();
+            response.EnsureSuccessStatusCode();
 
-        var result =
-            await response.Content
-                .ReadFromJsonAsync<
-                    OllamaEmbeddingResponse>(
-                        cancellationToken);
+            var result =
+                await response.Content
+                    .ReadFromJsonAsync<
+                        OllamaEmbeddingResponse>(
+                            cancellationToken);
 
-        if (result is not null)
-        {
-            OllamaNativeTelemetry.Record("embedding", result.NativeFields);
-        }
+            if (result is not null)
+            {
+                OllamaNativeTelemetry.Record("embedding", result.NativeFields);
+            }
 
-        return result?.Embedding
-            ?? [];
+            return result?.Embedding
+                ?? [];
         }, cancellationToken), cancellationToken);
     }
 

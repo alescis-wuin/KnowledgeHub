@@ -38,61 +38,61 @@ public sealed class VectorIndexCache : IVectorIndexCacheInvalidator, IDisposable
         return await KnowledgeHubActivities.TraceAsync<IReadOnlyList<VectorIndexEntry>>(
             "vector_index.load", async () =>
         {
-        ArgumentNullException.ThrowIfNull(context);
+            ArgumentNullException.ThrowIfNull(context);
 
-        await _gate.WaitAsync(cancellationToken);
-        try
-        {
-            if (_cache.TryGetValue(
-                    CacheKey,
-                    out IReadOnlyList<VectorIndexEntry>? cached) &&
-                cached is not null)
-            {
-                System.Diagnostics.Activity.Current?.SetTag("kh.cache.hit", true);
-                System.Diagnostics.Activity.Current?.SetTag("kh.cache.entry_count", cached.Count);
-                KnowledgeHubMetrics.RecordCacheLookup(hit: true);
-                return cached;
-            }
-
-            KnowledgeHubMetrics.RecordCacheLookup(hit: false);
-            var started = System.Diagnostics.Stopwatch.GetTimestamp();
+            await _gate.WaitAsync(cancellationToken);
             try
             {
-                var entries = await context.ChunkEmbeddings
-                .AsNoTracking()
-                .Select(embedding => new VectorIndexEntry(
-                    embedding.ChunkId,
-                    embedding.Chunk.DocumentId,
-                    embedding.Chunk.Document.Title,
-                    embedding.Chunk.Content,
-                    embedding.Embedding))
-                .ToArrayAsync(cancellationToken);
+                if (_cache.TryGetValue(
+                        CacheKey,
+                        out IReadOnlyList<VectorIndexEntry>? cached) &&
+                    cached is not null)
+                {
+                    System.Diagnostics.Activity.Current?.SetTag("kh.cache.hit", true);
+                    System.Diagnostics.Activity.Current?.SetTag("kh.cache.entry_count", cached.Count);
+                    KnowledgeHubMetrics.RecordCacheLookup(hit: true);
+                    return cached;
+                }
 
-            _cache.Set(CacheKey, entries, Lifetime);
-            System.Diagnostics.Activity.Current?.SetTag("kh.cache.hit", false);
-            System.Diagnostics.Activity.Current?.SetTag("kh.cache.entry_count", entries.Length);
-                KnowledgeHubMetrics.RecordCacheLoad("ok",
-                    System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds,
-                    entries.Length);
-                return entries;
+                KnowledgeHubMetrics.RecordCacheLookup(hit: false);
+                var started = System.Diagnostics.Stopwatch.GetTimestamp();
+                try
+                {
+                    var entries = await context.ChunkEmbeddings
+                    .AsNoTracking()
+                    .Select(embedding => new VectorIndexEntry(
+                        embedding.ChunkId,
+                        embedding.Chunk.DocumentId,
+                        embedding.Chunk.Document.Title,
+                        embedding.Chunk.Content,
+                        embedding.Embedding))
+                    .ToArrayAsync(cancellationToken);
+
+                    _cache.Set(CacheKey, entries, Lifetime);
+                    System.Diagnostics.Activity.Current?.SetTag("kh.cache.hit", false);
+                    System.Diagnostics.Activity.Current?.SetTag("kh.cache.entry_count", entries.Length);
+                    KnowledgeHubMetrics.RecordCacheLoad("ok",
+                        System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds,
+                        entries.Length);
+                    return entries;
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    KnowledgeHubMetrics.RecordCacheLoad("cancelled",
+                        System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds, 0);
+                    throw;
+                }
+                catch
+                {
+                    KnowledgeHubMetrics.RecordCacheLoad("error",
+                        System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds, 0);
+                    throw;
+                }
             }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            finally
             {
-                KnowledgeHubMetrics.RecordCacheLoad("cancelled",
-                    System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds, 0);
-                throw;
+                _gate.Release();
             }
-            catch
-            {
-                KnowledgeHubMetrics.RecordCacheLoad("error",
-                    System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds, 0);
-                throw;
-            }
-        }
-        finally
-        {
-            _gate.Release();
-        }
         }, cancellationToken);
     }
 
@@ -100,16 +100,16 @@ public sealed class VectorIndexCache : IVectorIndexCacheInvalidator, IDisposable
     {
         await KnowledgeHubActivities.TraceAsync("vector_index.invalidate", async () =>
         {
-        await _gate.WaitAsync(CancellationToken.None);
-        try
-        {
-            _cache.Remove(CacheKey);
-            KnowledgeHubMetrics.RecordCacheInvalidation();
-        }
-        finally
-        {
-            _gate.Release();
-        }
+            await _gate.WaitAsync(CancellationToken.None);
+            try
+            {
+                _cache.Remove(CacheKey);
+                KnowledgeHubMetrics.RecordCacheInvalidation();
+            }
+            finally
+            {
+                _gate.Release();
+            }
         });
     }
 

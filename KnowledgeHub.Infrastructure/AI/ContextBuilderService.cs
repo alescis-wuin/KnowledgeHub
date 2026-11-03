@@ -37,47 +37,47 @@ public sealed class ContextBuilderService
         return KnowledgeHubMetrics.MeasureStage("context", () =>
             KnowledgeHubActivities.Trace("rag.context", () =>
         {
-        var sb =
-            new StringBuilder();
+            var sb =
+                new StringBuilder();
 
-        var index = 1;
+            var index = 1;
 
-        foreach (var chunk in chunks)
-        {
-            sb.AppendLine(
-                $"SOURCE {index}");
+            foreach (var chunk in chunks)
+            {
+                sb.AppendLine(
+                    $"SOURCE {index}");
 
-            sb.AppendLine(
-                $"PERTINENCE : {chunk.Score:P0}");
+                sb.AppendLine(
+                    $"PERTINENCE : {chunk.Score:P0}");
 
-            sb.AppendLine(
-                $"Title: {chunk.Title}");
+                sb.AppendLine(
+                    $"Title: {chunk.Title}");
 
-            sb.AppendLine();
+                sb.AppendLine();
 
-            sb.AppendLine(
-                chunk.Content);
+                sb.AppendLine(
+                    chunk.Content);
 
-            sb.AppendLine();
+                sb.AppendLine();
 
-            sb.AppendLine(
-                "-----------------------------------");
+                sb.AppendLine(
+                    "-----------------------------------");
 
-            sb.AppendLine();
+                sb.AppendLine();
 
-            index++;
-        }
+                index++;
+            }
 
-        return new RetrievedContextDto
-        {
-            Question = question,
+            return new RetrievedContextDto
+            {
+                Question = question,
 
-            Context =
-                sb.ToString(),
+                Context =
+                    sb.ToString(),
 
-            Sources =
-                chunks.ToList()
-        };
+                Sources =
+                    chunks.ToList()
+            };
         }));
     }
 }

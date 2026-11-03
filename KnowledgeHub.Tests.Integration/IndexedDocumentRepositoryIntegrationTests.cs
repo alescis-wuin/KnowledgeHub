@@ -110,9 +110,9 @@ public sealed class IndexedDocumentRepositoryIntegrationTests
 
             trackedDocument.ReplaceChunks([newChunk]);
 
-		    await repository.UpdateIndexedAsync(
-		        trackedDocument,
-		        [CreateEmbedding(newChunk, 2f)]);
+            await repository.UpdateIndexedAsync(
+                trackedDocument,
+                [CreateEmbedding(newChunk, 2f)]);
 
             newChunkId = newChunk.Id;
         }
@@ -159,246 +159,246 @@ public sealed class IndexedDocumentRepositoryIntegrationTests
             vector);
     }
 
-	[Fact]
-	public async Task UpdateIndexedAsync_WhenEmbeddingInsertFails_RollsBack()
-	{
-	    var document = new KnowledgeDocument(
-	        "Titre initial",
-	        "Ancien contenu");
+    [Fact]
+    public async Task UpdateIndexedAsync_WhenEmbeddingInsertFails_RollsBack()
+    {
+        var document = new KnowledgeDocument(
+            "Titre initial",
+            "Ancien contenu");
 
-	    var oldChunk = new DocumentChunk(
-	        document.Id,
-	        0,
-	        document.Content.Length,
-	        document.Content);
+        var oldChunk = new DocumentChunk(
+            document.Id,
+            0,
+            document.Content.Length,
+            document.Content);
 
-	    document.ReplaceChunks([oldChunk]);
+        document.ReplaceChunks([oldChunk]);
 
-	    await using (var setup = _fixture.CreateContext())
-	    {
-	        var repository = new KnowledgeDocumentRepository(setup);
+        await using (var setup = _fixture.CreateContext())
+        {
+            var repository = new KnowledgeDocumentRepository(setup);
 
-	        await repository.AddIndexedAsync(
-	            document,
-	            [CreateEmbedding(oldChunk)]);
+            await repository.AddIndexedAsync(
+                document,
+                [CreateEmbedding(oldChunk)]);
 
-	        // Reject only the sentinel embedding used by this test.
-	        await setup.Database.ExecuteSqlRawAsync(
-	            """
+            // Reject only the sentinel embedding used by this test.
+            await setup.Database.ExecuteSqlRawAsync(
+                """
 	            ALTER TABLE "ChunkEmbeddings"
 	            ADD CONSTRAINT "CK_KH003_Rollback"
 	            CHECK ("Embedding" NOT LIKE '[9999,%');
 	            """);
-	    }
+        }
 
-	    Guid replacementId = Guid.Empty;
+        Guid replacementId = Guid.Empty;
 
-	    try
-	    {
-	        await using (var context = _fixture.CreateContext())
-	        {
-	            var repository =
-	                new KnowledgeDocumentRepository(context);
+        try
+        {
+            await using (var context = _fixture.CreateContext())
+            {
+                var repository =
+                    new KnowledgeDocumentRepository(context);
 
-	            var tracked =
-	                await repository.GetByIdAsync(document.Id);
+                var tracked =
+                    await repository.GetByIdAsync(document.Id);
 
-	            Assert.NotNull(tracked);
+                Assert.NotNull(tracked);
 
-	            tracked.Update(
-	                "Titre modifié",
-	                "Nouveau contenu");
+                tracked.Update(
+                    "Titre modifié",
+                    "Nouveau contenu");
 
-	            var replacement = new DocumentChunk(
-	                tracked.Id,
-	                0,
-	                tracked.Content.Length,
-	                tracked.Content);
+                var replacement = new DocumentChunk(
+                    tracked.Id,
+                    0,
+                    tracked.Content.Length,
+                    tracked.Content);
 
-	            replacementId = replacement.Id;
+                replacementId = replacement.Id;
 
-	            tracked.ReplaceChunks([replacement]);
+                tracked.ReplaceChunks([replacement]);
 
-	            var exception =
-	                await Assert.ThrowsAsync<DbUpdateException>(
-	                    () => repository.UpdateIndexedAsync(
-	                        tracked,
-	                        [CreateEmbedding(replacement, 9999f)]));
+                var exception =
+                    await Assert.ThrowsAsync<DbUpdateException>(
+                        () => repository.UpdateIndexedAsync(
+                            tracked,
+                            [CreateEmbedding(replacement, 9999f)]));
 
-	            var postgresError =
-	                Assert.IsType<PostgresException>(
-	                    exception.InnerException);
+                var postgresError =
+                    Assert.IsType<PostgresException>(
+                        exception.InnerException);
 
-	            // PostgreSQL CHECK constraint violation.
-	            Assert.Equal("23514", postgresError.SqlState);
-	        }
+                // PostgreSQL CHECK constraint violation.
+                Assert.Equal("23514", postgresError.SqlState);
+            }
 
-	        // Verify the database in a fresh DbContext.
-	        await using var verification = _fixture.CreateContext();
+            // Verify the database in a fresh DbContext.
+            await using var verification = _fixture.CreateContext();
 
-	        var persisted = await verification.Documents
-	            .AsNoTracking()
-	            .SingleAsync(x => x.Id == document.Id);
+            var persisted = await verification.Documents
+                .AsNoTracking()
+                .SingleAsync(x => x.Id == document.Id);
 
-	        Assert.Equal("Titre initial", persisted.Title);
-	        Assert.Equal("Ancien contenu", persisted.Content);
+            Assert.Equal("Titre initial", persisted.Title);
+            Assert.Equal("Ancien contenu", persisted.Content);
 
-	        Assert.True(await verification.DocumentChunks
-	            .AnyAsync(x => x.Id == oldChunk.Id));
+            Assert.True(await verification.DocumentChunks
+                .AnyAsync(x => x.Id == oldChunk.Id));
 
-	        Assert.True(await verification.ChunkEmbeddings
-	            .AnyAsync(x => x.ChunkId == oldChunk.Id));
+            Assert.True(await verification.ChunkEmbeddings
+                .AnyAsync(x => x.ChunkId == oldChunk.Id));
 
-	        Assert.False(await verification.DocumentChunks
-	            .AnyAsync(x => x.Id == replacementId));
+            Assert.False(await verification.DocumentChunks
+                .AnyAsync(x => x.Id == replacementId));
 
-	        Assert.False(await verification.ChunkEmbeddings
-	            .AnyAsync(x => x.ChunkId == replacementId));
+            Assert.False(await verification.ChunkEmbeddings
+                .AnyAsync(x => x.ChunkId == replacementId));
 
-	        Assert.Equal(
-	            1,
-	            await verification.DocumentChunks.CountAsync(
-	                x => x.DocumentId == document.Id));
-	    }
-	    finally
-	    {
-	        await using var cleanup = _fixture.CreateContext();
+            Assert.Equal(
+                1,
+                await verification.DocumentChunks.CountAsync(
+                    x => x.DocumentId == document.Id));
+        }
+        finally
+        {
+            await using var cleanup = _fixture.CreateContext();
 
-	        await cleanup.Database.ExecuteSqlRawAsync(
-	            """
+            await cleanup.Database.ExecuteSqlRawAsync(
+                """
 	            ALTER TABLE "ChunkEmbeddings"
 	            DROP CONSTRAINT IF EXISTS "CK_KH003_Rollback";
 	            """);
-	    }
-	}
+        }
+    }
 
-	[Fact]
-	public async Task UpdateAsync_WhenDocumentIsStale_RejectsSecondWrite()
-	{
-	    var document = new KnowledgeDocument(
-	        "Titre initial",
-	        "Contenu stable");
+    [Fact]
+    public async Task UpdateAsync_WhenDocumentIsStale_RejectsSecondWrite()
+    {
+        var document = new KnowledgeDocument(
+            "Titre initial",
+            "Contenu stable");
 
-	    var chunk = new DocumentChunk(
-	        document.Id,
-	        0,
-	        document.Content.Length,
-	        document.Content);
+        var chunk = new DocumentChunk(
+            document.Id,
+            0,
+            document.Content.Length,
+            document.Content);
 
-	    document.ReplaceChunks([chunk]);
+        document.ReplaceChunks([chunk]);
 
-	    await using (var setup = _fixture.CreateContext())
-	    {
-	        var repository = new KnowledgeDocumentRepository(setup);
+        await using (var setup = _fixture.CreateContext())
+        {
+            var repository = new KnowledgeDocumentRepository(setup);
 
-	        await repository.AddIndexedAsync(
-	            document,
-	            [CreateEmbedding(chunk)]);
-	    }
+            await repository.AddIndexedAsync(
+                document,
+                [CreateEmbedding(chunk)]);
+        }
 
-	    await using (var firstContext = _fixture.CreateContext())
-	    await using (var staleContext = _fixture.CreateContext())
-	    {
-	        var firstRepository =
-	            new KnowledgeDocumentRepository(firstContext);
+        await using (var firstContext = _fixture.CreateContext())
+        await using (var staleContext = _fixture.CreateContext())
+        {
+            var firstRepository =
+                new KnowledgeDocumentRepository(firstContext);
 
-	        var staleRepository =
-	            new KnowledgeDocumentRepository(staleContext);
+            var staleRepository =
+                new KnowledgeDocumentRepository(staleContext);
 
-	        var firstDocument =
-	            await firstRepository.GetByIdAsync(document.Id);
+            var firstDocument =
+                await firstRepository.GetByIdAsync(document.Id);
 
-	        var staleDocument =
-	            await staleRepository.GetByIdAsync(document.Id);
+            var staleDocument =
+                await staleRepository.GetByIdAsync(document.Id);
 
-	        Assert.NotNull(firstDocument);
-	        Assert.NotNull(staleDocument);
+            Assert.NotNull(firstDocument);
+            Assert.NotNull(staleDocument);
 
-	        firstDocument.Update(
-	            "Premier titre",
-	            firstDocument.Content);
+            firstDocument.Update(
+                "Premier titre",
+                firstDocument.Content);
 
-	        await firstRepository.UpdateAsync(firstDocument);
+            await firstRepository.UpdateAsync(firstDocument);
 
-	        staleDocument.Update(
-	            "Titre obsolète",
-	            staleDocument.Content);
+            staleDocument.Update(
+                "Titre obsolète",
+                staleDocument.Content);
 
-	        await Assert.ThrowsAsync<DbUpdateConcurrencyException>(
-	            () => staleRepository.UpdateAsync(staleDocument));
-	    }
+            await Assert.ThrowsAsync<DbUpdateConcurrencyException>(
+                () => staleRepository.UpdateAsync(staleDocument));
+        }
 
-	    await using var verification = _fixture.CreateContext();
+        await using var verification = _fixture.CreateContext();
 
-	    var persisted = await verification.Documents
-	        .AsNoTracking()
-	        .SingleAsync(x => x.Id == document.Id);
+        var persisted = await verification.Documents
+            .AsNoTracking()
+            .SingleAsync(x => x.Id == document.Id);
 
-	    Assert.Equal("Premier titre", persisted.Title);
-	    Assert.Equal("Contenu stable", persisted.Content);
+        Assert.Equal("Premier titre", persisted.Title);
+        Assert.Equal("Contenu stable", persisted.Content);
 
-	    Assert.True(await verification.DocumentChunks
-	        .AnyAsync(x => x.Id == chunk.Id));
+        Assert.True(await verification.DocumentChunks
+            .AnyAsync(x => x.Id == chunk.Id));
 
-	    var embedding = await verification.ChunkEmbeddings
-	        .AsNoTracking()
-	        .SingleAsync(x => x.ChunkId == chunk.Id);
+        var embedding = await verification.ChunkEmbeddings
+            .AsNoTracking()
+            .SingleAsync(x => x.ChunkId == chunk.Id);
 
-	    Assert.Equal(768, embedding.Embedding.Length);
-	}
+        Assert.Equal(768, embedding.Embedding.Length);
+    }
 
-	[Fact]
-	public async Task DeleteAsync_RemovesDocumentChunksAndEmbeddings()
-	{
-	    var document = new KnowledgeDocument(
-	        "Document à supprimer",
-	        "Contenu à supprimer");
+    [Fact]
+    public async Task DeleteAsync_RemovesDocumentChunksAndEmbeddings()
+    {
+        var document = new KnowledgeDocument(
+            "Document à supprimer",
+            "Contenu à supprimer");
 
-	    var firstChunk = new DocumentChunk(
-	        document.Id,
-	        0,
-	        10,
-	        "Premier chunk");
+        var firstChunk = new DocumentChunk(
+            document.Id,
+            0,
+            10,
+            "Premier chunk");
 
-	    var secondChunk = new DocumentChunk(
-	        document.Id,
-	        1,
-	        10,
-	        "Second chunk");
+        var secondChunk = new DocumentChunk(
+            document.Id,
+            1,
+            10,
+            "Second chunk");
 
-	    document.ReplaceChunks([firstChunk, secondChunk]);
+        document.ReplaceChunks([firstChunk, secondChunk]);
 
-	    await using (var setup = _fixture.CreateContext())
-	    {
-	        var repository = new KnowledgeDocumentRepository(setup);
+        await using (var setup = _fixture.CreateContext())
+        {
+            var repository = new KnowledgeDocumentRepository(setup);
 
-	        await repository.AddIndexedAsync(
-	            document,
-	            [
-	                CreateEmbedding(firstChunk),
-	                CreateEmbedding(secondChunk, 2f)
-	            ]);
-	    }
+            await repository.AddIndexedAsync(
+                document,
+                [
+                    CreateEmbedding(firstChunk),
+                    CreateEmbedding(secondChunk, 2f)
+                ]);
+        }
 
-	    await using (var context = _fixture.CreateContext())
-	    {
-	        var repository = new KnowledgeDocumentRepository(context);
+        await using (var context = _fixture.CreateContext())
+        {
+            var repository = new KnowledgeDocumentRepository(context);
 
-	        await repository.DeleteAsync(document.Id);
-	    }
+            await repository.DeleteAsync(document.Id);
+        }
 
-	    await using var verification = _fixture.CreateContext();
+        await using var verification = _fixture.CreateContext();
 
-	    Assert.False(await verification.Documents
-	        .AnyAsync(x => x.Id == document.Id));
+        Assert.False(await verification.Documents
+            .AnyAsync(x => x.Id == document.Id));
 
-	    Assert.False(await verification.DocumentChunks
-	        .AnyAsync(x => x.DocumentId == document.Id));
+        Assert.False(await verification.DocumentChunks
+            .AnyAsync(x => x.DocumentId == document.Id));
 
-	    Assert.False(await verification.ChunkEmbeddings
-	        .AnyAsync(x => x.ChunkId == firstChunk.Id));
+        Assert.False(await verification.ChunkEmbeddings
+            .AnyAsync(x => x.ChunkId == firstChunk.Id));
 
-	    Assert.False(await verification.ChunkEmbeddings
-	        .AnyAsync(x => x.ChunkId == secondChunk.Id));
-	}
+        Assert.False(await verification.ChunkEmbeddings
+            .AnyAsync(x => x.ChunkId == secondChunk.Id));
+    }
 }

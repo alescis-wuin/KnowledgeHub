@@ -47,65 +47,65 @@ public sealed class RagService
         {
             return await KnowledgeHubActivities.TraceAsync("rag.ask", async () =>
             {
-        var stopwatch = Stopwatch.StartNew();
+                var stopwatch = Stopwatch.StartNew();
 
-        var context = await _contextBuilder.BuildAsync(
-            question,
-            2,
-            cancellationToken);
+                var context = await _contextBuilder.BuildAsync(
+                    question,
+                    2,
+                    cancellationToken);
 
-        Activity.Current?.SetTag("kh.rag.source_count", context.Sources.Count);
-        if (context.Sources.Count == 0 ||
-            string.IsNullOrWhiteSpace(context.Context))
-        {
-            metricsOutcome = "no_context";
-            stopwatch.Stop();
-
-            _logger.LogInformation(SkippedEvent,
-                "RAG skipped: no usable context; DurationMs={DurationMs}",
-                Math.Round(stopwatch.Elapsed.TotalMilliseconds, 2));
-
-            return new AskQuestionResponseDto
-            {
-                Question = question,
-                Answer =
-                    "Aucune source exploitable dans la base de connaissances ne permet actuellement de répondre à cette question.",
-                Sources = []
-            };
-        }
-
-        var answer = await KnowledgeHubMetrics.MeasureStageAsync(
-            "generate",
-            () => KnowledgeHubActivities.TraceAsync<string>(
-                "rag.generate",
-                () => _chatCompletionService.GenerateAnswerAsync(
-                    question, context.Context, cancellationToken),
-                cancellationToken),
-            cancellationToken);
-
-        stopwatch.Stop();
-
-        _logger.LogInformation(CompletedEvent,
-            "RAG completed; SourceCount={SourceCount}; DurationMs={DurationMs}",
-            context.Sources.Count,
-            Math.Round(stopwatch.Elapsed.TotalMilliseconds, 2));
-
-        metricsOutcome = "ok";
-        return new AskQuestionResponseDto
-        {
-            Question = question,
-            Answer = answer,
-            Sources = context.Sources
-                .Select(source => new SourceReferenceDto
+                Activity.Current?.SetTag("kh.rag.source_count", context.Sources.Count);
+                if (context.Sources.Count == 0 ||
+                    string.IsNullOrWhiteSpace(context.Context))
                 {
-                    Title = source.Title,
-                    Score = source.Score,
-                    RelevancePercent =
-                        (int)Math.Round(source.Score * 100),
-                    Excerpt = BuildExcerpt(source.Content)
-                })
-                .ToList()
-        };
+                    metricsOutcome = "no_context";
+                    stopwatch.Stop();
+
+                    _logger.LogInformation(SkippedEvent,
+                        "RAG skipped: no usable context; DurationMs={DurationMs}",
+                        Math.Round(stopwatch.Elapsed.TotalMilliseconds, 2));
+
+                    return new AskQuestionResponseDto
+                    {
+                        Question = question,
+                        Answer =
+                            "Aucune source exploitable dans la base de connaissances ne permet actuellement de répondre à cette question.",
+                        Sources = []
+                    };
+                }
+
+                var answer = await KnowledgeHubMetrics.MeasureStageAsync(
+                    "generate",
+                    () => KnowledgeHubActivities.TraceAsync<string>(
+                        "rag.generate",
+                        () => _chatCompletionService.GenerateAnswerAsync(
+                            question, context.Context, cancellationToken),
+                        cancellationToken),
+                    cancellationToken);
+
+                stopwatch.Stop();
+
+                _logger.LogInformation(CompletedEvent,
+                    "RAG completed; SourceCount={SourceCount}; DurationMs={DurationMs}",
+                    context.Sources.Count,
+                    Math.Round(stopwatch.Elapsed.TotalMilliseconds, 2));
+
+                metricsOutcome = "ok";
+                return new AskQuestionResponseDto
+                {
+                    Question = question,
+                    Answer = answer,
+                    Sources = context.Sources
+                        .Select(source => new SourceReferenceDto
+                        {
+                            Title = source.Title,
+                            Score = source.Score,
+                            RelevancePercent =
+                                (int)Math.Round(source.Score * 100),
+                            Excerpt = BuildExcerpt(source.Content)
+                        })
+                        .ToList()
+                };
             }, cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

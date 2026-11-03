@@ -28,16 +28,16 @@ public sealed class OllamaChatCompletionService
         return await KnowledgeHubMetrics.MeasureOllamaAsync("chat", () =>
             KnowledgeHubActivities.TraceAsync("ollama.chat", async () =>
         {
-        var request =
-            new OllamaChatRequest
-            {
-                Model = "qwen3:4b-instruct",
+            var request =
+                new OllamaChatRequest
+                {
+                    Model = "qwen3:4b-instruct",
 
-                Stream = false,
+                    Stream = false,
 
-                Messages =
-                [
-                    new OllamaChatMessage
+                    Messages =
+                    [
+                        new OllamaChatMessage
                     {
                         Role = "system",
 
@@ -75,49 +75,49 @@ QUESTION
 {question}
 """
                     }
-                ],
+                    ],
 
-                Options =
-                    new OllamaOptions
-                    {
-                        NumPredict = 800,
-                        NumCtx = 4096
-                    }
-            };
+                    Options =
+                        new OllamaOptions
+                        {
+                            NumPredict = 800,
+                            NumCtx = 4096
+                        }
+                };
 
-        using var response =
-            await _httpClient.PostAsJsonAsync(
-                "/api/chat",
-                request,
-                cancellationToken);
+            using var response =
+                await _httpClient.PostAsJsonAsync(
+                    "/api/chat",
+                    request,
+                    cancellationToken);
 
-        response.EnsureSuccessStatusCode();
+            response.EnsureSuccessStatusCode();
 
-        // Never print or persist the raw response: it may contain reasoning,
-        // private document excerpts or model-generated confidential content.
-        OllamaChatResponse? result;
-        try
-        {
-            result = await response.Content
-                .ReadFromJsonAsync<OllamaChatResponse>(
-                    cancellationToken: cancellationToken);
-        }
-        catch (JsonException)
-        {
-            // Do not expose the parser's original diagnostic or payload.
-            throw new InvalidDataException(
-                "Ollama chat returned invalid JSON.");
-        }
+            // Never print or persist the raw response: it may contain reasoning,
+            // private document excerpts or model-generated confidential content.
+            OllamaChatResponse? result;
+            try
+            {
+                result = await response.Content
+                    .ReadFromJsonAsync<OllamaChatResponse>(
+                        cancellationToken: cancellationToken);
+            }
+            catch (JsonException)
+            {
+                // Do not expose the parser's original diagnostic or payload.
+                throw new InvalidDataException(
+                    "Ollama chat returned invalid JSON.");
+            }
 
-        if (string.IsNullOrWhiteSpace(result?.Message?.Content))
-        {
-            // A reasoning-only answer is not a user-facing answer.
-            throw new InvalidDataException(
-                "Ollama chat did not return a usable answer.");
-        }
+            if (string.IsNullOrWhiteSpace(result?.Message?.Content))
+            {
+                // A reasoning-only answer is not a user-facing answer.
+                throw new InvalidDataException(
+                    "Ollama chat did not return a usable answer.");
+            }
 
-        OllamaNativeTelemetry.Record("chat", result.NativeFields);
-        return result.Message.Content;
+            OllamaNativeTelemetry.Record("chat", result.NativeFields);
+            return result.Message.Content;
         }, cancellationToken), cancellationToken);
     }
 
