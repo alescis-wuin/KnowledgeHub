@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "phase": "ARCH-A1.2",
+  "scope": "structural_fixture_only",
+  "semanticAssessorQualified": false,
+  "unqualifiedAssessorPolicy": "ABSTAIN",
+  "migrationOfKh008TypesPerformed": false,
+  "source": "docs/architecture/ARCH-A0.2-contrats-v1.json"
+}
