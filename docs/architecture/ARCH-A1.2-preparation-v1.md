@@ -39,6 +39,31 @@ La carte structuree `ARCH-A1.2-type-movement-v1.json` decrit les **23** types HT
 
 Les vraies fixtures HTTP (17 cas normatifs) et les caracterisations KH008 ne sont pas transposees a ce jalon. Les tests xUnit couvrent des **invariants architecturaux**, pas des operations fonctionnelles.
 
+## Resolution du depot lors des tests externes (Windows PowerShell)
+
+Les deux suites xUnit lisent leurs fixtures et les fichiers de projet depuis le depot.
+Avec `dotnet test --artifacts-path` place sous `Downloads`, les assemblies executees
+sont hors de l'arborescence source. Le chemin de travail des tests ne permet alors
+pas de decouvrir `KnowledgeHub.slnx` en remontant les dossiers.
+
+Definir **avant chaque lancement de tests** la variable d'environnement de processus
+`KNOWLEDGEHUB_REPOSITORY_ROOT` vers la racine du depot verifiee. Exemple depuis le depot :
+
+```powershell
+$env:KNOWLEDGEHUB_REPOSITORY_ROOT = (Resolve-Path '.').Path
+$artifacts = Join-Path $HOME 'Downloads\KH-A1.2-architecture-artifacts'
+
+dotnet test 'KnowledgeHub.Client.Http.Tests/KnowledgeHub.Client.Http.Tests.csproj' `
+    -c Release --artifacts-path $artifacts --nologo
+
+dotnet test 'KnowledgeHub.Verification.Tests/KnowledgeHub.Verification.Tests.csproj' `
+    -c Release --artifacts-path $artifacts --nologo
+```
+
+La variable est lue par les deux helpers `RepositoryRoot()`. Les scripts de qualification
+doivent la propager a chaque processus `dotnet test` ; `--artifacts-path` seul n'est pas
+suffisant. Ne pas creer de faux `KnowledgeHub.slnx` dans les artefacts.
+
 ## Conditions de qualification locale
 
 1. Preflight du depot Windows (origin, main, HEAD, arbre, `git status` propre), sans reset/clean/pull automatiques.
@@ -46,7 +71,7 @@ Les vraies fixtures HTTP (17 cas normatifs) et les caracterisations KH008 ne son
 3. Construire les quatre assemblies et l'API/importeur (sans `KnowledgeHub.Client` MAUI), puis executer les deux projets de tests nouveaux et la suite unitaire historique. Utiliser un `--artifacts-path` distinct sous Telechargements.
 4. Les integrations PostgreSQL Testcontainers restent disponibles en option sur Windows, sans lancer de `database update` sur la base personnelle. Leur statut doit etre mentionne explicitement avant G1.
 5. Verifier statuts de sortie, TRX des suites, chemins touches, invariants de reference et absence de changement de migration ; conserver les rapports hors depot.
-6. Revue du diff et commit signe par le mainteneur seulement. `G1/I0` necessitera une approbation distincte liee au SHA/arbre testes, a la norme finale et a la cartographie des proprietaires/consommateurs.
+6. Revue du diff et commit par le mainteneur seulement ; sur un poste sans cle GPG, un commit non signe doit etre identifie explicitement et reste soumis aux protections GitHub. `G1/I0` necessitera une approbation distincte liee au SHA/arbre testes, a la norme finale et a la cartographie des proprietaires/consommateurs.
 
 ## Hors lot et dettes conservees
 

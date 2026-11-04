@@ -46,19 +46,44 @@ public sealed class VerificationArchitectureTests
     public void NewProjectsAreInSolutionWithoutChangingExistingOnes()
     {
         var slnx = XDocument.Load(Path.Combine(RepositoryRoot(), "KnowledgeHub.slnx"));
-        var projects = slnx.Descendants("Project")
+        var actual = slnx.Descendants("Project")
             .Select(project => (string?)project.Attribute("Path"))
             .Where(path => path is not null)
             .Select(path => Path.GetFileNameWithoutExtension(path!))
+            .OrderBy(project => project, StringComparer.Ordinal)
             .ToArray();
-        Assert.Equal(14, projects.Length);
-        foreach (var project in new[] {
-            "KnowledgeHub.Contracts.Http", "KnowledgeHub.Client.Http", "KnowledgeHub.Rag.Contracts",
-            "KnowledgeHub.Verification", "KnowledgeHub.Client.Http.Tests", "KnowledgeHub.Verification.Tests",
-            "KnowledgeHub.Client", "KnowledgeHub.Api", "KnowledgeHub.Tests.Integration", "KnowledgeHub.Tests.Unit" })
+        var expected = new[]
         {
-            Assert.Contains(project, projects);
-        }
+            "KnowledgeHub.Api",
+            "KnowledgeHub.Application",
+            "KnowledgeHub.Client",
+            "KnowledgeHub.Client.Http",
+            "KnowledgeHub.Client.Http.Tests",
+            "KnowledgeHub.Contracts.Http",
+            "KnowledgeHub.CorpusImporter",
+            "KnowledgeHub.Domain",
+            "KnowledgeHub.Infrastructure",
+            "KnowledgeHub.Rag.Contracts",
+            "KnowledgeHub.Tests.Integration",
+            "KnowledgeHub.Tests.Unit",
+            "KnowledgeHub.Verification",
+            "KnowledgeHub.Verification.Tests"
+        }.OrderBy(project => project, StringComparer.Ordinal).ToArray();
+        Assert.Equal(expected, actual);
+    }
+
+    [Theory]
+    [InlineData("IClaimProposalGenerator")]
+    [InlineData("IQualifiedEvidenceAssessor")]
+    public void RagPortMovementMapRecordsDeclaredSourceNamespace(string symbol)
+    {
+        var mapPath = Path.Combine(RepositoryRoot(), "docs", "architecture", "ARCH-A1.2-type-movement-v1.json");
+        using var json = JsonDocument.Parse(File.ReadAllText(mapPath));
+        var entry = json.RootElement.GetProperty("entries").EnumerateArray()
+            .Single(candidate => candidate.GetProperty("symbol").GetString() == symbol
+                && candidate.GetProperty("kind").GetString() == "rag_port");
+        Assert.Equal("KnowledgeHub.Application.Interfaces", entry.GetProperty("source_namespace").GetString());
+        Assert.Equal($"KnowledgeHub.Application/Interfaces/{symbol}.cs", entry.GetProperty("source_file").GetString());
     }
 
     [Fact]
