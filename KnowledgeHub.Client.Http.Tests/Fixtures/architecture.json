@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "phase": "ARCH-A1.2",
+  "scope": "structural_fixture_only",
+  "wireRuntimeQualified": false,
+  "futureSdkOperations": 22,
+  "automaticRetriesAllowed": false,
+  "apiNormalizationPerformed": false,
+  "source": "docs/architecture/ARCH-A0.2-contrats-v1.json"
+}
